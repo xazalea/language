@@ -1,15 +1,11 @@
-// Main Azalea Web Application Server
-// Routes to landing, playground, and lessons pages
-// Pure Azalea - no JavaScript/HTML dependencies
+// Main Azalea Web Application
+// Pure Azalea - uses native view system, no HTML rendering
 
-// Global state (in production, use database or session storage)
+// Global state
 form map state from {}
-
-// Helper function to generate HTML
-act html_page title body do
-    form text html from "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>" plus title plus "</title>\n    <style>\n        * { margin: 0; padding: 0; box-sizing: border-box; }\n        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }\n        a { text-decoration: none; }\n        button, .btn { cursor: pointer; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; font-weight: bold; }\n    </style>\n</head>\n<body>\n" plus body plus "\n</body>\n</html>"
-    give html
-end
+form num user_level from 1
+form num user_xp from 0
+form num current_lesson from 0
 
 // AI Help function using llm7.io
 act ai_help question do
@@ -19,57 +15,219 @@ act ai_help question do
     // Call llm7.io API
     call net post url with prompt put response
     
-    // Return response or helpful message
     if response same "" do
-        give "I'm here to help! Try asking about Azalea syntax, concepts, or debugging your code. Azalea uses keywords like 'form' for variables, 'act' for functions, 'call' to invoke, 'say' to print, 'if' for conditionals, and 'loop' for iteration."
+        give "I'm here to help! Try asking about Azalea syntax, concepts, or debugging your code."
     end
     give response
 end
 
-// Landing page handler
+// Landing page
 act landing_page req do
-    form text body from "<header style=\"background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 4rem 2rem; text-align: center;\">\n    <h1 style=\"font-size: 4rem; margin-bottom: 1rem;\">🌺 Azalea</h1>\n    <p style=\"font-size: 1.5rem; opacity: 0.9; margin-bottom: 2rem;\">Elegant, minimal, powerful programming language</p>\n    <div style=\"display: flex; gap: 1rem; justify-content: center;\">\n        <a href=\"/playground\" style=\"background: white; color: #667eea; padding: 1rem 2rem; border-radius: 8px; font-weight: bold;\">Get Started</a>\n        <a href=\"/lessons\" style=\"background: transparent; color: white; border: 2px solid white; padding: 1rem 2rem; border-radius: 8px; font-weight: bold;\">Learn</a>\n    </div>\n</header>\n<main style=\"padding: 4rem 2rem; max-width: 1200px; margin: 0 auto;\">\n    <section style=\"margin-bottom: 4rem;\">\n        <h2 style=\"text-align: center; font-size: 2.5rem; margin-bottom: 3rem;\">Why Azalea?</h2>\n        <div style=\"display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem;\">\n            <div style=\"padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center;\">\n                <h3 style=\"color: #667eea; margin-bottom: 1rem;\">Easy to Learn</h3>\n                <p>Perfect for beginners. Kids can learn it! Simple syntax that reads naturally.</p>\n            </div>\n            <div style=\"padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center;\">\n                <h3 style=\"color: #667eea; margin-bottom: 1rem;\">Powerful</h3>\n                <p>Build complex systems, web apps, backends, and more. Scales from simple to professional.</p>\n            </div>\n            <div style=\"padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center;\">\n                <h3 style=\"color: #667eea; margin-bottom: 1rem;\">Beautiful UI</h3>\n                <p>Full CSS support. Create stunning interfaces with minimal code. Beautiful by default.</p>\n            </div>\n        </div>\n    </section>\n    <section style=\"background: #f5f5f5; padding: 3rem; border-radius: 12px;\">\n        <h2 style=\"margin-bottom: 2rem;\">Try It Now</h2>\n        <pre style=\"background: #1e1e1e; color: #d4d4d4; padding: 1.5rem; border-radius: 8px; font-family: monospace; overflow-x: auto;\">say Hello World\nform num a from ten\nsay a</pre>\n        <a href=\"/playground\" style=\"background: #667eea; color: white; padding: 0.75rem 1.5rem; border-radius: 6px; display: inline-block; margin-top: 1rem;\">Run in Playground</a>\n    </section>\n</main>\n<footer style=\"background: #2d3748; color: white; padding: 2rem; text-align: center;\">\n    <p>Made with Azalea - From beginner to professional</p>\n</footer>"
-    
-    form text html from call html_page "Azalea - Elegant Programming Language" body
-    give html
-end
-
-// Playground page handler
-act playground_page req do
-    form text code from ""
-    form text output from "Ready to run code..."
-    
-    // Handle POST request for code execution
-    if req contains "code=" do
-        // Extract code from request (simplified - in production use proper parsing)
-        code give req
-        // In real implementation, execute code here
-        output give "Code executed! (Output would appear here)\n\nNote: Full code execution requires Azalea runtime integration."
+    call view header style background "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+                     style color white
+                     style padding 4rem 2rem
+                     style text-align center do
+        call view h1 style font-size 4rem
+                     style margin-bottom 1rem do
+            "🌺 Azalea"
+        end
+        call view p style font-size 1.5rem
+                     style opacity 0.9
+                     style margin-bottom 2rem do
+            "Elegant, minimal, powerful programming language"
+        end
+        call view div style display flex
+                     style gap 1rem
+                     style justify-content center do
+            call view link "/playground" "Get Started"
+            call view link "/lessons" "Learn"
+        end
     end
     
-    form text body from "<header style=\"background: #2d3748; color: white; padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center;\">\n    <h1 style=\"margin: 0;\">🎮 Playground</h1>\n    <div style=\"display: flex; gap: 1rem;\">\n        <a href=\"/\" style=\"background: transparent; color: white; border: 1px solid white; padding: 0.5rem 1rem; border-radius: 6px;\">Landing</a>\n        <a href=\"/lessons\" style=\"background: transparent; color: white; border: 1px solid white; padding: 0.5rem 1rem; border-radius: 6px;\">Lessons</a>\n    </div>\n</header>\n<main style=\"display: grid; grid-template-columns: 1fr 1fr; min-height: calc(100vh - 80px); gap: 0;\">\n    <div style=\"display: flex; flex-direction: column; border-right: 1px solid #e0e0e0;\">\n        <div style=\"background: #f5f5f5; padding: 1rem; border-bottom: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center;\">\n            <strong>Code Editor</strong>\n            <form method=\"POST\" action=\"/playground\" style=\"display: inline;\">\n                <button type=\"submit\" style=\"background: #667eea; color: white; padding: 0.5rem 1rem; border-radius: 6px;\">Run</button>\n            </form>\n        </div>\n        <form method=\"POST\" action=\"/playground\" style=\"display: flex; flex: 1; flex-direction: column;\">\n            <textarea name=\"code\" style=\"flex: 1; border: none; padding: 1rem; font-family: monospace; font-size: 14px; resize: none; outline: none;\">say Hello World\nform num a from ten\nsay a\nloop five do\n    say step\nend</textarea>\n            <button type=\"submit\" style=\"background: #667eea; color: white; padding: 0.5rem 1rem; border-radius: 6px; margin: 1rem;\">Run Code</button>\n        </form>\n    </div>\n    <div style=\"display: flex; flex-direction: column; background: #1e1e1e;\">\n        <div style=\"background: #2d3748; color: white; padding: 1rem; border-bottom: 1px solid #333;\">\n            <strong>Output</strong>\n        </div>\n        <div style=\"flex: 1; padding: 1rem; color: #d4d4d4; font-family: monospace; font-size: 14px; overflow-y: auto; white-space: pre-wrap;\">" plus output plus "</div>\n    </div>\n</main>\n<div style=\"background: #f5f5f5; padding: 2rem; border-top: 1px solid #e0e0e0;\">\n    <h3 style=\"margin-bottom: 1rem;\">🤖 Need Help? Ask AI</h3>\n    <form method=\"POST\" action=\"/ai-help\">\n        <textarea name=\"question\" placeholder=\"Ask a question about Azalea...\" style=\"width: 100%; padding: 1rem; border-radius: 8px; border: 1px solid #ccc; font-size: 14px; min-height: 100px; margin-bottom: 1rem;\"></textarea>\n        <button type=\"submit\" style=\"background: #667eea; color: white; padding: 0.75rem 1.5rem; border-radius: 6px;\">Get AI Help</button>\n    </form>\n</div>"
+    call view main style padding 4rem 2rem
+                   style max-width 1200px
+                   style margin 0 auto do
+        call view section style margin-bottom 4rem do
+            call view h2 style text-align center
+                         style font-size 2.5rem
+                         style margin-bottom 3rem do
+                "Why Azalea?"
+            end
+            call view div style display grid
+                         style grid-template-columns "repeat(3, 1fr)"
+                         style gap 2rem do
+                call view card style padding 2rem
+                               style border-radius 12px
+                               style box-shadow "0 4px 6px rgba(0,0,0,0.1)"
+                               style text-align center do
+                    call view h3 style color #667eea
+                                 style margin-bottom 1rem do
+                        "Easy to Learn"
+                    end
+                    call view p do
+                        "Perfect for beginners. Kids can learn it! Simple syntax that reads naturally."
+                    end
+                end
+                call view card style padding 2rem
+                               style border-radius 12px
+                               style box-shadow "0 4px 6px rgba(0,0,0,0.1)"
+                               style text-align center do
+                    call view h3 style color #667eea
+                                 style margin-bottom 1rem do
+                        "Powerful"
+                    end
+                    call view p do
+                        "Build complex systems, web apps, backends, and more. Scales from simple to professional."
+                    end
+                end
+                call view card style padding 2rem
+                               style border-radius 12px
+                               style box-shadow "0 4px 6px rgba(0,0,0,0.1)"
+                               style text-align center do
+                    call view h3 style color #667eea
+                                 style margin-bottom 1rem do
+                        "Beautiful UI"
+                    end
+                    call view p do
+                        "Full CSS support. Create stunning interfaces with minimal code. Beautiful by default."
+                    end
+                end
+            end
+        end
+        
+        call view section style background #f5f5f5
+                         style padding 3rem
+                         style border-radius 12px do
+            call view h2 style margin-bottom 2rem do
+                "Try It Now"
+            end
+            call view pre style background #1e1e1e
+                         style color #d4d4d4
+                         style padding 1.5rem
+                         style border-radius 8px
+                         style font-family monospace do
+                "say Hello World\nform num a from ten\nsay a"
+            end
+            call view link "/playground" "Run in Playground"
+        end
+    end
     
-    form text html from call html_page "Azalea Playground" body
-    give html
+    call view footer style background #2d3748
+                     style color white
+                     style padding 2rem
+                     style text-align center do
+        call view p do
+            "Made with Azalea - From beginner to professional"
+        end
+    end
 end
 
-// AI Help handler
-act ai_help_handler req do
-    form text question from req
-    form text answer from call ai_help question
+// Playground page
+act playground_page req do
+    call view header style background #2d3748
+                     style color white
+                     style padding 1.5rem 2rem
+                     style display flex
+                     style justify-content space-between
+                     style align-items center do
+        call view h1 style margin 0 do
+            "🎮 Playground"
+        end
+        call view div style display flex
+                     style gap 1rem do
+            call view link "/" "Landing"
+            call view link "/lessons" "Lessons"
+        end
+    end
     
-    form text body from "<div style=\"padding: 2rem; max-width: 800px; margin: 0 auto;\">\n    <h2>AI Assistant Response</h2>\n    <div style=\"background: #e3f2fd; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;\">\n        <p style=\"font-weight: bold;\">Your question:</p>\n        <p>" plus question plus "</p>\n    </div>\n    <div style=\"background: #f5f5f5; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;\">\n        <p style=\"font-weight: bold;\">Answer:</p>\n        <p style=\"white-space: pre-wrap;\">" plus answer plus "</p>\n    </div>\n    <a href=\"/playground\" style=\"background: #667eea; color: white; padding: 0.75rem 1.5rem; border-radius: 6px; display: inline-block;\">Back to Playground</a>\n</div>"
+    call view main style display grid
+                   style grid-template-columns "1fr 1fr"
+                   style min-height calc(100vh - 80px)
+                   style gap 0 do
+        call view div style display flex
+                     style flex-direction column
+                     style border-right "1px solid #e0e0e0" do
+            call view div style background #f5f5f5
+                         style padding 1rem
+                         style border-bottom "1px solid #e0e0e0" do
+                call view text style font-weight bold do
+                    "Code Editor"
+                end
+            end
+            call view textarea id editor
+                             style flex 1
+                             style border none
+                             style padding 1rem
+                             style font-family monospace
+                             style font-size 14px
+                             style resize none
+                             style outline none do
+                "say Hello World\nform num a from ten\nsay a\nloop five do\n    say step\nend"
+            end
+            call view button "Run"
+                         style background #667eea
+                         style color white
+                         style padding 0.5rem 1rem
+                         style border-radius 6px
+                         style margin 1rem do
+                say "Running code..."
+            end
+        end
+        
+        call view div style display flex
+                     style flex-direction column
+                     style background #1e1e1e do
+            call view div style background #2d3748
+                         style color white
+                         style padding 1rem
+                         style border-bottom "1px solid #333" do
+                call view text style font-weight bold do
+                    "Output"
+                end
+            end
+            call view div id output
+                         style flex 1
+                         style padding 1rem
+                         style color #d4d4d4
+                         style font-family monospace
+                         style font-size 14px
+                         style overflow-y auto
+                         style white-space pre-wrap do
+                "Ready to run code..."
+            end
+        end
+    end
     
-    form text html from call html_page "AI Help - Azalea" body
-    give html
+    // AI Help section
+    call view div style background #f5f5f5
+                     style padding 2rem
+                     style border-top "1px solid #e0e0e0" do
+        call view h3 style margin-bottom 1rem do
+            "🤖 Need Help? Ask AI"
+        end
+        call view textarea id ai_question
+                         placeholder "Ask a question about Azalea..."
+                         style width 100%
+                         style padding 1rem
+                         style border-radius 8px
+                         style border "1px solid #ccc"
+                         style font-size 14px
+                         style min-height 100px
+                         style margin-bottom 1rem
+        call view button "Get AI Help"
+                     style background #667eea
+                     style color white
+                     style padding 0.75rem 1.5rem
+                     style border-radius 6px do
+            form text question from "How do I use loops in Azalea?"
+            form text answer from call ai_help question
+            say answer
+        end
+    end
 end
 
-// Lessons page handler
+// Lessons page
 act lessons_page req do
-    form num current_lesson from 0
-    form num user_level from 1
-    form num user_xp from 0
-    
     // Lesson data
     form list lesson_titles from ["Hello World", "Variables", "Math Operations", "Conditionals", "Loops", "Functions", "Lists", "UI Components", "Styling", "Forms", "Advanced Functions"]
     form list lesson_codes from [
@@ -117,43 +275,169 @@ act lessons_page req do
     form text lesson_hint from lesson_hints[current_lesson]
     form text lesson_goal from lesson_goals[current_lesson]
     
-    // Build lesson list HTML
-    form text lesson_list from ""
-    loop 11 do
-        form num lesson_id from step
-        form text lesson_name from lesson_titles[lesson_id]
-        form text bg_color from "transparent"
-        form text text_color from "#333"
-        
-        if lesson_id same current_lesson do
-            bg_color give "#667eea"
-            text_color give "white"
+    call view header style background "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+                     style color white
+                     style padding 1.5rem 2rem do
+        call view div style display flex
+                     style justify-content space-between
+                     style align-items center do
+            call view div do
+                call view h1 style margin 0
+                             style margin-bottom 0.5rem do
+                    "📚 Learn Azalea"
+                end
+                call view div style display flex
+                             style gap 2rem
+                             style align-items center do
+                    call view text style opacity 0.9 do
+                        "Level:"
+                    end
+                    call view text style font-size 1.5rem
+                                 style font-weight bold do
+                        user_level
+                    end
+                    call view text style opacity 0.9 do
+                        "XP:"
+                    end
+                    call view text style font-size 1.5rem
+                                 style font-weight bold do
+                        user_xp
+                    end
+                end
+            end
+            call view div style display flex
+                         style gap 1rem do
+                call view link "/" "Landing"
+                call view link "/playground" "Playground"
+            end
         end
-        
-        lesson_list give lesson_list plus "<div style=\"padding: 0.75rem; margin-bottom: 0.5rem; border-radius: 6px; background: " plus bg_color plus "; color: " plus text_color plus ";\">" plus lesson_id plus ". " plus lesson_name plus "</div>"
     end
     
-    form text body from "<header style=\"background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1.5rem 2rem;\">\n    <div style=\"display: flex; justify-content: space-between; align-items: center;\">\n        <div>\n            <h1 style=\"margin: 0; margin-bottom: 0.5rem;\">📚 Learn Azalea</h1>\n            <div style=\"display: flex; gap: 2rem; align-items: center;\">\n                <span style=\"opacity: 0.9;\">Level:</span>\n                <span style=\"font-size: 1.5rem; font-weight: bold;\">" plus user_level plus "</span>\n                <span style=\"opacity: 0.9;\">XP:</span>\n                <span style=\"font-size: 1.5rem; font-weight: bold;\">" plus user_xp plus "</span>\n            </div>\n        </div>\n        <div style=\"display: flex; gap: 1rem;\">\n            <a href=\"/\" style=\"background: transparent; color: white; border: 1px solid white; padding: 0.5rem 1rem; border-radius: 6px;\">Landing</a>\n            <a href=\"/playground\" style=\"background: transparent; color: white; border: 1px solid white; padding: 0.5rem 1rem; border-radius: 6px;\">Playground</a>\n        </div>\n    </div>\n</header>\n<main style=\"display: grid; grid-template-columns: 300px 1fr; min-height: calc(100vh - 120px); gap: 0;\">\n    <div style=\"background: #f5f5f5; border-right: 1px solid #e0e0e0; overflow-y: auto; padding: 1rem;\">\n        <h3 style=\"margin-bottom: 1rem;\">Lessons</h3>\n        " plus lesson_list plus "\n    </div>\n    <div style=\"display: flex; flex-direction: column; padding: 2rem; overflow-y: auto;\">\n        <h2 style=\"font-size: 2rem; margin-bottom: 1rem; color: #667eea;\">" plus lesson_title plus "</h2>\n        <div style=\"background: #e3f2fd; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;\">\n            <p style=\"font-weight: bold; margin-bottom: 0.5rem;\">Goal:</p>\n            <p>" plus lesson_goal plus "</p>\n        </div>\n        <p style=\"line-height: 1.6; margin-bottom: 2rem;\">Learn by example. Try the code below in the playground!</p>\n        <pre style=\"background: #1e1e1e; color: #d4d4d4; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem; font-family: monospace; white-space: pre-wrap; overflow-x: auto;\">" plus lesson_code plus "</pre>\n        <div style=\"background: #fff3cd; padding: 1rem; border-radius: 8px; margin-bottom: 2rem;\">\n            <p style=\"font-weight: bold;\">💡 Hint:</p>\n            <p>" plus lesson_hint plus "</p>\n        </div>\n        <div style=\"display: flex; gap: 1rem;\">\n            <a href=\"/playground\" style=\"background: #667eea; color: white; padding: 1rem 2rem; border-radius: 8px; font-weight: bold;\">Try in Playground</a>\n            <form method=\"POST\" action=\"/complete-lesson\" style=\"display: inline;\">\n                <input type=\"hidden\" name=\"lesson_id\" value=\"0\">\n                <button type=\"submit\" style=\"background: #28a745; color: white; padding: 1rem 2rem; border-radius: 8px; font-weight: bold;\">Mark Complete</button>\n            </form>\n        </div>\n        <div style=\"background: #f5f5f5; padding: 1.5rem; border-radius: 8px; margin-top: 2rem;\">\n            <h3 style=\"margin-bottom: 1rem;\">🤖 Need Help? Ask AI</h3>\n            <form method=\"POST\" action=\"/ai-help\">\n                <input type=\"hidden\" name=\"context\" value=\"" plus lesson_title plus "\">\n                <textarea name=\"question\" placeholder=\"Ask about this lesson...\" style=\"width: 100%; padding: 1rem; border-radius: 8px; border: 1px solid #ccc; font-size: 14px; min-height: 100px; margin-bottom: 1rem;\"></textarea>\n                <button type=\"submit\" style=\"background: #667eea; color: white; padding: 0.75rem 1.5rem; border-radius: 6px;\">Get AI Help</button>\n            </form>\n        </div>\n    </div>\n</main>"
-    
-    form text html from call html_page "Learn Azalea" body
-    give html
-end
-
-// Complete lesson handler
-act complete_lesson_handler req do
-    form text body from "<div style=\"padding: 2rem; text-align: center; max-width: 600px; margin: 0 auto;\">\n    <h2 style=\"color: #28a745; font-size: 2rem; margin-bottom: 1rem;\">🎉 Lesson Completed!</h2>\n    <p style=\"font-size: 1.2rem; margin-bottom: 2rem;\">You earned 50 XP!</p>\n    <a href=\"/lessons\" style=\"background: #667eea; color: white; padding: 1rem 2rem; border-radius: 8px; display: inline-block; text-decoration: none; font-weight: bold;\">Continue Learning</a>\n</div>"
-    
-    form text html from call html_page "Lesson Completed" body
-    give html
+    call view main style display grid
+                   style grid-template-columns "300px 1fr"
+                   style min-height calc(100vh - 120px)
+                   style gap 0 do
+        call view div style background #f5f5f5
+                     style border-right "1px solid #e0e0e0"
+                     style overflow-y auto
+                     style padding 1rem do
+            call view h3 style margin-bottom 1rem do
+                "Lessons"
+            end
+            loop 11 do
+                form num lesson_id from step
+                form text lesson_name from lesson_titles[lesson_id]
+                form bool is_current from lesson_id same current_lesson
+                
+                call view div style padding 0.75rem
+                             style margin-bottom 0.5rem
+                             style border-radius 6px
+                             style cursor pointer
+                             style background if is_current then #667eea else transparent
+                             style color if is_current then white else #333 do
+                    call view text do
+                        lesson_id
+                        ". "
+                        lesson_name
+                    end
+                end
+            end
+        end
+        
+        call view div style display flex
+                     style flex-direction column
+                     style padding 2rem
+                     style overflow-y auto do
+            call view h2 style font-size 2rem
+                         style margin-bottom 1rem
+                         style color #667eea do
+                lesson_title
+            end
+            call view div style background #e3f2fd
+                         style padding 1rem
+                         style border-radius 8px
+                         style margin-bottom 1.5rem do
+                call view text style font-weight bold
+                             style margin-bottom 0.5rem do
+                    "Goal:"
+                end
+                call view text do
+                    lesson_goal
+                end
+            end
+            call view p style line-height 1.6
+                         style margin-bottom 2rem do
+                "Learn by example. Try the code below in the playground!"
+            end
+            call view pre style background #1e1e1e
+                         style color #d4d4d4
+                         style padding 1.5rem
+                         style border-radius 8px
+                         style margin-bottom 1.5rem
+                         style font-family monospace
+                         style white-space pre-wrap do
+                lesson_code
+            end
+            call view div style background #fff3cd
+                         style padding 1rem
+                         style border-radius 8px
+                         style margin-bottom 2rem do
+                call view text style font-weight bold do
+                    "💡 Hint:"
+                end
+                call view text do
+                    lesson_hint
+                end
+            end
+            call view div style display flex
+                         style gap 1rem do
+                call view link "/playground" "Try in Playground"
+                call view button "Mark Complete"
+                             style background #28a745
+                             style color white
+                             style padding 1rem 2rem
+                             style border-radius 8px
+                             style font-weight bold do
+                    user_xp give user_xp plus 50
+                    say "Lesson completed! +50 XP"
+                end
+            end
+            
+            // AI Help
+            call view div style background #f5f5f5
+                         style padding 1.5rem
+                         style border-radius 8px
+                         style margin-top 2rem do
+                call view h3 style margin-bottom 1rem do
+                    "🤖 Need Help? Ask AI"
+                end
+                call view textarea id lesson_question
+                                 placeholder "Ask about this lesson..."
+                                 style width 100%
+                                 style padding 1rem
+                                 style border-radius 8px
+                                 style border "1px solid #ccc"
+                                 style font-size 14px
+                                 style min-height 100px
+                                 style margin-bottom 1rem
+                call view button "Get AI Help"
+                             style background #667eea
+                             style color white
+                             style padding 0.75rem 1.5rem
+                             style border-radius 6px do
+                    form text question from "Explain this lesson"
+                    form text answer from call ai_help question
+                    say answer
+                end
+            end
+        end
+    end
 end
 
 // Routes
 call serve get "/" give landing_page
 call serve get "/playground" give playground_page
 call serve get "/lessons" give lessons_page
-call serve post "/playground" give playground_page
-call serve post "/ai-help" give ai_help_handler
-call serve post "/complete-lesson" give complete_lesson_handler
 
 // Start server
 call serve on 3000
