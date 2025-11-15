@@ -11,13 +11,23 @@ Azalea makes building beautiful UIs incredibly simple and clean.
 
 ## Basic Components
 
+### Headings (Ultra Simple!)
+
+```azalea
+call view h1 "Big Title"
+call view h2 "Subtitle"
+call view h3 "Small Title"
+```
+
 ### Text
 
 ```azalea
 call view text "Hello World"
+call view p "Paragraph text"
+call view span "Inline text"
 ```
 
-### Button
+### Button (Super Clean!)
 
 ```azalea
 call view button "Click Me" do
@@ -29,19 +39,36 @@ end
 
 ```azalea
 call view input "name" placeholder "Enter name"
+call view field "email" placeholder "Email"
 ```
 
 ### Image
 
 ```azalea
 call view image "/logo.png"
+call view img "/photo.jpg"
 ```
 
-### Container (Pane/Box)
+### Links
+
+```azalea
+call view link "/about" "About Us"
+call view a "https://example.com" "Visit Site"
+```
+
+### Container (Many Options!)
 
 ```azalea
 call view pane do
-    call view text "Inside the box"
+    call view text "Inside"
+end
+
+call view div do
+    call view text "Also works"
+end
+
+call view section do
+    call view text "Semantic HTML"
 end
 ```
 
@@ -95,10 +122,13 @@ call view list items
 
 ```azalea
 act app do
-    call view pane style "background" "white" do
-        call view text "My App" style "size" "xlarge"
-        
-        call view pane style "margin" "20" do
+    call view header do
+        call view h1 "My App"
+    end
+    
+    call view main do
+        call view section do
+            call view h2 "Welcome"
             call view input "name" placeholder "Name"
             call view button "Greet" do
                 say Hello!
@@ -107,10 +137,44 @@ act app do
         
         call view image "/logo.png"
     end
-    call view show pane
+    
+    call view footer do
+        call view p "Copyright 2025"
+    end
 end
 
 call app
+```
+
+## Modern Layouts
+
+### Card Layout
+
+```azalea
+call view card do
+    call view h2 "Card Title"
+    call view p "Card content"
+end
+```
+
+### Grid Layout
+
+```azalea
+form list items from ["Item 1", "Item 2", "Item 3"]
+call view grid items
+```
+
+### Row/Column
+
+```azalea
+call view row do
+    call view col do
+        call view p "Column 1"
+    end
+    call view col do
+        call view p "Column 2"
+    end
+end
 ```
 
 ## Advanced Patterns

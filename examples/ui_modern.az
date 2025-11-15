@@ -1,0 +1,28 @@
+// Modern UI with cards and grid
+// Beautiful by default!
+
+call view header do
+    call view h1 "My App"
+    call view nav do
+        call view link "/home" "Home"
+        call view link "/about" "About"
+    end
+end
+
+call view main do
+    call view grid do
+        call view card do
+            call view h2 "Card 1"
+            call view p "Content here"
+        end
+        call view card do
+            call view h2 "Card 2"
+            call view p "More content"
+        end
+    end
+end
+
+call view footer do
+    call view p "Copyright 2025"
+end
+

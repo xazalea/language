@@ -126,7 +126,10 @@ const std::vector<std::string> Lexer::keywords = {
     "else", "plus", "minus", "times", "div", "show", "render", "style",
     "button", "btn", "input", "field", "image", "img", "label", "pane",
     "div", "box", "ul", "start", "route", "post", "delete", "del",
-    "static", "files", "json", "send", "css"
+    "static", "files", "json", "send", "css", "link", "head", "body",
+    "title", "h1", "h2", "h3", "p", "span", "a", "form", "select",
+    "option", "table", "tr", "td", "th", "header", "footer", "nav",
+    "section", "article", "aside", "main", "grid", "row", "col", "card"
 };
 
 const std::string Lexer::symbols = ".,/?!;";
@@ -962,76 +965,155 @@ ValuePtr ServeModule::call(const std::string& method, const std::vector<ValuePtr
     return std::make_shared<Value>();
 }
 
-// ViewModule implementation
+// ViewModule implementation - Ultra simple UI syntax
 ValuePtr ViewModule::call(const std::string& method, const std::vector<ValuePtr>& args, Runtime& runtime) {
-    // UI components with clean syntax
-    if (method == "pane" || method == "div" || method == "box") {
-        // Container component
-        std::map<std::string, ValuePtr> props;
+    // Ultra-simple UI components - just pass content directly
+    std::map<std::string, ValuePtr> props;
+    
+    // HTML-like components for maximum simplicity
+    if (method == "h1" || method == "h2" || method == "h3" || method == "h4" || method == "h5" || method == "h6") {
+        if (!args.empty()) {
+            props["tag"] = std::make_shared<Value>(method);
+            props["content"] = args[0];
+        }
+        return std::make_shared<Value>(props);
+    }
+    
+    // Container components
+    if (method == "pane" || method == "div" || method == "box" || method == "section" || method == "main" || method == "article") {
         for (size_t i = 0; i < args.size(); i += 2) {
             if (i + 1 < args.size()) {
                 props[args[i]->toString()] = args[i + 1];
+            } else if (i < args.size()) {
+                // Single arg = content
+                props["content"] = args[i];
             }
         }
+        props["tag"] = std::make_shared<Value>(method == "pane" ? "div" : method);
         return std::make_shared<Value>(props);
-    } else if (method == "button" || method == "btn") {
-        // Button component
-        std::map<std::string, ValuePtr> props;
+    }
+    
+    // Button - super simple: just text, or text + action
+    if (method == "button" || method == "btn") {
         if (!args.empty()) {
             props["text"] = args[0];
-        }
-        for (size_t i = 1; i < args.size(); i += 2) {
-            if (i + 1 < args.size()) {
-                props[args[i]->toString()] = args[i + 1];
+            // If second arg is a function/block, it's the action
+            if (args.size() > 1) {
+                props["action"] = args[1];
             }
         }
+        props["tag"] = std::make_shared<Value>("button");
         return std::make_shared<Value>(props);
-    } else if (method == "text" || method == "label") {
-        // Text component
+    }
+    
+    // Text components - just pass the text
+    if (method == "text" || method == "label" || method == "p" || method == "span") {
         if (!args.empty()) {
-            std::map<std::string, ValuePtr> props;
             props["content"] = args[0];
-            return std::make_shared<Value>(props);
-        }
-    } else if (method == "input" || method == "field") {
-        // Input field
-        std::map<std::string, ValuePtr> props;
-        for (size_t i = 0; i < args.size(); i += 2) {
-            if (i + 1 < args.size()) {
-                props[args[i]->toString()] = args[i + 1];
-            }
+            props["tag"] = std::make_shared<Value>(method == "text" ? "span" : method);
         }
         return std::make_shared<Value>(props);
-    } else if (method == "image" || method == "img") {
-        // Image component
+    }
+    
+    // Input - name is first arg, optional props after
+    if (method == "input" || method == "field") {
         if (!args.empty()) {
-            std::map<std::string, ValuePtr> props;
-            props["src"] = args[0];
-            return std::make_shared<Value>(props);
+            props["name"] = args[0];
+            for (size_t i = 1; i < args.size(); i += 2) {
+                if (i + 1 < args.size()) {
+                    props[args[i]->toString()] = args[i + 1];
+                }
+            }
         }
-    } else if (method == "list" || method == "ul") {
-        // List component
-        std::map<std::string, ValuePtr> props;
+        props["tag"] = std::make_shared<Value>("input");
+        return std::make_shared<Value>(props);
+    }
+    
+    // Image - just URL
+    if (method == "image" || method == "img") {
+        if (!args.empty()) {
+            props["src"] = args[0];
+            props["tag"] = std::make_shared<Value>("img");
+        }
+        return std::make_shared<Value>(props);
+    }
+    
+    // Link
+    if (method == "link" || method == "a") {
+        if (args.size() >= 2) {
+            props["href"] = args[0];
+            props["content"] = args[1];
+            props["tag"] = std::make_shared<Value>("a");
+        }
+        return std::make_shared<Value>(props);
+    }
+    
+    // List - just pass items
+    if (method == "list" || method == "ul" || method == "ol") {
+        if (!args.empty() && args[0]->type == ValueType::LIST) {
+            props["items"] = args[0];
+            props["tag"] = std::make_shared<Value>(method == "list" ? "ul" : method);
+        }
+        return std::make_shared<Value>(props);
+    }
+    
+    // Card - container with automatic styling
+    if (method == "card") {
+        if (!args.empty()) {
+            props["content"] = args[0];
+        }
+        props["tag"] = std::make_shared<Value>("div");
+        props["class"] = std::make_shared<Value>("card");
+        return std::make_shared<Value>(props);
+    }
+    
+    // Grid layout
+    if (method == "grid" || method == "row") {
+        props["tag"] = std::make_shared<Value>("div");
+        props["class"] = std::make_shared<Value>(method);
         if (!args.empty() && args[0]->type == ValueType::LIST) {
             props["items"] = args[0];
         }
         return std::make_shared<Value>(props);
-    } else if (method == "show" || method == "render") {
-        // Render component to DOM (browser) or output
+    }
+    
+    // Column
+    if (method == "col") {
+        props["tag"] = std::make_shared<Value>("div");
+        props["class"] = std::make_shared<Value>("col");
+        if (!args.empty()) {
+            props["content"] = args[0];
+        }
+        return std::make_shared<Value>(props);
+    }
+    
+    // Header/Footer/Nav
+    if (method == "header" || method == "footer" || method == "nav") {
+        if (!args.empty()) {
+            props["content"] = args[0];
+        }
+        props["tag"] = std::make_shared<Value>(method);
+        return std::make_shared<Value>(props);
+    }
+    
+    // Show/Render - display component
+    if (method == "show" || method == "render") {
         if (!args.empty()) {
             std::string component = args[0]->toString();
             return std::make_shared<Value>("Rendered: " + component);
         }
-    } else if (method == "style" || method == "css") {
-        // Apply styles
-        std::map<std::string, ValuePtr> styles;
+    }
+    
+    // Style - apply CSS
+    if (method == "style" || method == "css") {
         for (size_t i = 0; i < args.size(); i += 2) {
             if (i + 1 < args.size()) {
-                styles[args[i]->toString()] = args[i + 1];
+                props[args[i]->toString()] = args[i + 1];
             }
         }
-        return std::make_shared<Value>(styles);
+        return std::make_shared<Value>(props);
     }
+    
     return std::make_shared<Value>();
 }
 

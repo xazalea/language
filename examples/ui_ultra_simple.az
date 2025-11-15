@@ -1,0 +1,9 @@
+// Ultra-simple UI - Just works!
+// No complex syntax, just clean code
+
+call view h1 "Welcome"
+call view p "This is super simple"
+call view button "Click" do
+    say Clicked!
+end
+

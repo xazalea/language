@@ -1,0 +1,32 @@
+// Complete modern web app
+// Everything you need!
+
+act app do
+    call view header do
+        call view h1 "Azalea App"
+    end
+    
+    call view main do
+        call view section do
+            call view h2 "Sign Up"
+            call view input "email" placeholder "Email"
+            call view input "password" placeholder "Password"
+            call view button "Submit" do
+                say Form submitted!
+            end
+        end
+        
+        call view section do
+            call view h2 "Features"
+            form list features from ["Fast", "Simple", "Powerful"]
+            call view list features
+        end
+    end
+    
+    call view footer do
+        call view p "Made with Azalea"
+    end
+end
+
+call app
+
