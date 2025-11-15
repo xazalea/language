@@ -1,15 +1,15 @@
 {
+  "version": 2,
   "builds": [
     {
-      "src": "web/**",
-      "use": "@vercel/static"
+      "src": "index.az",
+      "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "/web/$1"
+      "dest": "/index.az"
     }
   ]
 }
-

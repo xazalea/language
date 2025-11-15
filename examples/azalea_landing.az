@@ -1,0 +1,679 @@
+// Azalea Landing Page + Playground + Gamified Learning System
+// Complete interactive experience for learning Azalea
+
+// Global state variables
+form text current_section from "landing"
+form num user_level from 1
+form num user_xp from 0
+form num current_lesson from 0
+form text editor_code from ""
+form text output_text from "Ready to run code..."
+
+// Navigation function
+act navigate section do
+    current_section give section
+    call render_app
+end
+
+// XP and leveling system
+act add_xp amount do
+    user_xp give user_xp plus amount
+    
+    // Level up every 100 XP
+    form num new_level from user_xp div 100 plus 1
+    if new_level over user_level do
+        user_level give new_level
+        say Level up! You are now level
+        say new_level
+    end
+end
+
+// Render landing page
+act render_landing do
+    call view header style background linear-gradient(135deg, #667eea 0%, #764ba2 100%)
+                     style color white
+                     style padding 4rem 2rem
+                     style text-align center do
+        call view h1 style font-size 4rem
+                     style margin-bottom 1rem do
+            🌺 Azalea
+        end
+        call view p style font-size 1.5rem
+                     style opacity 0.9
+                     style margin-bottom 2rem do
+            "Elegant, minimal, powerful programming language"
+        end
+        call view div style display flex
+                     style gap 1rem
+                     style justify-content center do
+            call view button "Get Started"
+                         style background white
+                         style color #667eea
+                         style padding 1rem 2rem
+                         style border none
+                         style border-radius 8px
+                         style font-size 1.1rem
+                         style cursor pointer
+                         style font-weight bold do
+                call navigate "playground"
+            end
+            call view button "Learn"
+                         style background transparent
+                         style color white
+                         style border 2px solid white
+                         style padding 1rem 2rem
+                         style border-radius 8px
+                         style font-size 1.1rem
+                         style cursor pointer
+                         style font-weight bold do
+                call navigate "lessons"
+            end
+        end
+    end
+    
+    call view main style padding 4rem 2rem
+                   style max-width 1200px
+                   style margin 0 auto do
+        // Features section
+        call view section style margin-bottom 4rem do
+            call view h2 style text-align center
+                         style font-size 2.5rem
+                         style margin-bottom 3rem do
+                Why Azalea?
+            end
+            call view div style display grid
+                         style grid-template-columns repeat(3, 1fr)
+                         style gap 2rem do
+                call view card style padding 2rem
+                               style border-radius 12px
+                               style box-shadow 0 4px 6px rgba(0,0,0,0.1)
+                               style text-align center do
+                    call view h3 style color #667eea
+                                 style margin-bottom 1rem do
+                        Easy to Learn
+                    end
+                    call view p do
+                        "Perfect for beginners. Kids can learn it! Simple syntax that reads naturally."
+                    end
+                end
+                call view card style padding 2rem
+                               style border-radius 12px
+                               style box-shadow 0 4px 6px rgba(0,0,0,0.1)
+                               style text-align center do
+                    call view h3 style color #667eea
+                                 style margin-bottom 1rem do
+                        Powerful
+                    end
+                    call view p do
+                        "Build complex systems, web apps, backends, and more. Scales from simple to professional."
+                    end
+                end
+                call view card style padding 2rem
+                               style border-radius 12px
+                               style box-shadow 0 4px 6px rgba(0,0,0,0.1)
+                               style text-align center do
+                    call view h3 style color #667eea
+                                 style margin-bottom 1rem do
+                        Beautiful UI
+                    end
+                    call view p do
+                        "Full CSS support. Create stunning interfaces with minimal code. Beautiful by default."
+                    end
+                end
+            end
+        end
+        
+        // Quick example
+        call view section style background #f5f5f5
+                         style padding 3rem
+                         style border-radius 12px
+                         style margin-bottom 4rem do
+            call view h2 style margin-bottom 2rem do
+                Try It Now
+            end
+            call view div style background #1e1e1e
+                         style color #d4d4d4
+                         style padding 1.5rem
+                         style border-radius 8px
+                         style font-family monospace
+                         style margin-bottom 1rem
+                         style white-space pre do
+                say Hello World
+form num a from ten
+say a
+            end
+            call view button "Run in Playground"
+                         style background #667eea
+                         style color white
+                         style border none
+                         style padding 0.75rem 1.5rem
+                         style border-radius 6px
+                         style cursor pointer do
+                call navigate "playground"
+            end
+        end
+    end
+    
+    call view footer style background #2d3748
+                     style color white
+                     style padding 2rem
+                     style text-align center do
+        call view p do
+            "Made with Azalea - From beginner to professional"
+        end
+    end
+end
+
+// Render playground
+act render_playground do
+    call view header style background #2d3748
+                     style color white
+                     style padding 1.5rem 2rem
+                     style display flex
+                     style justify-content space-between
+                     style align-items center do
+        call view h1 style margin 0 do
+            🎮 Playground
+        end
+        call view div style display flex
+                     style gap 1rem do
+            call view button "Landing"
+                         style background transparent
+                         style color white
+                         style border 1px solid white
+                         style padding 0.5rem 1rem
+                         style border-radius 6px
+                         style cursor pointer do
+                call navigate "landing"
+            end
+            call view button "Lessons"
+                         style background transparent
+                         style color white
+                         style border 1px solid white
+                         style padding 0.5rem 1rem
+                         style border-radius 6px
+                         style cursor pointer do
+                call navigate "lessons"
+            end
+        end
+    end
+    
+    call view main style display grid
+                   style grid-template-columns 1fr 1fr
+                   style min-height 600px
+                   style gap 0 do
+        // Code editor
+        call view div style display flex
+                     style flex-direction column
+                     style border-right 1px solid #e0e0e0 do
+            call view div style background #f5f5f5
+                         style padding 1rem
+                         style border-bottom 1px solid #e0e0e0
+                         style display flex
+                         style justify-content space-between
+                         style align-items center do
+                call view text style font-weight bold do
+                    "Code Editor"
+                end
+                call view button "Run"
+                             style background #667eea
+                             style color white
+                             style border none
+                             style padding 0.5rem 1rem
+                             style border-radius 6px
+                             style cursor pointer do
+                    say "Running code..."
+                    say editor_code
+                end
+            end
+            call view textarea id editor
+                             style flex 1
+                             style border none
+                             style padding 1rem
+                             style font-family monospace
+                             style font-size 14px
+                             style resize none
+                             style outline none do
+                // Default code
+                say Hello World
+form num a from ten
+say a
+loop five do
+    say step
+end
+            end
+        end
+        
+        // Output
+        call view div style display flex
+                     style flex-direction column
+                     style background #1e1e1e do
+            call view div style background #2d3748
+                         style color white
+                         style padding 1rem
+                         style border-bottom 1px solid #333 do
+                call view text style font-weight bold do
+                    "Output"
+                end
+            end
+            call view div id output
+                         style flex 1
+                         style padding 1rem
+                         style color #d4d4d4
+                         style font-family monospace
+                         style font-size 14px
+                         style overflow-y auto
+                         style white-space pre-wrap do
+                Ready to run code...
+            end
+        end
+    end
+end
+
+// Lesson data - stored as simple variables
+form text lesson_0_title from Hello World
+form text lesson_0_code from say Hello World
+form text lesson_0_hint from Use the say keyword to print text
+form text lesson_0_goal from Print Hello World
+
+form text lesson_1_title from Variables
+form text lesson_1_code from form num age from 10\nsay age
+form text lesson_1_hint from Use form to create variables, num for numbers
+form text lesson_1_goal from Create a variable and print it
+
+form text lesson_2_title from Math Operations
+form text lesson_2_code from form num a from 10\nform num b from 5\nsay a plus b
+form text lesson_2_hint from Use plus, minus, times, div for math
+form text lesson_2_goal from Add two numbers and print the result
+
+form text lesson_3_title from Conditionals
+form text lesson_3_code from form num age from 15\nif age over 10 do\n    say You are old enough\nend
+form text lesson_3_hint from Use if, over, under, same for comparisons
+form text lesson_3_goal from Check if age is over 10
+
+form text lesson_4_title from Loops
+form text lesson_4_code from loop 5 do\n    say step\nend
+form text lesson_4_hint from Use loop with a number to repeat
+form text lesson_4_goal from Count from 0 to 4
+
+form text lesson_5_title from Functions
+form text lesson_5_code from act greet name do\n    say Hello\n    say name\nend\n\ncall greet Alice
+form text lesson_5_hint from Use act to define, call to use functions
+form text lesson_5_goal from Create a function that greets someone
+
+form text lesson_6_title from Lists
+form text lesson_6_code from form list names from [Alice, Bob, Charlie]\nloop names do\n    say step\nend
+form text lesson_6_hint from Use list type and loop over it
+form text lesson_6_goal from Create a list and print all items
+
+form text lesson_7_title from UI Components
+form text lesson_7_code from call view button Click Me do\n    say Button clicked!\nend
+form text lesson_7_hint from Use view to create UI components
+form text lesson_7_goal from Create a button that prints when clicked
+
+form text lesson_8_title from Styling
+form text lesson_8_code from call view div style background blue style color white do\n    call view text Hello\nend
+form text lesson_8_hint from Use style keyword to add CSS
+form text lesson_8_goal from Create a styled div
+
+form text lesson_9_title from Forms
+form text lesson_9_code from call view input name placeholder Enter name\ncall view button Submit do\n    say Form submitted!\nend
+form text lesson_9_hint from Use input for text fields
+form text lesson_9_goal from Create an input and submit button
+
+form text lesson_10_title from Advanced Functions
+form text lesson_10_code from act calculate a b op do\n    if op same plus do\n        give a plus b\n    end\nend\n\ncall calculate 10 5 plus put result\nsay result
+form text lesson_10_hint from Functions can take multiple parameters
+form text lesson_10_goal from Create a calculator function
+
+// Get lesson data
+act get_lesson_title lesson_num do
+    if lesson_num same 0 do
+        give lesson_0_title
+    end
+    if lesson_num same 1 do
+        give lesson_1_title
+    end
+    if lesson_num same 2 do
+        give lesson_2_title
+    end
+    if lesson_num same 3 do
+        give lesson_3_title
+    end
+    if lesson_num same 4 do
+        give lesson_4_title
+    end
+    if lesson_num same 5 do
+        give lesson_5_title
+    end
+    if lesson_num same 6 do
+        give lesson_6_title
+    end
+    if lesson_num same 7 do
+        give lesson_7_title
+    end
+    if lesson_num same 8 do
+        give lesson_8_title
+    end
+    if lesson_num same 9 do
+        give lesson_9_title
+    end
+    if lesson_num same 10 do
+        give lesson_10_title
+    end
+    give No lesson
+end
+
+act get_lesson_code lesson_num do
+    if lesson_num same 0 do
+        give lesson_0_code
+    end
+    if lesson_num same 1 do
+        give lesson_1_code
+    end
+    if lesson_num same 2 do
+        give lesson_2_code
+    end
+    if lesson_num same 3 do
+        give lesson_3_code
+    end
+    if lesson_num same 4 do
+        give lesson_4_code
+    end
+    if lesson_num same 5 do
+        give lesson_5_code
+    end
+    if lesson_num same 6 do
+        give lesson_6_code
+    end
+    if lesson_num same 7 do
+        give lesson_7_code
+    end
+    if lesson_num same 8 do
+        give lesson_8_code
+    end
+    if lesson_num same 9 do
+        give lesson_9_code
+    end
+    if lesson_num same 10 do
+        give lesson_10_code
+    end
+    give // No code
+end
+
+act get_lesson_hint lesson_num do
+    if lesson_num same 0 do
+        give lesson_0_hint
+    end
+    if lesson_num same 1 do
+        give lesson_1_hint
+    end
+    if lesson_num same 2 do
+        give lesson_2_hint
+    end
+    if lesson_num same 3 do
+        give lesson_3_hint
+    end
+    if lesson_num same 4 do
+        give lesson_4_hint
+    end
+    if lesson_num same 5 do
+        give lesson_5_hint
+    end
+    if lesson_num same 6 do
+        give lesson_6_hint
+    end
+    if lesson_num same 7 do
+        give lesson_7_hint
+    end
+    if lesson_num same 8 do
+        give lesson_8_hint
+    end
+    if lesson_num same 9 do
+        give lesson_9_hint
+    end
+    if lesson_num same 10 do
+        give lesson_10_hint
+    end
+    give No hint
+end
+
+act get_lesson_goal lesson_num do
+    if lesson_num same 0 do
+        give lesson_0_goal
+    end
+    if lesson_num same 1 do
+        give lesson_1_goal
+    end
+    if lesson_num same 2 do
+        give lesson_2_goal
+    end
+    if lesson_num same 3 do
+        give lesson_3_goal
+    end
+    if lesson_num same 4 do
+        give lesson_4_goal
+    end
+    if lesson_num same 5 do
+        give lesson_5_goal
+    end
+    if lesson_num same 6 do
+        give lesson_6_goal
+    end
+    if lesson_num same 7 do
+        give lesson_7_goal
+    end
+    if lesson_num same 8 do
+        give lesson_8_goal
+    end
+    if lesson_num same 9 do
+        give lesson_9_goal
+    end
+    if lesson_num same 10 do
+        give lesson_10_goal
+    end
+    give Complete the lesson
+end
+
+// Complete lesson
+act complete_current_lesson do
+    call add_xp 50
+    say "Lesson completed! +50 XP"
+    if current_lesson under 10 do
+        current_lesson give current_lesson plus 1
+    end
+    call render_app
+end
+
+// Render lessons
+act render_lessons do
+    call view header style background linear-gradient(135deg, #667eea 0%, #764ba2 100%)
+                     style color white
+                     style padding 1.5rem 2rem
+                     style display flex
+                     style justify-content space-between
+                     style align-items center do
+        call view div do
+            call view h1 style margin 0
+                         style margin-bottom 0.5rem do
+                📚 Learn Azalea
+            end
+            call view div style display flex
+                         style gap 2rem
+                         style align-items center do
+                call view text style opacity 0.9 do
+                    "Level:"
+                end
+                call view text style font-size 1.5rem
+                                 style font-weight bold do
+                    user_level
+                end
+                call view text style opacity 0.9 do
+                    "XP:"
+                end
+                call view text style font-size 1.5rem
+                                 style font-weight bold do
+                    user_xp
+                end
+            end
+        end
+        call view div style display flex
+                     style gap 1rem do
+            call view button "Landing"
+                         style background transparent
+                         style color white
+                         style border 1px solid white
+                         style padding 0.5rem 1rem
+                         style border-radius 6px
+                         style cursor pointer do
+                call navigate "landing"
+            end
+            call view button "Playground"
+                         style background transparent
+                         style color white
+                         style border 1px solid white
+                         style padding 0.5rem 1rem
+                         style border-radius 6px
+                         style cursor pointer do
+                call navigate "playground"
+            end
+        end
+    end
+    
+    call view main style display grid
+                   style grid-template-columns 300px 1fr
+                   style min-height 600px
+                   style gap 0 do
+        // Lesson list sidebar
+        call view div style background #f5f5f5
+                     style border-right 1px solid #e0e0e0
+                     style overflow-y auto
+                     style padding 1rem do
+            call view h3 style margin-bottom 1rem do
+                "Lessons"
+            end
+            loop 11 do
+                form num lesson_id from step
+                form bool is_current from lesson_id same current_lesson
+                form text lesson_title from call get_lesson_title lesson_id
+                form text bg_color from transparent
+                form text text_color from #333
+                form text font_weight from normal
+                
+                if is_current do
+                    bg_color give #667eea
+                    text_color give white
+                    font_weight give bold
+                end
+                
+                call view div style padding 0.75rem
+                             style margin-bottom 0.5rem
+                             style border-radius 6px
+                             style cursor pointer
+                             style background bg_color
+                             style color text_color do
+                    call view text style font-weight font_weight do
+                        lesson_id
+                        call view text do
+                            ". "
+                        end
+                        lesson_title
+                    end
+                end
+            end
+        end
+        
+        // Lesson content
+        call view div style display flex
+                     style flex-direction column
+                     style padding 2rem
+                     style overflow-y auto do
+            form text lesson_title from call get_lesson_title current_lesson
+            form text lesson_code from call get_lesson_code current_lesson
+            form text lesson_hint from call get_lesson_hint current_lesson
+            form text lesson_goal from call get_lesson_goal current_lesson
+            
+            call view h2 style font-size 2rem
+                         style margin-bottom 1rem
+                         style color #667eea do
+                lesson_title
+            end
+            call view div style background #e3f2fd
+                         style padding 1rem
+                         style border-radius 8px
+                         style margin-bottom 1.5rem do
+                call view text style font-weight bold
+                                 style margin-bottom 0.5rem do
+                    Goal:
+                end
+                call view text do
+                    lesson_goal
+                end
+            end
+            call view p style line-height 1.6
+                         style margin-bottom 2rem do
+                "Learn by example. Try the code below in the playground!"
+            end
+            call view div style background #1e1e1e
+                         style color #d4d4d4
+                         style padding 1.5rem
+                         style border-radius 8px
+                         style margin-bottom 1.5rem
+                         style font-family monospace
+                         style white-space pre-wrap do
+                lesson_code
+            end
+            call view div style background #fff3cd
+                         style padding 1rem
+                         style border-radius 8px
+                         style margin-bottom 2rem do
+                call view text style font-weight bold do
+                    "💡 Hint:"
+                end
+                call view text do
+                    lesson_hint
+                end
+            end
+            call view div style display flex
+                         style gap 1rem do
+                call view button "Try in Playground"
+                             style background #667eea
+                             style color white
+                             style border none
+                             style padding 1rem 2rem
+                             style border-radius 8px
+                             style cursor pointer
+                             style font-weight bold do
+                    editor_code give lesson_code
+                    call navigate "playground"
+                end
+                call view button "Mark Complete"
+                             style background #28a745
+                             style color white
+                             style border none
+                             style padding 1rem 2rem
+                             style border-radius 8px
+                             style cursor pointer
+                             style font-weight bold do
+                    call complete_current_lesson
+                end
+            end
+        end
+    end
+end
+
+// Main render function
+act render_app do
+    if current_section same "landing" do
+        call render_landing
+    end
+    if current_section same "playground" do
+        call render_playground
+    end
+    if current_section same "lessons" do
+        call render_lessons
+    end
+end
+
+// Initialize app
+call render_app

@@ -1,0 +1,23 @@
+# Git attributes for Azalea project
+*.az linguist-language=Azalea
+*.az text eol=lf
+
+# Markdown files
+*.md text eol=lf
+
+# Source files
+*.cpp text eol=lf
+*.h text eol=lf
+*.js text eol=lf
+*.html text eol=lf
+*.json text eol=lf
+
+# Build artifacts (binary)
+*.wasm binary
+*.o binary
+*.a binary
+
+# Documentation
+docs/** text eol=lf
+examples/** text eol=lf
+
