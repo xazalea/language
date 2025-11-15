@@ -129,7 +129,21 @@ const std::vector<std::string> Lexer::keywords = {
     "static", "files", "json", "send", "css", "link", "head", "body",
     "title", "h1", "h2", "h3", "p", "span", "a", "form", "select",
     "option", "table", "tr", "td", "th", "header", "footer", "nav",
-    "section", "article", "aside", "main", "grid", "row", "col", "card"
+    "section", "article", "aside", "main", "grid", "row", "col", "card",
+    // Flexible syntax keywords
+    "let", "var", "const", "set", "create", "new", "def", "fn", "func",
+    "return", "print", "output", "display", "when", "then", "while", "for",
+    "each", "repeat", "until", "break", "continue", "switch", "case",
+    "equals", "is", "are", "has", "have", "contains", "include",
+    "add", "subtract", "multiply", "divide", "mod", "power", "sqrt",
+    "greater", "less", "equal", "notequal", "andalso", "orelse",
+    // CSS and styling
+    "color", "background", "bg", "width", "height", "margin", "padding",
+    "border", "radius", "shadow", "font", "size", "weight", "family",
+    "align", "center", "left", "right", "justify", "flex", "grid",
+    "display", "position", "absolute", "relative", "fixed", "sticky",
+    "top", "bottom", "left", "right", "zindex", "opacity", "transform",
+    "transition", "animation", "hover", "active", "focus", "visited"
 };
 
 const std::string Lexer::symbols = ".,/?!;";
@@ -306,22 +320,67 @@ std::shared_ptr<ASTNode> Parser::parseForm() {
 
 std::shared_ptr<ASTNode> Parser::parseAct() {
     Token tok = current();
-    advance(); // consume "act"
+    std::string keyword = tok.value;
+    
+    // Flexible: accept "act", "def", "fn", "func", "function"
+    if (keyword == "act" || keyword == "def" || keyword == "fn" || 
+        keyword == "func" || keyword == "function") {
+        advance();
+    } else {
+        return nullptr;
+    }
     
     auto node = std::make_shared<ASTNode>(NodeType::ACT, tok);
     
+    // Function name
     if (check(TokenType::IDENTIFIER)) {
         node->children.push_back(std::make_shared<ASTNode>(NodeType::IDENTIFIER, current()));
         advance();
     }
     
-    // Parse parameters
-    while (check(TokenType::IDENTIFIER) && !match("do")) {
-        node->children.push_back(std::make_shared<ASTNode>(NodeType::IDENTIFIER, current()));
-        advance();
+    // Flexible parameter parsing
+    // Accept: "param1 param2" or "param1, param2" or "(param1, param2)"
+    bool inParens = false;
+    if (current().type == TokenType::SYMBOL && current().value == "(") {
+        advance(); // consume "("
+        inParens = true;
     }
     
-    if (match("do")) {
+    while (pos < tokens.size() && current().type != TokenType::EOF_TOKEN) {
+        if (match("do") || match("then") || match("when")) {
+            break;
+        }
+        
+        if (inParens && current().type == TokenType::SYMBOL && current().value == ")") {
+            advance(); // consume ")"
+            break;
+        }
+        
+        if (current().type == TokenType::SYMBOL && 
+            (current().value == "," || current().value == ";")) {
+            advance(); // skip comma/semicolon
+            continue;
+        }
+        
+        if (check(TokenType::IDENTIFIER)) {
+            node->children.push_back(std::make_shared<ASTNode>(NodeType::IDENTIFIER, current()));
+            advance();
+        } else {
+            break;
+        }
+    }
+    
+    // Flexible block start: "do", "then", "{", or just start
+    if (match("do") || match("then") || match("when")) {
+        node->children.push_back(parseBlock());
+    } else if (current().type == TokenType::SYMBOL && current().value == "{") {
+        advance(); // consume "{"
+        node->children.push_back(parseBlock());
+        if (current().type == TokenType::SYMBOL && current().value == "}") {
+            advance(); // consume "}"
+        }
+    } else {
+        // Try to parse block anyway
         node->children.push_back(parseBlock());
     }
     
@@ -334,21 +393,37 @@ std::shared_ptr<ASTNode> Parser::parseCall() {
     
     auto node = std::make_shared<ASTNode>(NodeType::CALL, tok);
     
-    if (check(TokenType::IDENTIFIER)) {
+    if (check(TokenType::IDENTIFIER) || check(TokenType::KEYWORD)) {
         node->children.push_back(std::make_shared<ASTNode>(NodeType::IDENTIFIER, current()));
         advance();
     }
     
-    // Parse arguments
-    while (pos < tokens.size() && current().type != TokenType::EOF_TOKEN && 
-           current().value != "end" && current().value != "do" && 
-           current().value != "else") {
-        if (current().type == TokenType::KEYWORD && 
-            (current().value == "put" || current().value == "with" || 
-             current().value == "to" || current().value == "on" || 
-             current().value == "give")) {
-            break;
+    // Flexible argument parsing - accept many styles
+    while (pos < tokens.size() && current().type != TokenType::EOF_TOKEN) {
+        // Stop conditions - but be flexible
+        if (current().value == "end" || current().value == "else") break;
+        
+        // Flexible keywords that might end the call
+        if (current().type == TokenType::KEYWORD) {
+            std::string kw = current().value;
+            if (kw == "put" || kw == "with" || kw == "to" || kw == "on" || 
+                kw == "give" || kw == "then" || kw == "when") {
+                // Check if it's part of expression or end marker
+                if (pos + 1 < tokens.size()) {
+                    Token next = tokens[pos + 1];
+                    // If followed by identifier or value, it's part of expression
+                    if (next.type == TokenType::IDENTIFIER || 
+                        next.type == TokenType::NUMBER || 
+                        next.type == TokenType::STRING) {
+                        node->children.push_back(parseExpression());
+                        continue;
+                    }
+                }
+                break;
+            }
         }
+        
+        // Parse expression - flexible
         node->children.push_back(parseExpression());
     }
     
@@ -377,12 +452,29 @@ std::shared_ptr<ASTNode> Parser::parseIf() {
 
 std::shared_ptr<ASTNode> Parser::parseLoop() {
     Token tok = current();
-    advance(); // consume "loop"
+    std::string keyword = tok.value;
+    
+    // Flexible: accept "loop", "while", "for", "repeat", "each"
+    if (keyword == "loop" || keyword == "while" || keyword == "for" || 
+        keyword == "repeat" || keyword == "each") {
+        advance();
+    } else {
+        return nullptr;
+    }
     
     auto node = std::make_shared<ASTNode>(NodeType::LOOP, tok);
     node->children.push_back(parseExpression());
     
-    if (match("do")) {
+    // Flexible block start
+    if (match("do") || match("then")) {
+        node->children.push_back(parseBlock());
+    } else if (current().type == TokenType::SYMBOL && current().value == "{") {
+        advance();
+        node->children.push_back(parseBlock());
+        if (current().type == TokenType::SYMBOL && current().value == "}") {
+            advance();
+        }
+    } else {
         node->children.push_back(parseBlock());
     }
     
@@ -391,7 +483,14 @@ std::shared_ptr<ASTNode> Parser::parseLoop() {
 
 std::shared_ptr<ASTNode> Parser::parseGive() {
     Token tok = current();
-    advance(); // consume "give"
+    std::string keyword = tok.value;
+    
+    // Flexible: accept "give", "return"
+    if (keyword == "give" || keyword == "return") {
+        advance();
+    } else {
+        return nullptr;
+    }
     
     auto node = std::make_shared<ASTNode>(NodeType::GIVE, tok);
     node->children.push_back(parseExpression());
@@ -400,7 +499,15 @@ std::shared_ptr<ASTNode> Parser::parseGive() {
 
 std::shared_ptr<ASTNode> Parser::parseSay() {
     Token tok = current();
-    advance(); // consume "say"
+    std::string keyword = tok.value;
+    
+    // Flexible: accept "say", "print", "output", "display"
+    if (keyword == "say" || keyword == "print" || keyword == "output" || 
+        keyword == "display" || keyword == "log") {
+        advance();
+    } else {
+        return nullptr;
+    }
     
     auto node = std::make_shared<ASTNode>(NodeType::SAY, tok);
     node->children.push_back(parseExpression());
@@ -772,28 +879,50 @@ ValuePtr Runtime::evaluate(std::shared_ptr<ASTNode> node) {
                 ValuePtr right = evaluate(node->children[1]);
                 
                 std::string op = node->value;
-                if (op == "plus") {
-                    return std::make_shared<Value>(left->toNumber() + right->toNumber());
-                } else if (op == "minus") {
-                    return std::make_shared<Value>(left->toNumber() - right->toNumber());
-                } else if (op == "times") {
-                    return std::make_shared<Value>(left->toNumber() * right->toNumber());
-                } else if (op == "div") {
-                    double r = right->toNumber();
-                    if (r == 0.0) return std::make_shared<Value>(0.0);
-                    return std::make_shared<Value>(left->toNumber() / r);
-                } else if (op == "over") {
-                    return std::make_shared<Value>(left->toNumber() > right->toNumber());
-                } else if (op == "under") {
-                    return std::make_shared<Value>(left->toNumber() < right->toNumber());
-                } else if (op == "same") {
+                double lnum = left->toNumber();
+                double rnum = right->toNumber();
+                
+                // Arithmetic - flexible operators
+                if (op == "plus" || op == "add" || op == "+") {
+                    return std::make_shared<Value>(lnum + rnum);
+                } else if (op == "minus" || op == "subtract" || op == "-") {
+                    return std::make_shared<Value>(lnum - rnum);
+                } else if (op == "times" || op == "multiply" || op == "*") {
+                    return std::make_shared<Value>(lnum * rnum);
+                } else if (op == "div" || op == "divide" || op == "/") {
+                    if (rnum == 0.0) return std::make_shared<Value>(0.0);
+                    return std::make_shared<Value>(lnum / rnum);
+                } else if (op == "mod" || op == "%") {
+                    if (rnum == 0.0) return std::make_shared<Value>(0.0);
+                    return std::make_shared<Value>(std::fmod(lnum, rnum));
+                } else if (op == "power" || op == "^" || op == "**") {
+                    return std::make_shared<Value>(std::pow(lnum, rnum));
+                }
+                // Comparison - flexible operators
+                else if (op == "over" || op == "greater" || op == ">") {
+                    return std::make_shared<Value>(lnum > rnum);
+                } else if (op == "under" || op == "less" || op == "<") {
+                    return std::make_shared<Value>(lnum < rnum);
+                } else if (op == ">=") {
+                    return std::make_shared<Value>(lnum >= rnum);
+                } else if (op == "<=") {
+                    return std::make_shared<Value>(lnum <= rnum);
+                } else if (op == "same" || op == "equals" || op == "is" || 
+                           op == "are" || op == "==" || op == "=") {
                     if (left->type == ValueType::TEXT && right->type == ValueType::TEXT) {
                         return std::make_shared<Value>(left->toString() == right->toString());
                     }
-                    return std::make_shared<Value>(std::abs(left->toNumber() - right->toNumber()) < 0.0001);
-                } else if (op == "and") {
+                    return std::make_shared<Value>(std::abs(lnum - rnum) < 0.0001);
+                } else if (op == "not" || op == "notequal" || op == "!=") {
+                    if (left->type == ValueType::TEXT && right->type == ValueType::TEXT) {
+                        return std::make_shared<Value>(left->toString() != right->toString());
+                    }
+                    return std::make_shared<Value>(std::abs(lnum - rnum) >= 0.0001);
+                }
+                // Logical - flexible operators
+                else if (op == "and" || op == "andalso" || op == "&&") {
                     return std::make_shared<Value>(left->toBool() && right->toBool());
-                } else if (op == "or") {
+                } else if (op == "or" || op == "orelse" || op == "||") {
                     return std::make_shared<Value>(left->toBool() || right->toBool());
                 }
             }

@@ -1,0 +1,77 @@
+// Flexible Syntax Examples
+// All of these work - choose your style!
+
+// Variable declaration - many ways
+form num x from 10
+let num y = 20
+var num z is 30
+const num w equals 40
+set num v to 50
+
+// Functions - many ways
+act add a b do
+    give a plus b
+end
+
+def subtract a b {
+    return a - b
+}
+
+fn multiply a b then
+    return a * b
+end
+
+// Conditionals - many ways
+if x > 10 do
+    say Big
+end
+
+when x < 5 then
+    say Small
+end
+
+if x == 10 {
+    say Equal
+}
+
+// Loops - many ways
+loop 5 do
+    say step
+end
+
+while x < 10 {
+    say x
+    x = x + 1
+}
+
+for 10 do
+    say step
+end
+
+// Output - many ways
+say Hello
+print World
+output Test
+display Result
+
+// Operators - many ways
+form num sum from 5 + 10
+form num diff from 20 - 5
+form num prod from 3 * 4
+form num quot from 20 / 4
+
+form num sum2 from 5 plus 10
+form num diff2 from 20 minus 5
+form num prod2 from 3 times 4
+form num quot2 from 20 div 4
+
+// Comparisons - many ways
+if x > 10 do say Big end
+if x greater 10 do say Big end
+if x over 10 do say Big end
+
+if x == 10 do say Equal end
+if x equals 10 do say Equal end
+if x is 10 do say Equal end
+if x same 10 do say Equal end
+

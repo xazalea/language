@@ -1,0 +1,73 @@
+// Stunning UI with Full CSS Support
+// Beautiful by default, fully customizable!
+
+act stunning_app do
+    // Header with gradient background
+    call view header style "background" "linear-gradient(135deg, #667eea 0%, #764ba2 100%)" 
+                      style "color" "white"
+                      style "padding" "2rem"
+                      style "text-align" "center" do
+        call view h1 "Stunning Azalea App"
+        call view p "Beautiful UI with Full CSS"
+    end
+    
+    // Main content with grid layout
+    call view main style "display" "grid"
+                   style "grid-template-columns" "repeat(3, 1fr)"
+                   style "gap" "2rem"
+                   style "padding" "2rem"
+                   style "max-width" "1200px"
+                   style "margin" "0 auto" do
+        
+        // Card 1 with shadow and hover effect
+        call view card style "background" "white"
+                       style "border-radius" "12px"
+                       style "padding" "2rem"
+                       style "box-shadow" "0 4px 6px rgba(0,0,0,0.1)"
+                       style "transition" "transform 0.3s"
+                       style "hover" "transform: scale(1.05)" do
+            call view h2 "Card 1"
+            call view p "Beautiful card with shadow"
+            call view button "Click Me" style "background" "#667eea"
+                                        style "color" "white"
+                                        style "border" "none"
+                                        style "padding" "1rem 2rem"
+                                        style "border-radius" "8px"
+                                        style "cursor" "pointer" do
+                say Clicked!
+            end
+        end
+        
+        // Card 2 with gradient
+        call view card style "background" "linear-gradient(45deg, #f093fb 0%, #f5576c 100%)"
+                       style "color" "white"
+                       style "border-radius" "12px"
+                       style "padding" "2rem"
+                       style "box-shadow" "0 8px 16px rgba(0,0,0,0.2)" do
+            call view h2 "Card 2"
+            call view p "Gradient background"
+        end
+        
+        // Card 3 with animation
+        call view card style "background" "#4facfe"
+                       style "background-image" "linear-gradient(45deg, #4facfe 0%, #00f2fe 100%)"
+                       style "color" "white"
+                       style "border-radius" "12px"
+                       style "padding" "2rem"
+                       style "animation" "pulse 2s infinite" do
+            call view h2 "Card 3"
+            call view p "Animated card"
+        end
+    end
+    
+    // Footer
+    call view footer style "background" "#2d3748"
+                     style "color" "white"
+                     style "padding" "2rem"
+                     style "text-align" "center" do
+        call view p "Made with Azalea - Stunning UI Made Simple"
+    end
+end
+
+call stunning_app
+

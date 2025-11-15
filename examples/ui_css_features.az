@@ -1,0 +1,71 @@
+// Full CSS Features Demo
+// All CSS properties supported!
+
+act css_demo do
+    // Flexbox layout
+    call view div style "display" "flex"
+                 style "justify-content" "center"
+                 style "align-items" "center"
+                 style "height" "100vh"
+                 style "background" "linear-gradient(135deg, #667eea 0%, #764ba2 100%)" do
+        
+        // Centered card
+        call view card style "background" "white"
+                       style "border-radius" "20px"
+                       style "padding" "3rem"
+                       style "box-shadow" "0 20px 60px rgba(0,0,0,0.3)"
+                       style "max-width" "500px"
+                       style "width" "100%" do
+            
+            call view h1 style "color" "#667eea"
+                        style "margin-bottom" "1rem"
+                        style "font-size" "2.5rem"
+                        style "font-weight" "bold" do
+                "CSS Features"
+            end
+            
+            call view p style "color" "#666"
+                       style "line-height" "1.6"
+                       style "margin-bottom" "2rem" do
+                "All CSS properties work in Azalea!"
+            end
+            
+            // Button with hover
+            call view button "Hover Me" style "background" "#667eea"
+                                        style "color" "white"
+                                        style "border" "none"
+                                        style "padding" "1rem 2rem"
+                                        style "border-radius" "8px"
+                                        style "font-size" "1.1rem"
+                                        style "cursor" "pointer"
+                                        style "transition" "all 0.3s"
+                                        style "hover" "background: #5568d3; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4)" do
+                say Hovered!
+            end
+        end
+    end
+    
+    // Grid layout example
+    call view div style "display" "grid"
+                 style "grid-template-columns" "repeat(auto-fit, minmax(250px, 1fr))"
+                 style "gap" "2rem"
+                 style "padding" "2rem" do
+        
+        loop 6 do
+            call view card style "background" "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+                           style "color" "white"
+                           style "padding" "2rem"
+                           style "border-radius" "12px"
+                           style "box-shadow" "0 4px 6px rgba(0,0,0,0.1)"
+                           style "transform" "rotate(0deg)"
+                           style "transition" "transform 0.3s"
+                           style "hover" "transform: rotate(5deg) scale(1.05)" do
+                call view h3 "Card"
+                call view p step
+            end
+        end
+    end
+end
+
+call css_demo
+
