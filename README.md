@@ -196,12 +196,39 @@ make all
 make clean
 ```
 
+## Key Features
+
+### 🎨 **Flexible Syntax - Code Your Way!**
+Write code in **any style** you prefer - all work perfectly:
+- Variables: `form`, `let`, `var`, `const`, `set`
+- Functions: `act`, `def`, `fn`, `func`, `function`
+- Conditionals: `if`, `when`
+- Loops: `loop`, `while`, `for`, `repeat`, `each`
+- Operators: `plus`/`+`, `minus`/`-`, `times`/`*`, `div`/`/`
+- Output: `say`, `print`, `output`, `display`
+
+### 💅 **Full CSS Support - Stunning UIs!**
+Complete CSS capabilities with shortcuts:
+- All CSS properties supported
+- Shortcuts: `bg` (background), `fg` (color), `p` (padding), `m` (margin)
+- Gradients, shadows, animations, transitions
+- Flexbox, Grid, positioning
+- Hover effects and responsive design
+
+### 🌐 **Perfect for UI Development**
+- HTML-like components: `h1`, `p`, `button`, `div`, `section`
+- Semantic HTML: `header`, `footer`, `nav`, `main`
+- Modern layouts: `card`, `grid`, `row`, `col`
+- Beautiful by default, fully customizable
+
 ## Documentation
 
 - **[Language Specification](docs/language_spec.md)** - Complete syntax reference
 - **[Quick Start Guide](docs/QUICKSTART.md)** - Get started quickly
 - **[For Kids](docs/FOR_KIDS.md)** - Super simple guide for beginners
 - **[UI Guide](docs/UI_GUIDE.md)** - Build beautiful interfaces
+- **[CSS Guide](docs/CSS_GUIDE.md)** - Full CSS styling reference
+- **[Flexible Syntax](docs/FLEXIBLE_SYNTAX.md)** - Code your way guide
 - **[Backend Guide](docs/BACKEND_GUIDE.md)** - Create powerful APIs
 - **[Architecture](docs/ARCHITECTURE.md)** - How Azalea works
 
