@@ -1,0 +1,9 @@
+// Server example
+act main req do
+    say Handling request
+    give OK
+end
+
+serve on four_zero_zero_zero give main
+say Server started on port 4000
+

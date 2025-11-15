@@ -1,0 +1,4 @@
+// File operations example
+call file read /sys/info put out
+say out
+

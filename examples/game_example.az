@@ -1,0 +1,13 @@
+// Simple game example
+act game_loop do
+    form num score from zero
+    loop ten do
+        call play render
+        score give score plus one
+        say score
+    end
+end
+
+call play game
+call game_loop
+

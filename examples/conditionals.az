@@ -1,0 +1,16 @@
+// Conditionals example
+form num a from ten
+form num b from five
+
+if a over b do
+    say a
+    say is greater than
+    say b
+end
+
+if b under a do
+    say b
+    say is less than
+    say a
+end
+

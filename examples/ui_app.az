@@ -1,0 +1,17 @@
+// Complete UI app
+// Beautiful and clean!
+
+act app do
+    call view pane style "background" "blue" style "padding" "20" do
+        call view text "My App" style "size" "large"
+        call view button "Click" do
+            say Clicked!
+        end
+        call view image "/logo.png"
+        call view input "email" placeholder "Email"
+    end
+    call view show pane
+end
+
+call app
+

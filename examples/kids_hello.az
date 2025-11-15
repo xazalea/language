@@ -1,0 +1,15 @@
+// Hello World for kids!
+// Numbers work too: 5, 10, 100
+
+say Hello World!
+form num age from 8
+say I am
+say age
+say years old
+
+form num count from 5
+loop count do
+    say Counting
+    say step
+end
+

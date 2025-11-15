@@ -1,0 +1,22 @@
+// Simple calculator for kids
+// Mix numbers and words!
+
+form num a from 10
+form num b from 5
+
+form num sum from a plus b
+say Sum is
+say sum
+
+form num diff from a minus b
+say Difference is
+say diff
+
+form num prod from a times b
+say Product is
+say prod
+
+form num quot from a div b
+say Quotient is
+say quot
+

@@ -1,0 +1,16 @@
+// Functions example
+act sum a b do
+    give a plus b
+end
+
+act greet name do
+    say Hello
+    say name
+end
+
+form num x from five
+form num y from three
+call sum x y put result
+say result
+call greet World
+

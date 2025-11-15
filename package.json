@@ -1,0 +1,22 @@
+{
+  "name": "azalea-lang",
+  "version": "1.0.0",
+  "description": "Azalea - Elegant, minimal, powerful interpreted language",
+  "main": "bin/azalea.js",
+  "scripts": {
+    "build": "make wasm",
+    "build-native": "make native",
+    "clean": "make clean",
+    "test": "make examples",
+    "serve": "python3 -m http.server 8000"
+  },
+  "keywords": [
+    "programming-language",
+    "interpreter",
+    "wasm",
+    "azalea"
+  ],
+  "author": "",
+  "license": "MIT"
+}
+

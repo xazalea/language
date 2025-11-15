@@ -1,0 +1,4 @@
+// Networking example
+call net get https:/api.example.com put data
+say data
+

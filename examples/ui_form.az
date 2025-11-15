@@ -1,0 +1,13 @@
+// Beautiful form UI
+// Super clean and easy!
+
+call view pane do
+    call view text "Welcome!"
+    call view input "name" placeholder "Enter your name"
+    call view button "Submit" do
+        say Form submitted!
+    end
+end
+
+call view show pane
+

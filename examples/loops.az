@@ -1,0 +1,11 @@
+// Loops example
+loop ten do
+    say step
+end
+
+form num count from five
+loop count do
+    say Counting
+    say step
+end
+

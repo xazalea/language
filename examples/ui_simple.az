@@ -1,0 +1,9 @@
+// Simple UI - Perfect for beginners!
+// This creates a beautiful button
+
+call view button "Click Me" do
+    say Button clicked!
+end
+
+call view show button
+

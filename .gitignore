@@ -1,0 +1,13 @@
+build/
+bin/
+*.o
+*.js
+*.wasm
+*.exe
+.DS_Store
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+

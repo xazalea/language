@@ -1,0 +1,11 @@
+// Simple backend server
+// Easy to understand!
+
+act home req do
+    give "Hello from Azalea!"
+end
+
+call serve get "/" give home
+call serve on 3000
+say Server running!
+

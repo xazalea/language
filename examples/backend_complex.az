@@ -1,0 +1,30 @@
+// Complex backend with multiple routes
+// Still super clean!
+
+act get_users req do
+    form list users from ["Alice", "Bob", "Charlie"]
+    call serve json users
+end
+
+act create_user req do
+    form text name from req
+    say Creating user
+    say name
+    call serve json "User created"
+end
+
+act update_user req do
+    form text id from req
+    say Updating user
+    say id
+    call serve json "User updated"
+end
+
+call serve get "/users" give get_users
+call serve post "/users" give create_user
+call serve put "/users/:id" give update_user
+call serve delete "/users/:id" give delete_user
+call serve static "/public"
+call serve on 3000
+say Complex backend ready!
+

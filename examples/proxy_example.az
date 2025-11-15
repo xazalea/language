@@ -1,0 +1,10 @@
+// Web proxy example
+act proxy_handler req do
+    form text url from req
+    call net get url put data
+    give data
+end
+
+serve on four_zero_zero_zero give proxy_handler
+say Proxy server running
+

@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Azalea Language - Web Interpreter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .editor-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            min-height: 600px;
+        }
+        
+        .editor-panel {
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #e0e0e0;
+        }
+        
+        .editor-panel:last-child {
+            border-right: none;
+        }
+        
+        .panel-header {
+            background: #f5f5f5;
+            padding: 15px 20px;
+            font-weight: bold;
+            color: #333;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        textarea {
+            flex: 1;
+            border: none;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            resize: none;
+            outline: none;
+            background: #fafafa;
+        }
+        
+        .output {
+            flex: 1;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        
+        .controls {
+            padding: 20px;
+            background: #f5f5f5;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .examples {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .example-btn {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+        
+        .example-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        .status {
+            margin-left: auto;
+            padding: 8px 16px;
+            background: #e8f5e9;
+            color: #2e7d32;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .status.error {
+            background: #ffebee;
+            color: #c62828;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌺 Azalea</h1>
+            <p>Elegant, minimal, powerful interpreted language</p>
+        </div>
+        
+        <div class="editor-container">
+            <div class="editor-panel">
+                <div class="panel-header">Code Editor</div>
+                <textarea id="editor" placeholder="// Write your Azalea code here
+
+form num a from ten
+say a
+loop five do
+    say step
+end">// Hello Azalea
+form num a from ten
+say a
+loop five do
+    say step
+end</textarea>
+            </div>
+            
+            <div class="editor-panel">
+                <div class="panel-header">Output</div>
+                <div class="output" id="output">Ready to run...</div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button onclick="runCode()">▶ Run</button>
+            <button onclick="clearOutput()">Clear</button>
+            <div class="examples">
+                <button class="example-btn" onclick="loadExample('hello')">Hello</button>
+                <button class="example-btn" onclick="loadExample('functions')">Functions</button>
+                <button class="example-btn" onclick="loadExample('loops')">Loops</button>
+            </div>
+            <div class="status" id="status">Ready</div>
+        </div>
+    </div>
+    
+    <script>
+        let AzaleaModule = null;
+        let azaleaReady = false;
+        let outputBuffer = [];
+        
+        // Initialize Emscripten module
+        function initAzalea() {
+            if (typeof AzaleaModule === 'undefined') {
+                updateStatus('Loading Azalea...', false);
+                // Try to load the module
+                if (typeof require !== 'undefined') {
+                    AzaleaModule = require('./azalea.js');
+                } else {
+                    // Fallback: assume AzaleaModule is defined globally
+                    if (typeof window.AzaleaModule !== 'undefined') {
+                        window.AzaleaModule().then(module => {
+                            AzaleaModule = module;
+                            azaleaReady = true;
+                            updateStatus('Ready', false);
+                        });
+                    } else {
+                        updateStatus('Azalea module not found. Please build with: make wasm', true);
+                    }
+                }
+            } else {
+                AzaleaModule().then(module => {
+                    AzaleaModule = module;
+                    // Override print function to capture output
+                    AzaleaModule.print = function(text) {
+                        outputBuffer.push(text);
+                    };
+                    azaleaReady = true;
+                    updateStatus('Ready', false);
+                });
+            }
+        }
+        
+        // Initialize on load
+        window.addEventListener('load', initAzalea);
+        
+        function updateStatus(message, isError) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = 'status' + (isError ? ' error' : '');
+        }
+        
+        async function runCode() {
+            if (!azaleaReady) {
+                updateStatus('Loading...', false);
+                await new Promise(resolve => setTimeout(resolve, 100));
+                if (!azaleaReady) {
+                    updateStatus('Module not ready', true);
+                    return;
+                }
+            }
+            
+            const code = document.getElementById('editor').value;
+            const output = document.getElementById('output');
+            outputBuffer = [];
+            
+            try {
+                updateStatus('Running...', false);
+                
+                // Allocate memory for source
+                const sourcePtr = AzaleaModule.allocateUTF8(code);
+                
+                // Execute
+                const resultPtr = AzaleaModule.ccall(
+                    'azalea_execute',
+                    'number',
+                    ['number'],
+                    [sourcePtr]
+                );
+                
+                // Get result
+                const result = AzaleaModule.UTF8ToString(resultPtr);
+                
+                // Free memory
+                AzaleaModule._free(sourcePtr);
+                if (resultPtr !== 0) {
+                    AzaleaModule._free(resultPtr);
+                }
+                
+                // Display output
+                if (outputBuffer.length > 0) {
+                    output.textContent = outputBuffer.join('\n');
+                } else {
+                    output.textContent = result || 'No output';
+                }
+                
+                updateStatus('Success', false);
+            } catch (error) {
+                output.textContent = 'Error: ' + error.message;
+                updateStatus('Error', true);
+            }
+        }
+        
+        function clearOutput() {
+            document.getElementById('output').textContent = '';
+            updateStatus('Ready', false);
+        }
+        
+        const examples = {
+            hello: `// Hello World
+say Hello World
+form num a from ten
+say a`,
+            functions: `// Functions
+act sum a b do
+    give a plus b
+end
+
+form num x from five
+form num y from three
+call sum x y put result
+say result`,
+            loops: `// Loops
+loop ten do
+    say step
+end`
+        };
+        
+        function loadExample(name) {
+            if (examples[name]) {
+                document.getElementById('editor').value = examples[name];
+            }
+        }
+    </script>
+</body>
+</html>
+

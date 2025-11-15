@@ -1,0 +1,7 @@
+// Hello World in Azalea
+say Hello World
+form num a from ten
+form num b from five
+say a
+say b
+

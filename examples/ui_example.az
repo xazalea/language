@@ -1,0 +1,6 @@
+// UI example
+view pane title Sol text Lumen
+view button text Click do
+    say Button clicked
+end
+

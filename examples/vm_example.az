@@ -1,0 +1,4 @@
+// VM creation example
+call vm make core eight mem four_g
+say VM created successfully
+
