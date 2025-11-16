@@ -79,57 +79,26 @@ function getLandingPageHTML() {
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background: #F0DAD5;
             min-height: 100vh; 
             padding: 20px; 
-            position: relative; 
-            overflow-x: hidden;
         }
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: 
-                radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3), transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(255, 119, 198, 0.2), transparent 50%);
-            pointer-events: none;
-            z-index: 0;
-        }
-        .matte {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
-            border-radius: 16px;
-        }
-        .matte-strong {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(30px) saturate(200%);
-            -webkit-backdrop-filter: blur(30px) saturate(200%);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
-        }
-        .matte-card {
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(15px) saturate(150%);
-            -webkit-backdrop-filter: blur(15px) saturate(150%);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            box-shadow: 0 4px 16px 0 rgba(31, 38, 135, 0.1);
+        .card {
+            background: #FFFFFF;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(66, 70, 88, 0.1);
             transition: all 0.3s ease;
         }
-        .matte-card:hover {
+        .card:hover {
             transform: translateY(-4px);
-            box-shadow: 0 8px 24px 0 rgba(31, 38, 135, 0.2);
-            background: rgba(255, 255, 255, 0.12);
+            box-shadow: 0 8px 24px rgba(66, 70, 88, 0.15);
         }
         .btn {
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: #6C739C;
+            border: none;
             color: white;
             padding: 12px 24px;
-            border-radius: 12px;
+            border-radius: 8px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -137,37 +106,35 @@ function getLandingPageHTML() {
             display: inline-block;
         }
         .btn:hover {
-            background: rgba(255, 255, 255, 0.3);
+            background: #5a6085;
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 12px rgba(108, 115, 156, 0.3);
         }
         .btn-primary {
-            background: rgba(255, 255, 255, 0.25);
-            border: 1px solid rgba(255, 255, 255, 0.4);
+            background: #C56B62;
+        }
+        .btn-primary:hover {
+            background: #b55a52;
         }
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            position: relative;
-            z-index: 1;
         }
-        h1, h2, h3 { color: white; font-weight: 700; }
-        p, span { color: rgba(255, 255, 255, 0.9); }
+        h1, h2, h3 { color: #424658; font-weight: 700; }
+        p, span { color: #424658; }
         code {
-            background: rgba(0, 0, 0, 0.3);
+            background: #F0DAD5;
             padding: 2px 8px;
             border-radius: 4px;
             font-family: 'Fira Code', monospace;
-            color: #fff;
+            color: #424658;
         }
         pre {
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(10px);
+            background: #424658;
             padding: 20px;
-            border-radius: 12px;
+            border-radius: 8px;
             overflow-x: auto;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #fff;
+            color: #F0DAD5;
             font-family: 'Fira Code', monospace;
         }
         .grid-3 {
@@ -183,35 +150,35 @@ function getLandingPageHTML() {
     </style>
 </head>
 <body>
-    <header class="matte-strong p-6 mb-6">
+    <header class="card p-6 mb-6" style="background: linear-gradient(135deg, #6C739C 0%, #D9A69F 100%);">
         <div class="container text-center">
-            <h1 style="font-size: 4rem; margin-bottom: 16px;">🌺 Azalea</h1>
-            <p style="font-size: 1.5rem; margin-bottom: 32px; opacity: 0.95;">Elegant, minimal, powerful programming language</p>
+            <h1 style="font-size: 4rem; margin-bottom: 16px; color: white;">🌺 Azalea</h1>
+            <p style="font-size: 1.5rem; margin-bottom: 32px; color: white; opacity: 0.95;">Elegant, minimal, powerful programming language</p>
             <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
                 <a href="/playground" class="btn btn-primary">Get Started</a>
-                <a href="/lessons" class="btn">Learn</a>
+                <a href="/lessons" class="btn" style="background: rgba(255,255,255,0.2); border: 2px solid white;">Learn</a>
             </div>
         </div>
     </header>
     <main class="container">
-        <section class="matte p-6 mb-6">
+        <section class="card p-6 mb-6">
             <h2 class="text-center mb-6" style="font-size: 2.5rem;">Why Azalea?</h2>
             <div class="grid-3">
-                <div class="matte-card p-4 text-center">
-                    <h3 style="color: #fff; margin-bottom: 16px; font-size: 1.5rem;">🎯 Super Easy</h3>
-                    <p style="line-height: 1.6;">Start coding in minutes! No complex syntax to memorize. Perfect for absolute beginners.</p>
+                <div class="card p-4 text-center" style="background: #F0DAD5;">
+                    <h3 style="color: #424658; margin-bottom: 16px; font-size: 1.5rem;">🎯 Super Easy</h3>
+                    <p style="line-height: 1.6; color: #424658;">Start coding in minutes! No complex syntax to memorize. Perfect for absolute beginners.</p>
                 </div>
-                <div class="matte-card p-4 text-center">
-                    <h3 style="color: #fff; margin-bottom: 16px; font-size: 1.5rem;">🚀 Learn JavaScript Next</h3>
-                    <p style="line-height: 1.6;">Azalea concepts map directly to JavaScript. Master Azalea, then easily transition to JS!</p>
+                <div class="card p-4 text-center" style="background: #F0DAD5;">
+                    <h3 style="color: #424658; margin-bottom: 16px; font-size: 1.5rem;">🚀 Learn JavaScript Next</h3>
+                    <p style="line-height: 1.6; color: #424658;">Azalea concepts map directly to JavaScript. Master Azalea, then easily transition to JS!</p>
                 </div>
-                <div class="matte-card p-4 text-center">
-                    <h3 style="color: #fff; margin-bottom: 16px; font-size: 1.5rem;">✨ Super Flexible</h3>
-                    <p style="line-height: 1.6;">Write code your way! 12+ ways to create variables, 8+ ways to write functions. Be creative!</p>
+                <div class="card p-4 text-center" style="background: #F0DAD5;">
+                    <h3 style="color: #424658; margin-bottom: 16px; font-size: 1.5rem;">✨ Super Flexible</h3>
+                    <p style="line-height: 1.6; color: #424658;">Write code your way! 12+ ways to create variables, 8+ ways to write functions. Be creative!</p>
                 </div>
             </div>
         </section>
-        <section class="matte p-6">
+        <section class="card p-6">
             <h2 class="mb-4" style="font-size: 2rem;">Try It Now</h2>
             <pre><code>say Hello World
 form num a from ten
@@ -219,7 +186,7 @@ say a</code></pre>
             <a href="/playground" class="btn btn-primary" style="margin-top: 16px;">Run in Playground</a>
         </section>
     </main>
-    <footer class="matte p-4" style="text-align: center; margin-top: 48px;">
+    <footer class="card p-4" style="text-align: center; margin-top: 48px; background: #BABBB1; color: #424658;">
         <p>Made with Azalea - From beginner to professional</p>
     </footer>
 </body>
@@ -237,37 +204,21 @@ function getPlaygroundPageHTML() {
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background: #F0DAD5;
             min-height: 100vh; 
             padding: 20px; 
-            position: relative; 
-            overflow-x: hidden;
         }
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: 
-                radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3), transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(255, 119, 198, 0.2), transparent 50%);
-            pointer-events: none;
-            z-index: 0;
-        }
-        .matte {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
-            border-radius: 16px;
+        .card {
+            background: #FFFFFF;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(66, 70, 88, 0.1);
         }
         .btn {
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: #6C739C;
+            border: none;
             color: white;
             padding: 12px 24px;
-            border-radius: 12px;
+            border-radius: 8px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -275,16 +226,21 @@ function getPlaygroundPageHTML() {
             display: inline-block;
         }
         .btn:hover {
-            background: rgba(255, 255, 255, 0.3);
+            background: #5a6085;
             transform: translateY(-2px);
         }
+        .btn-primary {
+            background: #C56B62;
+        }
+        .btn-primary:hover {
+            background: #b55a52;
+        }
         textarea {
-            background: rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: #fff;
+            background: #FFFFFF;
+            border: 2px solid #BABBB1;
+            color: #424658;
             padding: 16px;
-            border-radius: 12px;
+            border-radius: 8px;
             font-family: 'Fira Code', monospace;
             font-size: 14px;
             resize: none;
@@ -293,16 +249,15 @@ function getPlaygroundPageHTML() {
             height: 100%;
         }
         textarea:focus {
-            border-color: rgba(255, 255, 255, 0.4);
-            background: rgba(0, 0, 0, 0.4);
+            border-color: #6C739C;
+            box-shadow: 0 0 0 3px rgba(108, 115, 156, 0.1);
         }
         #output {
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #fff;
+            background: #424658;
+            border: 2px solid #BABBB1;
+            color: #F0DAD5;
             padding: 16px;
-            border-radius: 12px;
+            border-radius: 8px;
             font-family: 'Fira Code', monospace;
             font-size: 14px;
             white-space: pre-wrap;
@@ -321,7 +276,7 @@ function getPlaygroundPageHTML() {
             padding: 16px;
         }
         .panel-header {
-            background: rgba(255, 255, 255, 0.1);
+            background: #F0DAD5;
             padding: 12px 16px;
             border-radius: 8px;
             margin-bottom: 8px;
@@ -329,79 +284,117 @@ function getPlaygroundPageHTML() {
             justify-content: space-between;
             align-items: center;
         }
-        h1, h2, h3 { color: white; font-weight: 700; }
-        .container { position: relative; z-index: 1; }
+        h1, h2, h3 { color: #424658; font-weight: 700; }
+        .container { max-width: 1400px; margin: 0 auto; }
     </style>
 </head>
 <body>
-    <header class="matte" style="padding: 20px; margin-bottom: 20px;">
+    <header class="card" style="padding: 20px; margin-bottom: 20px; background: linear-gradient(135deg, #6C739C 0%, #D9A69F 100%);">
         <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
-        <h1 style="margin: 0;">🎮 Playground</h1>
+            <h1 style="margin: 0; color: white;">🎮 Playground</h1>
             <div style="display: flex; gap: 12px;">
-                <a href="/" class="btn">Landing</a>
-                <a href="/lessons" class="btn">Lessons</a>
+                <a href="/" class="btn" style="background: rgba(255,255,255,0.2); border: 2px solid white;">Landing</a>
+                <a href="/lessons" class="btn" style="background: rgba(255,255,255,0.2); border: 2px solid white;">Lessons</a>
             </div>
         </div>
     </header>
-    <div class="grid-2 matte" style="padding: 0;">
-        <div class="panel">
-            <div class="panel-header">
-                <strong style="color: white;">Code Editor</strong>
-                <button class="btn" onclick="runCode()" style="padding: 8px 16px; font-size: 14px;">▶ Run</button>
-            </div>
-            <textarea id="editor" spellcheck="false">say Hello World
+    <div class="container">
+        <div class="grid-2 card" style="padding: 0;">
+            <div class="panel">
+                <div class="panel-header">
+                    <strong style="color: #424658;">Code Editor</strong>
+                    <button class="btn btn-primary" onclick="runCode()" style="padding: 8px 16px; font-size: 14px;">▶ Run</button>
+                </div>
+                <textarea id="editor" spellcheck="false">say Hello World
 form num a from ten
 say a
 loop five do
     say step
 end</textarea>
             </div>
-        <div class="panel">
-            <div class="panel-header">
-                <strong style="color: white;">Output</strong>
+            <div class="panel">
+                <div class="panel-header">
+                    <strong style="color: #424658;">Output</strong>
+                </div>
+                <div id="output">Ready to run code...</div>
             </div>
-            <div id="output">Ready to run code...</div>
+        </div>
+        <div class="card" style="padding: 2rem; margin-top: 20px;">
+            <h3 style="margin-bottom: 1rem; color: #424658;">🤖 Need Help? Ask AI</h3>
+            <textarea id="ai_question" placeholder="Ask a question about Azalea..." style="width: 100%; padding: 1rem; border-radius: 8px; border: 2px solid #BABBB1; font-size: 14px; min-height: 100px; margin-bottom: 1rem; background: #FFFFFF; color: #424658;"></textarea>
+            <button class="btn btn-primary" onclick="getAIHelp()" style="padding: 0.75rem 1.5rem;">Get AI Help</button>
         </div>
     </div>
-    <div class="matte" style="padding: 2rem; margin-top: 20px;">
-        <h3 style="margin-bottom: 1rem;">🤖 Need Help? Ask AI</h3>
-        <textarea id="ai_question" placeholder="Ask a question about Azalea..." style="width: 100%; padding: 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); font-size: 14px; min-height: 100px; margin-bottom: 1rem; background: rgba(0,0,0,0.2); color: white;"></textarea>
-        <button class="btn" onclick="getAIHelp()" style="padding: 0.75rem 1.5rem;">Get AI Help</button>
-    </div>
     <script src="/azalea-browser.js"></script>
-    <script src="/azalea-hybrid.js"></script>
     <script>
-        let hybridRuntime = null;
+        let runtime = null;
         let azaleaReady = false;
         
         async function initAzalea() {
             try {
-                hybridRuntime = new AzaleaHybridRuntime();
-                const status = await hybridRuntime.initialize();
-                azaleaReady = status.hybrid;
+                if (typeof AzaleaRuntime !== 'undefined') {
+                    runtime = new AzaleaRuntime();
+                    azaleaReady = true;
+                } else {
+                    throw new Error('Azalea runtime not loaded');
+                }
             } catch (e) {
                 console.error('Init error:', e);
+                azaleaReady = false;
             }
         }
         
-        window.addEventListener('load', initAzalea);
+        window.addEventListener('load', () => {
+            initAzalea();
+            // Load code from URL parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const codeParam = urlParams.get('code');
+            if (codeParam) {
+                document.getElementById('editor').value = decodeURIComponent(codeParam);
+            }
+        });
         
         async function runCode() {
-            if (!azaleaReady || !hybridRuntime) {
-                await initAzalea();
-            }
             const code = document.getElementById('editor').value;
             const output = document.getElementById('output');
+            
+            if (!azaleaReady || !runtime) {
+                output.textContent = 'Initializing runtime...';
+                await initAzalea();
+                if (!azaleaReady || !runtime) {
+                    output.textContent = 'Error: Runtime not initialized. Please refresh the page.\\n\\nMake sure /azalea-browser.js is available.';
+                    return;
+                }
+            }
+            
             try {
                 output.textContent = 'Running...';
-                const results = await hybridRuntime.execute(code);
-                if (results.hybrid && results.hybrid.success) {
-                    output.textContent = results.hybrid.output.join('\\n') || 'No output';
+                
+                // Capture console.log output
+                const originalLog = console.log;
+                const logs = [];
+                console.log = (...args) => {
+                    logs.push(args.map(a => String(a)).join(' '));
+                    originalLog.apply(console, args);
+                };
+                
+                // Execute code
+                if (runtime && typeof runtime.execute === 'function') {
+                    runtime.execute(code);
                 } else {
-                    output.textContent = 'Error: ' + results.errors.map(e => e.error).join('\\n');
+                    throw new Error('Runtime execute method not available');
+                }
+                
+                // Restore console.log
+                console.log = originalLog;
+                
+                if (logs.length > 0) {
+                    output.textContent = logs.join('\\n');
+                } else {
+                    output.textContent = 'Code executed successfully (no output)\\n\\nTip: Use "say" to print: say Hello World';
                 }
             } catch (e) {
-                output.textContent = 'Error: ' + e.message;
+                output.textContent = 'Error: ' + e.message + '\\n\\nMake sure your code is valid Azalea syntax.';
             }
         }
         
@@ -432,54 +425,39 @@ function getLessonsPageHTML() {
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background: #F0DAD5;
             min-height: 100vh; 
             padding: 20px; 
-            position: relative; 
-            overflow-x: hidden;
         }
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: 
-                radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3), transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(255, 119, 198, 0.2), transparent 50%);
-            pointer-events: none;
-            z-index: 0;
-        }
-        .matte {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
-            border-radius: 16px;
-        }
-        .matte-card {
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
+        .card {
+            background: #FFFFFF;
             border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(66, 70, 88, 0.1);
+        }
+        .lesson-card {
+            background: #F0DAD5;
+            border: 2px solid #BABBB1;
+            border-radius: 8px;
             padding: 12px;
             margin-bottom: 8px;
             cursor: pointer;
             transition: all 0.2s;
         }
-        .matte-card:hover {
-            background: rgba(255, 255, 255, 0.12);
+        .lesson-card:hover {
+            background: #DEA785;
+            border-color: #6C739C;
         }
-        .matte-card.active {
-            background: rgba(255, 255, 255, 0.2);
-            border-color: rgba(255, 255, 255, 0.3);
+        .lesson-card.active {
+            background: #6C739C;
+            border-color: #C56B62;
+            color: white;
         }
         .btn {
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: #6C739C;
+            border: none;
             color: white;
             padding: 12px 24px;
-            border-radius: 12px;
+            border-radius: 8px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -487,26 +465,35 @@ function getLessonsPageHTML() {
             display: inline-block;
         }
         .btn:hover {
-            background: rgba(255, 255, 255, 0.3);
+            background: #5a6085;
+            transform: translateY(-2px);
+        }
+        .btn-primary {
+            background: #C56B62;
+        }
+        .btn-primary:hover {
+            background: #b55a52;
+        }
+        .btn-success {
+            background: #6C739C;
         }
         pre {
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(10px);
+            background: #424658;
             padding: 20px;
-            border-radius: 12px;
+            border-radius: 8px;
             overflow-x: auto;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #fff;
+            color: #F0DAD5;
             font-family: 'Fira Code', monospace;
+            margin: 16px 0;
         }
-        h1, h2, h3 { color: white; font-weight: 700; }
-        p { color: rgba(255, 255, 255, 0.9); line-height: 1.6; }
+        h1, h2, h3 { color: #424658; font-weight: 700; }
+        p { color: #424658; line-height: 1.6; }
         code {
-            background: rgba(0, 0, 0, 0.3);
+            background: #F0DAD5;
             padding: 2px 8px;
             border-radius: 4px;
             font-family: 'Fira Code', monospace;
-            color: #fff;
+            color: #424658;
         }
         .grid-2 {
             display: grid;
@@ -514,14 +501,22 @@ function getLessonsPageHTML() {
             gap: 0;
             min-height: calc(100vh - 100px);
         }
-        .sidebar { padding: 20px; overflow-y: auto; }
-        .content { padding: 32px; overflow-y: auto; }
-        .container { position: relative; z-index: 1; }
+        .sidebar { padding: 20px; overflow-y: auto; background: #FFFFFF; border-radius: 12px 0 0 12px; }
+        .content { padding: 32px; overflow-y: auto; background: #FFFFFF; border-radius: 0 12px 12px 0; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .info-box {
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            border-left: 4px solid;
+        }
+        .info-box.goal { background: #F0DAD5; border-color: #6C739C; }
+        .info-box.hint { background: #F0DAD5; border-color: #DEA785; }
+        .info-box.tip { background: #F0DAD5; border-color: #C56B62; }
         textarea {
-            background: rgba(0, 0, 0, 0.2);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: white;
+            background: #FFFFFF;
+            border: 2px solid #BABBB1;
+            color: #424658;
             padding: 1rem;
             border-radius: 8px;
             font-size: 14px;
@@ -532,64 +527,217 @@ function getLessonsPageHTML() {
     </style>
 </head>
 <body>
-    <header class="matte" style="padding: 20px; margin-bottom: 20px;">
+    <header class="card" style="padding: 20px; margin-bottom: 20px; background: linear-gradient(135deg, #6C739C 0%, #D9A69F 100%);">
         <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
             <div>
-                <h1 style="margin: 0; margin-bottom: 8px;">📚 Learn Azalea</h1>
+                <h1 style="margin: 0; margin-bottom: 8px; color: white;">📚 Learn Azalea</h1>
                 <div style="display: flex; gap: 24px; align-items: center;">
-                    <span style="opacity: 0.9; color: white;">Level: <strong>1</strong></span>
-                    <span style="opacity: 0.9; color: white;">XP: <strong>0</strong></span>
+                    <span style="color: white; opacity: 0.9;">Level: <strong id="level">1</strong></span>
+                    <span style="color: white; opacity: 0.9;">XP: <strong id="xp">0</strong></span>
                 </div>
             </div>
             <div style="display: flex; gap: 12px;">
-                <a href="/" class="btn">Landing</a>
-                <a href="/playground" class="btn">Playground</a>
+                <a href="/" class="btn" style="background: rgba(255,255,255,0.2); border: 2px solid white;">Landing</a>
+                <a href="/playground" class="btn" style="background: rgba(255,255,255,0.2); border: 2px solid white;">Playground</a>
             </div>
         </div>
     </header>
-    <div class="grid-2 matte" style="padding: 0;">
-        <div class="sidebar">
-            <h3 style="margin-bottom: 16px; color: white;">Lessons</h3>
-            <div class="matte-card active">0. Hello World</div>
-            <div class="matte-card">1. Variables</div>
-            <div class="matte-card">2. Math Operations</div>
-            <div class="matte-card">3. Conditionals</div>
-            <div class="matte-card">4. Loops</div>
-            <div class="matte-card">5. Functions</div>
-            <div class="matte-card">6. Lists</div>
-            <div class="matte-card">7. UI Components</div>
-            <div class="matte-card">8. Styling</div>
-            <div class="matte-card">9. Forms</div>
-            <div class="matte-card">10. Advanced Functions</div>
-        </div>
-        <div class="content">
-            <div class="matte" style="padding: 16px; margin-bottom: 24px; background: rgba(76, 175, 80, 0.2); border-color: rgba(76, 175, 80, 0.3);">
-                <p style="font-weight: bold; margin-bottom: 8px; color: white;">🎯 Why Azalea?</p>
-                <p style="color: white; font-size: 0.9rem;">Azalea is SUPER easy! No complex syntax. Once you master Azalea, learning JavaScript will be a breeze. The concepts are the same, just different words!</p>
+    <div class="container">
+        <div class="grid-2 card" style="padding: 0;">
+            <div class="sidebar">
+                <h3 style="margin-bottom: 16px; color: #424658;">Lessons</h3>
+                <div class="lesson-card active" onclick="loadLesson(0)">0. Hello World</div>
+                <div class="lesson-card" onclick="loadLesson(1)">1. Variables</div>
+                <div class="lesson-card" onclick="loadLesson(2)">2. Math Operations</div>
+                <div class="lesson-card" onclick="loadLesson(3)">3. Conditionals</div>
+                <div class="lesson-card" onclick="loadLesson(4)">4. Loops</div>
+                <div class="lesson-card" onclick="loadLesson(5)">5. Functions</div>
+                <div class="lesson-card" onclick="loadLesson(6)">6. Lists</div>
+                <div class="lesson-card" onclick="loadLesson(7)">7. UI Components</div>
+                <div class="lesson-card" onclick="loadLesson(8)">8. Styling</div>
+                <div class="lesson-card" onclick="loadLesson(9)">9. Forms</div>
+                <div class="lesson-card" onclick="loadLesson(10)">10. Advanced</div>
             </div>
-            <h2 style="font-size: 2rem; margin-bottom: 16px; color: white;">Lesson 0: Hello World</h2>
-            <div class="matte" style="padding: 16px; margin-bottom: 24px; background: rgba(33, 150, 243, 0.2); border-color: rgba(33, 150, 243, 0.3);">
-                <p style="font-weight: bold; margin-bottom: 8px; color: white;">Goal:</p>
-                <p style="color: white;">Print 'Hello World' - Your first program!</p>
-            </div>
-            <p style="margin-bottom: 16px;">In Azalea, printing is super simple. Just use <code>say</code> (or any of 8+ other words!).</p>
-            <pre><code>say Hello World</code></pre>
-            <div class="matte" style="padding: 16px; margin: 24px 0; background: rgba(255, 193, 7, 0.2); border-color: rgba(255, 193, 7, 0.3);">
-                <p style="font-weight: bold; margin-bottom: 8px; color: white;">💡 Hint:</p>
-                <p style="color: white;">Use the 'say' keyword to print text</p>
-            </div>
-            <div style="display: flex; gap: 12px;">
-                <a href="/playground" class="btn">Try in Playground</a>
-                <button class="btn" style="background: rgba(40, 167, 69, 0.3); border-color: rgba(40, 167, 69, 0.4);">Mark Complete</button>
-            </div>
-            <div class="matte" style="padding: 1.5rem; margin-top: 2rem;">
-                <h3 style="margin-bottom: 1rem;">🤖 Need Help? Ask AI</h3>
-                <textarea id="lesson_question" placeholder="Ask about this lesson..."></textarea>
-                <button class="btn" onclick="getAIHelp()" style="padding: 0.75rem 1.5rem;">Get AI Help</button>
+            <div class="content" id="lesson-content">
+                <div class="info-box goal">
+                    <p style="font-weight: bold; margin-bottom: 8px; color: #424658;">🎯 Why Azalea?</p>
+                    <p style="color: #424658; font-size: 0.9rem;">Azalea is SUPER easy! No complex syntax. Once you master Azalea, learning JavaScript will be a breeze. The concepts are the same, just different words!</p>
+                </div>
+                <h2 style="font-size: 2rem; margin-bottom: 16px;">Lesson 0: Hello World</h2>
+                <div class="info-box goal">
+                    <p style="font-weight: bold; margin-bottom: 8px; color: #424658;">Goal:</p>
+                    <p style="color: #424658;">Print 'Hello World' - Your first program!</p>
+                </div>
+                <p style="margin-bottom: 16px;">In Azalea, printing is super simple. Just use <code>say</code> (or any of 8+ other words like <code>print</code>, <code>output</code>, <code>display</code>, <code>log</code>!).</p>
+                <pre><code>say Hello World</code></pre>
+                <div class="info-box hint">
+                    <p style="font-weight: bold; margin-bottom: 8px; color: #424658;">💡 Hint:</p>
+                    <p style="color: #424658;">Use the 'say' keyword to print text. You can also use: print, output, display, log, echo, show, write - they all work the same!</p>
+                </div>
+                <div class="info-box tip">
+                    <p style="font-weight: bold; margin-bottom: 8px; color: #424658;">✨ Try This:</p>
+                    <p style="color: #424658;">Try using different keywords: <code>print Hello World</code> or <code>display Hello World</code> - they all work!</p>
+                </div>
+                <div style="display: flex; gap: 12px; margin-top: 24px;">
+                    <a href="/playground" class="btn btn-primary">Try in Playground</a>
+                    <button class="btn btn-success" onclick="completeLesson(0)">Mark Complete</button>
+                </div>
+                <div class="card" style="padding: 1.5rem; margin-top: 2rem;">
+                    <h3 style="margin-bottom: 1rem; color: #424658;">🤖 Need Help? Ask AI</h3>
+                    <textarea id="lesson_question" placeholder="Ask about this lesson..."></textarea>
+                    <button class="btn btn-primary" onclick="getAIHelp()" style="padding: 0.75rem 1.5rem;">Get AI Help</button>
+                </div>
             </div>
         </div>
     </div>
     <script>
+        const lessons = [
+            {
+                title: "Hello World",
+                goal: "Print 'Hello World' - Your first program!",
+                code: "say Hello World",
+                hint: "Use the 'say' keyword to print text. You can also use: print, output, display, log, echo, show, write - they all work the same!",
+                tip: "Try using different keywords: print Hello World or display Hello World - they all work!",
+                explanation: "In Azalea, printing is super simple. Just use 'say' (or any of 8+ other words!)."
+            },
+            {
+                title: "Variables",
+                goal: "Create a variable and print it",
+                code: "form num age from 10\nsay age",
+                hint: "Use 'form' to create variables, 'num' for numbers. You can also use: let, var, const, set, create, make, declare, define, init, new!",
+                tip: "Variables can hold numbers, text, or other values. Try: form text name from Alice",
+                explanation: "Variables store values. Use 'form' (or 11+ other keywords!) to create them. 'num' means number, 'text' means string."
+            },
+            {
+                title: "Math Operations",
+                goal: "Add two numbers and print the result",
+                code: "form num a from 10\nform num b from 5\nsay a plus b",
+                hint: "Use 'plus' for addition. Also try: minus, times, div (division). You can use +, -, *, / too!",
+                tip: "Math is easy! Try: say 10 plus 5, or say 10 times 3",
+                explanation: "Azalea supports all math operations. Use words (plus, minus, times, div) or symbols (+, -, *, /)."
+            },
+            {
+                title: "Conditionals",
+                goal: "Check if age is over 10",
+                code: "form num age from 15\nif age over 10 do\n    say You are old enough\nend",
+                hint: "Use 'if' for conditionals. Comparison words: over (>), under (<), same (==). You can also use: when, whenever, provided, assuming, given!",
+                tip: "Try different comparisons: if age same 15, if age under 20",
+                explanation: "Conditionals let you make decisions. Use 'if' with comparisons like 'over', 'under', 'same'."
+            },
+            {
+                title: "Loops",
+                goal: "Count from 0 to 4",
+                code: "loop 5 do\n    say step\nend",
+                hint: "Use 'loop' with a number to repeat. 'step' is the current count (0, 1, 2, 3, 4). You can also use: while, for, repeat, each, foreach, iterate!",
+                tip: "Try: loop 10 do say step - counts from 0 to 9!",
+                explanation: "Loops repeat code. 'loop 5' runs 5 times. 'step' is the current iteration number (starts at 0)."
+            },
+            {
+                title: "Functions",
+                goal: "Create a function that greets someone",
+                code: "act greet name do\n    say Hello\n    say name\nend\n\ncall greet Alice",
+                hint: "Use 'act' to define functions, 'call' to use them. You can also use: def, fn, func, function, method, procedure!",
+                tip: "Functions can take multiple parameters: act add a b do give a plus b end",
+                explanation: "Functions are reusable code blocks. Define with 'act', call with 'call'. Use 'give' to return values."
+            },
+            {
+                title: "Lists",
+                goal: "Create a list and print all items",
+                code: "form list names from [Alice, Bob, Charlie]\nloop names do\n    say step\nend",
+                hint: "Use 'list' type for arrays. Loop over lists to access each item. 'step' is the current item in the loop.",
+                tip: "Lists can hold any type: form list numbers from [1, 2, 3, 4, 5]",
+                explanation: "Lists store multiple values. Use square brackets []. Loop over them to access each item."
+            },
+            {
+                title: "UI Components",
+                goal: "Create a button that prints when clicked",
+                code: "call view button Click Me do\n    say Button clicked!\nend",
+                hint: "Use 'view' module to create UI. 'button' creates a button. The 'do' block runs when clicked.",
+                tip: "Try other UI elements: call view input name, call view text Hello",
+                explanation: "Azalea can create UI! Use 'view' module with element names like 'button', 'input', 'text'."
+            },
+            {
+                title: "Styling",
+                goal: "Create a styled div",
+                code: "call view div style background blue style color white do\n    call view text Hello\nend",
+                hint: "Use 'style' keyword to add CSS. You can add multiple styles: style background blue style color white",
+                tip: "Try different styles: style padding 20, style border-radius 8",
+                explanation: "Style UI elements with the 'style' keyword. Add any CSS property you want!"
+            },
+            {
+                title: "Forms",
+                goal: "Create an input and submit button",
+                code: "call view input name placeholder Enter name\ncall view button Submit do\n    say Form submitted!\nend",
+                hint: "Use 'input' for text fields. Add 'placeholder' for hint text. Buttons can have actions in 'do' blocks.",
+                tip: "Try different input types: call view input email type email",
+                explanation: "Forms collect user input. Use 'input' for fields, 'button' for actions."
+            },
+            {
+                title: "Advanced Functions",
+                goal: "Create a calculator function",
+                code: "act calculate a b op do\n    if op same plus do\n        give a plus b\n    end\nend\n\ncall calculate 10 5 plus put result\nsay result",
+                hint: "Functions can take multiple parameters. Use 'give' to return values. Use 'put' to store the result.",
+                tip: "Try making it handle multiple operations: if op same minus do give a minus b end",
+                explanation: "Advanced functions can make decisions and return values. Use 'give' to return, 'put' to store results."
+            }
+        ];
+        
+        let currentLesson = 0;
+        let xp = 0;
+        let level = 1;
+        
+        function loadLesson(index) {
+            currentLesson = index;
+            const lesson = lessons[index];
+            
+            // Update sidebar
+            document.querySelectorAll('.lesson-card').forEach((card, i) => {
+                card.classList.toggle('active', i === index);
+            });
+            
+            // Update content
+            document.getElementById('lesson-content').innerHTML = \`
+                <div class="info-box goal">
+                    <p style="font-weight: bold; margin-bottom: 8px; color: #424658;">🎯 Why Azalea?</p>
+                    <p style="color: #424658; font-size: 0.9rem;">Azalea is SUPER easy! No complex syntax. Once you master Azalea, learning JavaScript will be a breeze. The concepts are the same, just different words!</p>
+                </div>
+                <h2 style="font-size: 2rem; margin-bottom: 16px;">Lesson \${index}: \${lesson.title}</h2>
+                <div class="info-box goal">
+                    <p style="font-weight: bold; margin-bottom: 8px; color: #424658;">Goal:</p>
+                    <p style="color: #424658;">\${lesson.goal}</p>
+                </div>
+                <p style="margin-bottom: 16px;">\${lesson.explanation}</p>
+                <pre><code>\${lesson.code}</code></pre>
+                <div class="info-box hint">
+                    <p style="font-weight: bold; margin-bottom: 8px; color: #424658;">💡 Hint:</p>
+                    <p style="color: #424658;">\${lesson.hint}</p>
+                </div>
+                <div class="info-box tip">
+                    <p style="font-weight: bold; margin-bottom: 8px; color: #424658;">✨ Try This:</p>
+                    <p style="color: #424658;">\${lesson.tip}</p>
+                </div>
+                <div style="display: flex; gap: 12px; margin-top: 24px;">
+                    <a href="/playground?code=\${encodeURIComponent(lesson.code)}" class="btn btn-primary">Try in Playground</a>
+                    <button class="btn btn-success" onclick="completeLesson(\${index})">Mark Complete</button>
+                </div>
+                <div class="card" style="padding: 1.5rem; margin-top: 2rem;">
+                    <h3 style="margin-bottom: 1rem; color: #424658;">🤖 Need Help? Ask AI</h3>
+                    <textarea id="lesson_question" placeholder="Ask about this lesson..."></textarea>
+                    <button class="btn btn-primary" onclick="getAIHelp()" style="padding: 0.75rem 1.5rem;">Get AI Help</button>
+                </div>
+            \`;
+        }
+        
+        function completeLesson(index) {
+            xp += 50;
+            if (xp >= level * 100) {
+                level++;
+            }
+            document.getElementById('xp').textContent = xp;
+            document.getElementById('level').textContent = level;
+            alert(\`Lesson \${index} completed! +50 XP. Total XP: \${xp}\`);
+        }
+        
         async function getAIHelp() {
             const question = document.getElementById('lesson_question').value;
             if (!question) return;
