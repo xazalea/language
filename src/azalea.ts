@@ -634,10 +634,16 @@ export class AzaleaRuntime {
       return String(component || '');
     }
     
-    const tag = component.tag || 'div';
+    let tag = component.tag || 'div';
     const content = component.content || '';
     const style = component.style || '';
     const title = component.title || '';
+    const href = component.href || '';
+    
+    // If button has href, render as link instead
+    if (tag === 'button' && href) {
+      tag = 'a';
+    }
     
     let html = '';
     if (tag === 'html' || tag === 'page') {
@@ -652,7 +658,7 @@ export class AzaleaRuntime {
       }
       html += '.container{max-width:1200px;margin:0 auto;padding:0 20px}.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:24px}.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}@media(max-width:768px){.grid-2,.grid-3{grid-template-columns:1fr}}';
       html += 'h1,h2,h3{font-weight:600;margin-bottom:16px}h1{font-size:2.5rem}h2{font-size:2rem}h3{font-size:1.5rem}';
-      html += 'button,a.btn{display:inline-block;padding:12px 24px;background:#6366F1;color:white;border:none;border-radius:8px;text-decoration:none;font-weight:500;cursor:pointer;transition:all 0.2s}button:hover,a.btn:hover{opacity:0.9;transform:translateY(-1px)}';
+      html += 'button,a.btn,a[href]{display:inline-block;padding:12px 24px;background:#6366F1;color:white;border:none;border-radius:8px;text-decoration:none;font-weight:500;cursor:pointer;transition:all 0.2s}button:hover,a.btn:hover,a[href]:hover{opacity:0.9;transform:translateY(-1px)}';
       html += 'header{padding:32px 0;margin-bottom:32px}section{padding:48px 0}footer{padding:32px 0;text-align:center;margin-top:64px}';
       html += 'box,div.card{background:white;padding:24px;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,0.1)}';
       html += 'code,pre{background:#F3F4F6;padding:16px;border-radius:8px;font-family:Monaco,monospace;overflow-x:auto}';
@@ -661,7 +667,17 @@ export class AzaleaRuntime {
       html += '</style>';
       html += '</head><body class="container">';
     } else {
-      html = `<${tag}>`;
+      let attrs = '';
+      if (href) attrs += ` href="${href}"`;
+      if (style) attrs += ` style="${style}"`;
+      if (component.class) attrs += ` class="${component.class}"`;
+      if (component.id) attrs += ` id="${component.id}"`;
+      if (component.name) attrs += ` name="${component.name}"`;
+      if (component.type) attrs += ` type="${component.type}"`;
+      if (component.action) attrs += ` action="${component.action}"`;
+      if (component.method) attrs += ` method="${component.method}"`;
+      
+      html = `<${tag}${attrs}>`;
     }
     
     if (content) html += content;
@@ -722,6 +738,11 @@ export class AzaleaRuntime {
               value = value.slice(1, -1);
             }
             
+            // Evaluate variable if it's an identifier
+            if (this.variables.has(value)) {
+              value = String(this.variables.get(value)!.value);
+            }
+            
             if (arg === 'title') component.title = value;
             else if (arg === 'style') component.style = (component.style || '') + value + ';';
             else if (arg === 'bg') {
@@ -735,7 +756,31 @@ export class AzaleaRuntime {
             }
             else if (arg === 'color') component.style = (component.style || '') + `color:${value};`;
             else if (arg === 'font') component.style = (component.style || '') + `font-family:${value};`;
-            else if (arg === 'go') component.href = value;
+            else if (arg === 'go') {
+              // Handle string concatenation in href (e.g., "/lessons?lesson=" + id)
+              let hrefValue = value;
+              // Check if there are more args that should be concatenated
+              let j = i + 2;
+              while (j < args.length) {
+                const nextArg = String(args[j]);
+                if (nextArg === '+') {
+                  j++;
+                  if (j < args.length) {
+                    let nextVal = String(args[j]);
+                    // Evaluate variable if it's an identifier
+                    if (this.variables.has(nextVal)) {
+                      nextVal = String(this.variables.get(nextVal)!.value);
+                    }
+                    hrefValue += nextVal;
+                    j++;
+                  }
+                } else {
+                  break;
+                }
+              }
+              component.href = hrefValue;
+              i = j - 1; // Update i to skip processed args
+            }
             else if (arg === 'action') component.action = value;
             else if (arg === 'method') component.method = value;
             else if (arg === 'name') component.name = value;
