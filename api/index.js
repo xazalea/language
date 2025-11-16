@@ -31,17 +31,35 @@ module.exports = async (req, res) => {
     // Get the path - Vercel passes original URL in req.url after rewrite
     let path = req.url || req.path || '/';
     
-    // Handle query parameters
-    const codeParam = req.query?.code || '';
+    // Extract query parameters before removing them
+    let codeParam = '';
+    let lessonId = '';
     
+    // Handle query parameters from req.query (Vercel parsed) or URL
     if (req.query && typeof req.query === 'object') {
+      codeParam = req.query.code || '';
+      lessonId = req.query.lesson || '';
       if (req.query.path) {
         path = req.query.path;
       }
     }
     
-    // Remove query string and hash from path
-    path = path.split('?')[0].split('#')[0];
+    // Also check URL directly for query params
+    if (path.includes('?')) {
+      const urlParts = path.split('?');
+      path = urlParts[0];
+      const queryString = urlParts[1].split('#')[0];
+      const params = new URLSearchParams(queryString);
+      if (params.get('lesson') && !lessonId) {
+        lessonId = params.get('lesson');
+      }
+      if (params.get('code') && !codeParam) {
+        codeParam = params.get('code');
+      }
+    }
+    
+    // Remove hash from path
+    path = path.split('#')[0];
     
     // Normalize path
     if (!path.startsWith('/')) {
@@ -64,25 +82,37 @@ module.exports = async (req, res) => {
           
           // Get code from POST body (form-encoded)
           let codeFromBody = '';
-          if (path === '/playground' && method === 'POST') {
+          let lessonFromBody = '';
+          if ((path === '/playground' || path === '/lessons') && method === 'POST') {
             if (req.body) {
               if (typeof req.body === 'string') {
-                // Parse form data: code=...
-                const match = req.body.match(/code=([^&]*)/);
-                if (match) {
-                  codeFromBody = decodeURIComponent(match[1].replace(/\+/g, ' '));
+                // Parse form data: code=...&lesson=...
+                const codeMatch = req.body.match(/code=([^&]*)/);
+                if (codeMatch) {
+                  codeFromBody = decodeURIComponent(codeMatch[1].replace(/\+/g, ' '));
                 }
-              } else if (req.body.code) {
-                codeFromBody = req.body.code;
+                const lessonMatch = req.body.match(/lesson=([^&]*)/);
+                if (lessonMatch) {
+                  lessonFromBody = decodeURIComponent(lessonMatch[1].replace(/\+/g, ' '));
+                }
+              } else {
+                if (req.body.code) {
+                  codeFromBody = req.body.code;
+                }
+                if (req.body.lesson) {
+                  lessonFromBody = req.body.lesson;
+                }
               }
             }
           }
           const finalCode = codeFromBody || codeParam || '';
+          const finalLesson = lessonFromBody || lessonId || '';
           
-          // Inject path and code into Azalea
+          // Inject path, code, and lesson into Azalea
           const escapedPath = path.replace(/"/g, '\\"');
           const escapedCode = finalCode.replace(/"/g, '\\"').replace(/\n/g, '\\n');
-          siteCode = siteCode.replace(/say call serve.*$/, `say call serve "${escapedPath}" "${escapedCode}"`);
+          const escapedLesson = finalLesson.replace(/"/g, '\\"');
+          siteCode = siteCode.replace(/say call serve.*$/, `say call serve "${escapedPath}" "${escapedCode}" "${escapedLesson}"`);
           
           const runtime = new AzaleaRuntime();
           

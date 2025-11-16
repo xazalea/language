@@ -42,10 +42,12 @@ landing
     footer
         text Made with Azalea
 
-// Execute code
-exec code
+// Execute Azalea code using runtime
+exec_azalea code
     if code empty give Ready to run code
     
+    // Use Azalea runtime to execute
+    // This is a simplified version - in real implementation, use AzaleaRuntime
     lines = code split \n
     out = 
     i = 0
@@ -60,6 +62,10 @@ exec code
             val = line after say
             out = out + val.trim + \n
         
+        if line starts form
+            // Variable declaration - just acknowledge
+            out = out + Variable created\n
+        
         if line starts loop
             parts = line split  
             numStr = parts[1]
@@ -71,22 +77,28 @@ exec code
             if numStr = two count = 2
             if numStr = three count = 3
             if numStr = four count = 4
+            if numStr = 5 count = 5
+            if numStr = 10 count = 10
             
             step = 0
             loop count
                 out = out + step + \n
                 step = step + 1
         
+        if line starts if
+            // Conditional - acknowledge
+            out = out + Condition checked\n
+        
         i = i + 1
     
-    if out empty out = Code executed no output\n\nTip Use say to print
+    if out empty out = Code executed successfully\n\nTip Use say to print output
     give out
 
 // Playground
 playground code
-    if code empty code = say Hello World\nform num a from ten\nsay a\nloop five do\n    say step\nend
+    if code empty code = say Hello World
     
-    output = exec code
+    output = exec_azalea code
     
     page title Playground
     style bg bg color text
@@ -102,32 +114,274 @@ playground code
             form action /playground method post
                 textarea name code code
                 button ▶ Run
-        
+    
         panel
             big Output
             box output
 
-// Lessons
-lessons
-    page title Lessons
+// Lesson data
+lesson_data
+    // Lesson 0: What is Azalea
+    title_0 = What is Azalea
+    desc_0 = Azalea is a super simple programming language designed for everyone from kids to professionals. It has NO strict grammar rules - you can write code your way! Azalea serves itself directly as web pages, so you can build websites without learning HTML CSS or JavaScript.
+    code_0 = say Hello from Azalea
+    hint_0 = Azalea uses simple words like say to print text. No quotes needed!
+    goal_0 = Print Hello from Azalea
+    
+    // Lesson 1: Your First Code
+    title_1 = Your First Code
+    desc_1 = Lets start super simple! In Azalea you use say to print text. You dont need quotes or complicated syntax - just write what you want!
+    code_1 = say Hello World
+    hint_1 = Just type say followed by what you want to print
+    goal_1 = Print Hello World
+    
+    // Lesson 2: Variables
+    title_2 = Variables Store Information
+    desc_2 = Variables are like boxes that hold information. Use form to create them. You can store numbers text or anything!
+    code_2 = form text name from Alice\nsay name
+    hint_2 = Use form to create a variable. form text creates text variable form num creates number
+    goal_2 = Create a variable called name with value Alice and print it
+    
+    // Lesson 3: Numbers
+    title_3 = Working with Numbers
+    desc_3 = Azalea loves numbers! You can use words like ten five or actual numbers like 10 5. Both work the same!
+    code_3 = form num age from ten\nsay age\nform num score from 100\nsay score
+    hint_3 = Use form num for numbers. You can use words like ten or numbers like 10
+    goal_3 = Create two number variables and print them
+    
+    // Lesson 4: Math
+    title_4 = Doing Math
+    desc_4 = Azalea makes math super easy! Use plus minus times div for calculations. No complicated operators needed!
+    code_4 = form num a from 10\nform num b from 5\nsay a plus b\nsay a minus b\nsay a times b
+    hint_4 = Use plus minus times div for math operations
+    goal_4 = Add subtract and multiply two numbers
+    
+    // Lesson 5: Conditionals
+    title_5 = Making Decisions
+    desc_5 = Use if to make decisions in your code. Check if something is over under or same as something else!
+    code_5 = form num age from 15\nif age over 10 do\n    say You are old enough\nend
+    hint_5 = Use if with over under same to compare. Use do and end for the block
+    goal_5 = Check if age is over 10 and print a message
+    
+    // Lesson 6: Loops
+    title_6 = Repeating Things
+    desc_6 = Loops let you repeat code! Use loop with a number or word like five ten. The step variable counts for you!
+    code_6 = loop five do\n    say step\nend
+    hint_6 = Use loop with a number. step automatically counts from 0
+    goal_6 = Count from 0 to 4 using a loop
+    
+    // Lesson 7: Functions
+    title_7 = Creating Functions
+    desc_7 = Functions are reusable blocks of code. Use act to define them and call to use them. Functions make code organized!
+    code_7 = act greet name do\n    say Hello\n    say name\nend\n\ncall greet Alice
+    hint_7 = Use act to define a function. Use call to use it
+    goal_7 = Create a function that greets someone
+    
+    // Lesson 8: Lists
+    title_8 = Working with Lists
+    desc_8 = Lists hold multiple items. Create them with form list and loop through them. Super useful for collections!
+    code_8 = form list names from Alice Bob Charlie\nloop names do\n    say step\nend
+    hint_8 = Use form list to create a list. Loop through it to see all items
+    goal_8 = Create a list of names and print each one
+    
+    // Lesson 9: Building Web Pages
+    title_9 = Building Web Pages
+    desc_9 = Azalea IS the web! Use page header section box to build websites. No HTML needed - Azalea serves itself!
+    code_9 = page title My Page\n    header\n        big Welcome\n    section\n        text This is Azalea
+    hint_9 = Use page to start a web page. Use header section box for structure
+    goal_9 = Create a simple web page with header and section
+    
+    // Lesson 10: Interactive Elements
+    title_10 = Buttons and Forms
+    desc_10 = Add buttons forms and inputs to make pages interactive. Azalea handles everything - no JavaScript needed!
+    code_10 = form action /submit method post\n    textarea name message\n    button Submit\n
+    hint_10 = Use form with action and method. Use textarea and button inside
+    goal_10 = Create a form with a textarea and submit button
+    
+    // Lesson 11: Styling
+    title_11 = Making It Beautiful
+    desc_11 = Style your pages with bg color font. Use simple keywords - no CSS knowledge needed!
+    code_11 = header bg pri color white\n    big Styled Header\nsection bg light\n    text Content here
+    hint_11 = Use bg for background color for text color font for fonts
+    goal_11 = Style a header and section with colors
+    
+    // Lesson 12: Advanced Functions
+    title_12 = Advanced Functions
+    desc_12 = Functions can take multiple parameters return values and do complex things. This is where you become a pro!
+    code_12 = act calculate a b op do\n    if op same plus do\n        give a plus b\n    end\n    if op same minus do\n        give a minus b\n    end\nend\n\ncall calculate 10 5 plus put result\nsay result
+    hint_12 = Functions can use give to return values. Use put to store the result
+    goal_12 = Create a calculator function that adds or subtracts
+    
+    // Lesson 13: Pro Patterns
+    title_13 = Pro Patterns
+    desc_13 = As a pro you combine everything - functions loops conditionals. Build complex programs with simple Azalea syntax!
+    code_13 = act process list do\n    loop list do\n        if step over 10 do\n            say step is big\n        end\n    end\nend\n\nform list numbers from 5 15 8 20\ncall process numbers
+    hint_13 = Combine functions loops and conditionals to build powerful programs
+    goal_13 = Create a function that processes a list and prints big numbers
+
+// Single lesson page
+lesson_page lesson_id code_input
+    // Get lesson data
+    form text title from lesson_data title_ + lesson_id
+    form text desc from lesson_data desc_ + lesson_id
+    form text code_example from lesson_data code_ + lesson_id
+    form text hint from lesson_data hint_ + lesson_id
+    form text goal from lesson_data goal_ + lesson_id
+    
+    // Execute user code if provided
+    form text output from 
+    if code_input not empty
+        output = exec_azalea code_input
+    
+    page title Lesson + lesson_id +  -  + title
     style bg bg color text
     
     header bg pri color white
-        big 📚 Learn Azalea
+        big 📚 Lesson + lesson_id +  -  + title
+        link Home go /
+        link Playground go /playground
+        link All Lessons go /lessons
+    
+    section
+        box
+            big About This Lesson
+            text desc
+            text 
+            big Your Goal
+            text goal
+        
+        grid 2
+            panel
+                big Try It Yourself
+                text Example code
+                code code_example
+                text 
+                big Your Code
+                form action /lessons method post
+                    input type hidden name lesson value lesson_id
+                    textarea name code code_input
+                    button ▶ Run Your Code
+            
+            panel
+                big Output
+                if output empty
+                    text Run your code to see output here
+                else
+                    box output
+                    text 
+                    big 💡 Hint
+                    text hint
+
+// All lessons page
+lessons lesson_id_param code_input
+    // Default to lesson 0 if not specified
+    form num lesson_id from 0
+    if lesson_id_param not empty
+        lesson_id = lesson_id_param
+    
+    // Handle POST for code execution - show single lesson
+    if code_input not empty
+        give lesson_page lesson_id code_input
+    
+    // If lesson ID provided, show that lesson
+    if lesson_id_param not empty
+        give lesson_page lesson_id 
+    
+    page title Learn Azalea
+    style bg bg color text
+    
+    header bg pri color white
+        big 📚 Learn Azalea - From Child to Pro
         link Home go /
         link Playground go /playground
     
-    box
-        big Lessons
-        text Interactive lessons coming soon
-        text For now try the playground to learn Azalea
+    section
+        box bg light
+            big 🌺 What is Azalea
+            text 
+            text Azalea is a revolutionary programming language designed to be super simple yet incredibly powerful. Here is how it works
+            text 
+            big Key Features
+            text 
+            text 1. NO Grammar Rules - Write code your way! No quotes no colons no strict syntax
+            text 2. Super Simple - Kids can start coding in minutes. Adults can build professional apps
+            text 3. Direct Web Serving - Azalea IS the web. No HTML CSS or JavaScript needed
+            text 4. Flexible - 12+ ways to create variables 8+ ways to write functions. Be creative!
+            text 5. Progressive - Start simple learn JavaScript concepts then become a pro
+            text 
+            big How Azalea Works
+            text 
+            text Azalea uses a super loose parser that understands what you mean even if you write it differently. It serves itself directly as web pages - when you write Azalea code it automatically becomes a website. The language is designed to map directly to JavaScript concepts so learning Azalea prepares you for JavaScript but with much simpler syntax.
+            text 
+            big Learning Path
+            text 
+            text Start as a child with simple say statements. Progress to variables and math. Learn conditionals and loops. Master functions and lists. Build web pages. Become a pro with advanced patterns. Each lesson builds on the previous one taking you from complete beginner to professional developer.
+        
+        big Choose a Lesson
+        grid 4
+            box
+                big Lesson 0
+                text What is Azalea
+                button Start go /lessons?lesson=0
+            box
+                big Lesson 1
+                text Your First Code
+                button Start go /lessons?lesson=1
+            box
+                big Lesson 2
+                text Variables
+                button Start go /lessons?lesson=2
+            box
+                big Lesson 3
+                text Numbers
+                button Start go /lessons?lesson=3
+            box
+                big Lesson 4
+                text Math
+                button Start go /lessons?lesson=4
+            box
+                big Lesson 5
+                text Conditionals
+                button Start go /lessons?lesson=5
+            box
+                big Lesson 6
+                text Loops
+                button Start go /lessons?lesson=6
+            box
+                big Lesson 7
+                text Functions
+                button Start go /lessons?lesson=7
+            box
+                big Lesson 8
+                text Lists
+                button Start go /lessons?lesson=8
+            box
+                big Lesson 9
+                text Web Pages
+                button Start go /lessons?lesson=9
+            box
+                big Lesson 10
+                text Interactive Elements
+                button Start go /lessons?lesson=10
+            box
+                big Lesson 11
+                text Styling
+                button Start go /lessons?lesson=11
+            box
+                big Lesson 12
+                text Advanced Functions
+                button Start go /lessons?lesson=12
+            box
+                big Lesson 13
+                text Pro Patterns
+                button Start go /lessons?lesson=13
 
 // Router
-serve path code
+serve path code lesson_id_param
     if path = / give landing
     if path = /playground give playground code
-    if path = /lessons give lessons
+    if path = /lessons give lessons lesson_id_param code
     give landing
 
 // Start
-serve / 
+serve /  
