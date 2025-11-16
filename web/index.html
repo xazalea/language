@@ -193,44 +193,50 @@ end</textarea>
                 <button class="example-btn" onclick="loadExample('functions')">Functions</button>
                 <button class="example-btn" onclick="loadExample('loops')">Loops</button>
             </div>
-            <div class="status" id="status">Ready</div>
+            <div class="runtime-info">
+                <div class="status" id="status">Initializing Hybrid Runtime...</div>
+                <div style="font-size: 12px; color: #666; padding: 8px 12px; background: #f5f5f5; border-radius: 4px;">
+                    <span id="runtime-status">TS: ⏳ WASM: ⏳</span>
+                </div>
+            </div>
         </div>
     </div>
     
+    <script src="azalea-browser.js"></script>
+    <script src="azalea-hybrid.js"></script>
     <script>
-        let AzaleaModule = null;
+        
+        let hybridRuntime = null;
         let azaleaReady = false;
         let outputBuffer = [];
         
-        // Initialize Emscripten module
-        function initAzalea() {
-            if (typeof AzaleaModule === 'undefined') {
-                updateStatus('Loading Azalea...', false);
-                // Try to load the module
-                if (typeof require !== 'undefined') {
-                    AzaleaModule = require('./azalea.js');
-                } else {
-                    // Fallback: assume AzaleaModule is defined globally
-                    if (typeof window.AzaleaModule !== 'undefined') {
-                        window.AzaleaModule().then(module => {
-                            AzaleaModule = module;
-                            azaleaReady = true;
-                            updateStatus('Ready', false);
-                        });
-                    } else {
-                        updateStatus('Azalea module not found. Please build with: make wasm', true);
-                    }
+        // Initialize Azalea HYBRID runtime (TypeScript + WASM simultaneously)
+        async function initAzalea() {
+            try {
+                updateStatus('Initializing hybrid runtime (TS + WASM)...', false);
+                
+                hybridRuntime = new AzaleaHybridRuntime();
+                const status = await hybridRuntime.initialize();
+                
+                // Update runtime status display
+                const statusEl = document.getElementById('runtime-status');
+                if (statusEl) {
+                    const tsStatus = status.tsReady ? '✅' : '❌';
+                    const wasmStatus = status.wasmReady ? '✅' : '❌';
+                    statusEl.textContent = `TS: ${tsStatus} WASM: ${wasmStatus}`;
                 }
-            } else {
-                AzaleaModule().then(module => {
-                    AzaleaModule = module;
-                    // Override print function to capture output
-                    AzaleaModule.print = function(text) {
-                        outputBuffer.push(text);
-                    };
+                
+                // Hybrid runtime requires BOTH
+                if (status.hybrid) {
+                    updateStatus('Ready (Hybrid: TS + WASM)', false);
                     azaleaReady = true;
-                    updateStatus('Ready', false);
-                });
+                } else {
+                    updateStatus('Failed: Hybrid runtime requires both TS and WASM', true);
+                    azaleaReady = false;
+                }
+            } catch (error) {
+                updateStatus('Failed to initialize: ' + error.message, true);
+                console.error('Azalea init error:', error);
             }
         }
         
@@ -239,16 +245,18 @@ end</textarea>
         
         function updateStatus(message, isError) {
             const status = document.getElementById('status');
-            status.textContent = message;
-            status.className = 'status' + (isError ? ' error' : '');
+            if (status) {
+                status.textContent = message;
+                status.className = 'status' + (isError ? ' error' : '');
+            }
         }
         
         async function runCode() {
-            if (!azaleaReady) {
-                updateStatus('Loading...', false);
+            if (!azaleaReady || !hybridRuntime) {
+                updateStatus('Initializing...', false);
                 await new Promise(resolve => setTimeout(resolve, 100));
-                if (!azaleaReady) {
-                    updateStatus('Module not ready', true);
+                if (!azaleaReady || !hybridRuntime) {
+                    updateStatus('Runtime not ready', true);
                     return;
                 }
             }
@@ -258,41 +266,39 @@ end</textarea>
             outputBuffer = [];
             
             try {
-                updateStatus('Running...', false);
+                updateStatus('Running (Hybrid: TS + WASM)...', false);
                 
-                // Allocate memory for source
-                const sourcePtr = AzaleaModule.allocateUTF8(code);
+                // Execute using HYBRID runtime (both TypeScript and WASM simultaneously)
+                const results = await hybridRuntime.execute(code);
                 
-                // Execute
-                const resultPtr = AzaleaModule.ccall(
-                    'azalea_execute',
-                    'number',
-                    ['number'],
-                    [sourcePtr]
-                );
-                
-                // Get result
-                const result = AzaleaModule.UTF8ToString(resultPtr);
-                
-                // Free memory
-                AzaleaModule._free(sourcePtr);
-                if (resultPtr !== 0) {
-                    AzaleaModule._free(resultPtr);
-                }
-                
-                // Display output
-                if (outputBuffer.length > 0) {
-                    output.textContent = outputBuffer.join('\n');
+                // Display output from hybrid execution
+                if (results.hybrid && results.hybrid.success) {
+                    const outputText = results.hybrid.output.join('\n');
+                    output.textContent = outputText || 'No output';
+                    
+                    // Show validation status
+                    let statusMsg = 'Success';
+                    if (results.hybrid.validated) {
+                        statusMsg += ' (Hybrid: TS + WASM validated)';
+                    } else {
+                        statusMsg += ' (Hybrid execution)';
+                    }
+                    updateStatus(statusMsg, false);
                 } else {
-                    output.textContent = result || 'No output';
+                    // Show errors
+                    const errorText = results.errors.map(e => `${e.runtime}: ${e.error}`).join('\n');
+                    output.textContent = 'Error:\n' + errorText;
+                    updateStatus('Error', true);
                 }
-                
-                updateStatus('Success', false);
             } catch (error) {
                 output.textContent = 'Error: ' + error.message;
                 updateStatus('Error', true);
+                console.error(error);
             }
         }
+        
+        // Make runCode available globally
+        window.runCode = runCode;
         
         function clearOutput() {
             document.getElementById('output').textContent = '';
@@ -300,10 +306,18 @@ end</textarea>
         }
         
         const examples = {
-            hello: `// Hello World
-say Hello World
-form num a from ten
-say a`,
+            hello: `// ULTIMATE FLEXIBILITY - ALL of these work the same!
+say Hello World 5
+say. Hello World 5
+say.Hello World 5
+5say Hello World
+5 say Hello World
+say Hello World 5
+say.Hello World 5
+
+// Naming feature - also flexible
+form num age from 25 name'myAge'
+say myAge`,
             functions: `// Functions
 act sum a b do
     give a plus b
@@ -313,10 +327,39 @@ form num x from five
 form num y from three
 call sum x y put result
 say result`,
-            loops: `// Loops
-loop ten do
+            loops: `// Loops - Flexible Grammar
+loop 5 do
     say step
-end`
+end
+
+5loop do
+    say Hello
+end`,
+            flexible: `// Super Flexible Grammar Examples
+say. Hello World 5
+5say Hello World
+say Hello World 5
+
+form num count from 10 name'counter'
+say counter`,
+            markdown: `// Markdown Support in Hybrid Runtime
+// You can render markdown files for static pages
+
+// Example: Render markdown
+form text md from "# Hello World
+
+This is **markdown** content!
+
+- Item 1
+- Item 2
+
+\`\`\`azalea
+say Code in markdown!
+\`\`\`"
+
+// Parse and render markdown
+form text html from call markdown parse md
+say html`
         };
         
         function loadExample(name) {
@@ -324,6 +367,9 @@ end`
                 document.getElementById('editor').value = examples[name];
             }
         }
+        
+        // Make loadExample available globally
+        window.loadExample = loadExample;
     </script>
 </body>
 </html>

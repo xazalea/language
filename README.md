@@ -322,11 +322,13 @@ Write code in **any style** you prefer - all work perfectly:
 - Operators: `plus`/`+`, `minus`/`-`, `times`/`*`, `div`/`/`
 - Output: `say`, `print`, `output`, `display`, `log`, `echo`, `show`, `write`
 
-### ⚡ **Dual Mode - Maximum Efficiency**
-- **Compile to C++** for maximum performance
-- **Interpret with TypeScript** for rapid development
-- **Choose your mode** based on needs
-- **Most efficient language** on the planet
+### ⚡ **True Hybrid Runtime - Maximum Efficiency**
+- **Uses BOTH TypeScript AND WASM simultaneously** - true hybrid execution
+- **TypeScript Interpreter** - Fast startup, easy debugging, rapid development
+- **WASM-Compiled C++** - Maximum performance, near-native speed
+- **Automatic validation** - Both runtimes execute and validate each other
+- **Smart fallback** - If one fails, the other continues
+- **Most efficient language** on the planet - best of both worlds
 
 ### 💅 **Full CSS Support - Stunning UIs!**
 Complete CSS capabilities with shortcuts:

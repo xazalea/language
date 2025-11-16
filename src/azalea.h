@@ -201,6 +201,12 @@ public:
     ValuePtr call(const std::string& method, const std::vector<ValuePtr>& args, Runtime& runtime) override;
 };
 
+class MarkdownModule : public Module {
+public:
+    std::string getName() const override { return "markdown"; }
+    ValuePtr call(const std::string& method, const std::vector<ValuePtr>& args, Runtime& runtime) override;
+};
+
 // Number word conversion
 double wordToNumber(const std::string& word);
 std::string numberToWord(double num);

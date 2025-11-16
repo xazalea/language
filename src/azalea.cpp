@@ -221,12 +221,41 @@ Token Lexer::readString() {
 
 Token Lexer::readIdentifier() {
     size_t start = pos;
+    // Check if we start with a number (for "5say" style tokens)
+    bool startsWithNumber = std::isdigit(source[pos]);
+    size_t numberEnd = pos;
+    
+    if (startsWithNumber) {
+        // Read the number part
+        while (numberEnd < source.length() && std::isdigit(source[numberEnd])) {
+            numberEnd++;
+        }
+        // Check if there's a keyword/identifier after the number
+        if (numberEnd < source.length() && (std::isalpha(source[numberEnd]) || source[numberEnd] == '_')) {
+            // This is a number+keyword combination like "5say"
+            // We'll handle this in tokenize() by splitting it
+            pos = numberEnd;
+            col += (numberEnd - start);
+            // Continue reading the identifier part
+        }
+    }
+    
     while (pos < source.length() && 
            (std::isalnum(source[pos]) || source[pos] == '_')) {
         pos++;
         col++;
     }
     std::string value = source.substr(start, pos - start);
+    
+    // Split number+keyword if needed (e.g., "5say" -> we need to handle this specially)
+    if (startsWithNumber && pos > numberEnd) {
+        // Return the number part first, the identifier will be read next
+        std::string numberPart = source.substr(start, numberEnd - start);
+        pos = numberEnd; // Reset to read identifier separately
+        col = col - (pos - numberEnd);
+        return Token(TokenType::NUMBER, numberPart, line, col);
+    }
+    
     TokenType type = std::find(keywords.begin(), keywords.end(), value) != keywords.end()
                      ? TokenType::KEYWORD : TokenType::IDENTIFIER;
     return Token(type, value, line, col);
@@ -559,6 +588,19 @@ std::shared_ptr<ASTNode> Parser::parseSay() {
     Token tok = current();
     std::string keyword = tok.value;
     
+    // Check for number before say (e.g., "5 say" or "5say")
+    int repeatCount = 1;
+    if (tok.type == TokenType::NUMBER && pos + 1 < tokens.size()) {
+        try {
+            repeatCount = static_cast<int>(std::stod(tok.value));
+            advance(); // consume number
+            tok = current();
+            keyword = tok.value;
+        } catch (...) {
+            // Not a valid number, continue normally
+        }
+    }
+    
     // Flexible: accept "say", "print", "output", "display"
     // SUPER FLEXIBLE: accept many output variations
     if (keyword == "say" || keyword == "print" || keyword == "output" || 
@@ -570,7 +612,44 @@ std::shared_ptr<ASTNode> Parser::parseSay() {
     }
     
     auto node = std::make_shared<ASTNode>(NodeType::SAY, tok);
-    node->children.push_back(parseExpression());
+    
+    // Handle "say." syntax (dot after say)
+    if (current().type == TokenType::SYMBOL && current().value == ".") {
+        advance(); // consume dot
+    }
+    
+    // Parse expression - check if last token is a number (e.g., "say Hello World 5")
+    auto exprNode = parseExpression();
+    node->children.push_back(exprNode);
+    
+    // Check if expression ends with a number for repeat count
+    if (pos < tokens.size() && current().type == TokenType::NUMBER) {
+        try {
+            repeatCount = static_cast<int>(std::stod(current().value));
+            advance();
+        } catch (...) {
+            // Ignore
+        }
+    }
+    
+    // Store repeat count in a special child node
+    if (repeatCount > 1) {
+        auto repeatNode = std::make_shared<ASTNode>(NodeType::LITERAL, 
+            Token(TokenType::NUMBER, std::to_string(repeatCount)));
+        node->children.push_back(repeatNode);
+    }
+    
+    // Check for name'identifier' syntax
+    if (match("name") && current().type == TokenType::STRING) {
+        std::string name = current().value;
+        // Remove quotes
+        if (name.length() >= 2 && name[0] == '\'' && name[name.length()-1] == '\'') {
+            name = name.substr(1, name.length() - 2);
+        }
+        node->value = name;
+        advance();
+    }
+    
     return node;
 }
 
@@ -833,6 +912,7 @@ Runtime::Runtime() {
     registerModule("serve", std::make_shared<ServeModule>());
     registerModule("view", std::make_shared<ViewModule>());
     registerModule("play", std::make_shared<PlayModule>());
+    registerModule("markdown", std::make_shared<MarkdownModule>());
 }
 
 void Runtime::registerModule(const std::string& name, ModulePtr module) {
@@ -965,7 +1045,22 @@ ValuePtr Runtime::evaluate(std::shared_ptr<ASTNode> node) {
         case NodeType::SAY: {
             if (!node->children.empty()) {
                 ValuePtr value = evaluate(node->children[0]);
-                print(value->toString());
+                int repeatCount = 1;
+                
+                // Check for repeat count (second child or in value)
+                if (node->children.size() > 1 && node->children[1]->type == NodeType::LITERAL) {
+                    repeatCount = static_cast<int>(evaluate(node->children[1])->toNumber());
+                }
+                
+                for (int i = 0; i < repeatCount; i++) {
+                    print(value->toString());
+                }
+                
+                // Store named output if name is provided
+                if (!node->value.empty()) {
+                    setVariable(node->value, value);
+                }
+                
                 return value;
             }
             break;
@@ -1364,6 +1459,80 @@ ValuePtr PlayModule::call(const std::string& method, const std::vector<ValuePtr>
     if (method == "game" || method == "sprite" || method == "render") {
         // Game logic implementation
         return std::make_shared<Value>("Play: " + method);
+    }
+    return std::make_shared<Value>();
+}
+
+// MarkdownModule implementation
+ValuePtr MarkdownModule::call(const std::string& method, const std::vector<ValuePtr>& args, Runtime& runtime) {
+    if (method == "parse") {
+        if (!args.empty()) {
+            std::string markdown = args[0]->toString();
+            // Simple markdown to HTML conversion
+            std::string html = markdown;
+            
+            // Headers
+            size_t pos = 0;
+            while ((pos = html.find("### ", pos)) != std::string::npos) {
+                size_t end = html.find("\n", pos);
+                if (end == std::string::npos) end = html.length();
+                std::string text = html.substr(pos + 4, end - pos - 4);
+                html.replace(pos, end - pos, "<h3>" + text + "</h3>");
+                pos += text.length() + 7;
+            }
+            
+            pos = 0;
+            while ((pos = html.find("## ", pos)) != std::string::npos) {
+                size_t end = html.find("\n", pos);
+                if (end == std::string::npos) end = html.length();
+                std::string text = html.substr(pos + 3, end - pos - 3);
+                html.replace(pos, end - pos, "<h2>" + text + "</h2>");
+                pos += text.length() + 6;
+            }
+            
+            pos = 0;
+            while ((pos = html.find("# ", pos)) != std::string::npos) {
+                size_t end = html.find("\n", pos);
+                if (end == std::string::npos) end = html.length();
+                std::string text = html.substr(pos + 2, end - pos - 2);
+                html.replace(pos, end - pos, "<h1>" + text + "</h1>");
+                pos += text.length() + 5;
+            }
+            
+            // Bold
+            pos = 0;
+            while ((pos = html.find("**", pos)) != std::string::npos) {
+                size_t end = html.find("**", pos + 2);
+                if (end != std::string::npos) {
+                    std::string text = html.substr(pos + 2, end - pos - 2);
+                    html.replace(pos, end - pos + 2, "<strong>" + text + "</strong>");
+                    pos += text.length() + 15;
+                } else {
+                    break;
+                }
+            }
+            
+            // Code blocks
+            pos = 0;
+            while ((pos = html.find("```", pos)) != std::string::npos) {
+                size_t end = html.find("```", pos + 3);
+                if (end != std::string::npos) {
+                    std::string code = html.substr(pos + 3, end - pos - 3);
+                    html.replace(pos, end - pos + 3, "<pre><code>" + code + "</code></pre>");
+                    pos += code.length() + 21;
+                } else {
+                    break;
+                }
+            }
+            
+            return std::make_shared<Value>(html);
+        }
+    } else if (method == "serve" || method == "render") {
+        if (!args.empty()) {
+            std::string path = args[0]->toString();
+            // In browser, this would fetch and render markdown
+            return std::make_shared<Value>("Rendered markdown from " + path);
+        }
     }
     return std::make_shared<Value>();
 }

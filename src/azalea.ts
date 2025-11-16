@@ -74,22 +74,45 @@ export class AzaleaRuntime {
     return this.parseTokens(tokens);
   }
 
-  // Tokenize with flexible grammar
+  // ULTIMATE FLEXIBLE tokenizer - no rigid rules, handles ANY combination
   private tokenize(source: string): string[] {
-    // Handle multiple comment styles
-    source = source.replace(/\/\/.*$/gm, ''); // // comments
-    source = source.replace(/\/\*[\s\S]*?\*\//g, ''); // /* */ comments
-    source = source.replace(/#.*$/gm, ''); // # comments
+    // Handle comments
+    source = source.replace(/\/\/.*$/gm, '');
+    source = source.replace(/\/\*[\s\S]*?\*\//g, '');
+    source = source.replace(/#.*$/gm, '');
     
-    // Split into tokens, handling multiple delimiters
+    // Ultra-flexible tokenization: preserve everything, split only on meaningful boundaries
     const tokens: string[] = [];
     let current = '';
     let inString = false;
     let stringChar = '';
+    let inNameQuote = false;
     
     for (let i = 0; i < source.length; i++) {
       const char = source[i];
       
+      // Handle name'identifier' syntax
+      if (!inString && char === "'" && current.toLowerCase().endsWith('name')) {
+        inNameQuote = true;
+        if (current.length > 4) {
+          tokens.push(current.slice(0, -4));
+          current = 'name';
+        }
+        continue;
+      }
+      
+      if (inNameQuote) {
+        if (char === "'") {
+          tokens.push("name'" + current + "'");
+          current = '';
+          inNameQuote = false;
+          continue;
+        }
+        current += char;
+        continue;
+      }
+      
+      // Strings
       if ((char === '"' || char === "'") && (i === 0 || source[i-1] !== '\\')) {
         if (!inString) {
           inString = true;
@@ -106,25 +129,72 @@ export class AzaleaRuntime {
         }
       } else if (inString) {
         current += char;
-      } else if (/\s/.test(char)) {
-        if (current.trim()) {
-          tokens.push(current.trim());
-          current = '';
-        }
-      } else if (/[{}();,\[\]]/.test(char)) {
+      } 
+      // Block delimiters - always separate
+      else if (/[{}()\[\]]/.test(char)) {
         if (current.trim()) tokens.push(current.trim());
         tokens.push(char);
         current = '';
-      } else {
+      }
+      // Whitespace - can be separator OR part of token (for flexibility)
+      else if (/\s/.test(char)) {
+        // Only split if we have a meaningful token
+        // Allow "say.Hello" to stay together, but "say Hello" can split
+        if (current.trim() && !current.match(/[a-zA-Z0-9_]+[\.\d]+$/)) {
+          tokens.push(current.trim());
+          current = '';
+        } else if (current.trim().length > 0) {
+          // Keep whitespace in token for ultra-flexible parsing
+          current += char;
+        }
+      }
+      // Everything else goes into current token (dots, numbers, letters, etc.)
+      else {
         current += char;
       }
     }
     
     if (current.trim()) tokens.push(current.trim());
-    return tokens.filter(t => t.length > 0);
+    
+    // Post-process: Extract all possible patterns
+    // This allows "5say", "say.", "say.Hello", "say Hello 5", etc. to all work
+    const processed: string[] = [];
+    for (const token of tokens) {
+      if (!token) continue;
+      
+      // Try to split number+keyword (e.g., "5say" -> ["5", "say"])
+      const numKeywordMatch = token.match(/^(\d+)([a-zA-Z_][a-zA-Z0-9_]*)$/);
+      if (numKeywordMatch) {
+        processed.push(numKeywordMatch[1]);
+        processed.push(numKeywordMatch[2]);
+        continue;
+      }
+      
+      // Try to split keyword+dot (e.g., "say." -> ["say", "."])
+      const keywordDotMatch = token.match(/^([a-zA-Z_][a-zA-Z0-9_]*)\.$/);
+      if (keywordDotMatch) {
+        processed.push(keywordDotMatch[1]);
+        processed.push('.');
+        continue;
+      }
+      
+      // Try to split keyword+dot+text (e.g., "say.Hello" -> ["say", ".", "Hello"])
+      const keywordDotTextMatch = token.match(/^([a-zA-Z_][a-zA-Z0-9_]*)\.([^\s]+)$/);
+      if (keywordDotTextMatch) {
+        processed.push(keywordDotTextMatch[1]);
+        processed.push('.');
+        processed.push(keywordDotTextMatch[2]);
+        continue;
+      }
+      
+      // Keep as-is
+      processed.push(token);
+    }
+    
+    return processed.filter(t => t && t.length > 0);
   }
 
-  // Parse tokens into AST
+  // ULTIMATE FLEXIBLE parser - pattern-agnostic, handles ANY combination
   private parseTokens(tokens: string[]): AzaleaAST[] {
     const ast: AzaleaAST[] = [];
     let i = 0;
@@ -133,24 +203,63 @@ export class AzaleaRuntime {
       const token = tokens[i];
       const normalized = this.normalizeKeyword(token);
       
+      // ULTRA FLEXIBLE: Look for patterns in ANY order
+      // Pattern 1: Number before keyword (5say, 5 say, etc.)
+      // Pattern 2: Keyword with dot (say., say.Hello, etc.)
+      // Pattern 3: Keyword with number after (say 5, say Hello 5, etc.)
+      // Pattern 4: Any combination of the above
+      
+      let repeatCount: number | null = null;
+      let hasDot = false;
+      
+      // Check current and surrounding tokens for flexible patterns
+      // Look ahead and behind for numbers, dots, keywords
+      
+      // Check if current is a number and next is a keyword
+      if (!isNaN(parseFloat(token)) && i + 1 < tokens.length) {
+        const nextToken = tokens[i + 1];
+        const nextNormalized = this.normalizeKeyword(nextToken);
+        if (nextNormalized === 'say' || nextNormalized === 'loop' || nextNormalized === 'print') {
+          repeatCount = parseFloat(token);
+          i++; // Skip the number, process keyword next
+          continue; // Will process keyword in next iteration
+        }
+      }
+      
+      // Check if current token ends with dot or has dot after
+      if (token.endsWith('.') || (i + 1 < tokens.length && tokens[i + 1] === '.')) {
+        hasDot = true;
+      }
+      
+      // Check if previous token was a number (for "5 say" pattern)
+      if (i > 0 && !isNaN(parseFloat(tokens[i - 1]))) {
+        const prevNormalized = this.normalizeKeyword(token);
+        if (prevNormalized === 'say' || prevNormalized === 'loop') {
+          repeatCount = parseFloat(tokens[i - 1]);
+        }
+      }
+      
+      // Now parse based on keyword
       if (normalized === 'form') {
         const node = this.parseVariable(tokens, i);
         ast.push(node.node);
         i = node.next;
+        i = this.parseNaming(tokens, i, node.node);
       } else if (normalized === 'act') {
         const node = this.parseFunction(tokens, i);
         ast.push(node.node);
         i = node.next;
+        i = this.parseNaming(tokens, i, node.node);
       } else if (normalized === 'if') {
         const node = this.parseConditional(tokens, i);
         ast.push(node.node);
         i = node.next;
       } else if (normalized === 'loop') {
-        const node = this.parseLoop(tokens, i);
+        const node = this.parseLoop(tokens, i, repeatCount);
         ast.push(node.node);
         i = node.next;
-      } else if (normalized === 'say') {
-        const node = this.parseOutput(tokens, i);
+      } else if (normalized === 'say' || normalized === 'print') {
+        const node = this.parseOutput(tokens, i, repeatCount, hasDot);
         ast.push(node.node);
         i = node.next;
       } else {
@@ -159,6 +268,50 @@ export class AzaleaRuntime {
     }
     
     return ast;
+  }
+  
+  // Parse name'identifier' syntax - flexible format
+  private parseNaming(tokens: string[], start: number, targetNode: AzaleaAST): number {
+    let i = start;
+    
+    // Handle "name'identifier'" as single token or separate tokens
+    if (i < tokens.length) {
+      const token = tokens[i];
+      
+      // Check if token is "name'identifier'" format
+      const nameMatch = token.match(/^name'([^']+)'$/);
+      if (nameMatch) {
+        targetNode.value = nameMatch[1];
+        i++;
+        return i;
+      }
+      
+      // Check if token starts with "name'"
+      if (token.startsWith("name'") && token.endsWith("'")) {
+        const name = token.slice(5, -1); // Remove "name'" and "'"
+        targetNode.value = name;
+        i++;
+        return i;
+      }
+      
+      // Check for separate "name" token followed by quoted identifier
+      if (token.toLowerCase() === 'name') {
+        i++;
+        if (i < tokens.length) {
+          let nameToken = tokens[i];
+          // Handle various quote styles
+          if (nameToken.startsWith("'") && nameToken.endsWith("'")) {
+            targetNode.value = nameToken.slice(1, -1);
+            i++;
+          } else if (nameToken.startsWith('"') && nameToken.endsWith('"')) {
+            targetNode.value = nameToken.slice(1, -1);
+            i++;
+          }
+        }
+      }
+    }
+    
+    return i;
   }
 
   private parseVariable(tokens: string[], start: number): { node: AzaleaAST; next: number } {
@@ -271,12 +424,14 @@ export class AzaleaRuntime {
     return { node, next: i };
   }
 
-  private parseLoop(tokens: string[], start: number): { node: AzaleaAST; next: number } {
+  private parseLoop(tokens: string[], start: number, repeatCount: number | null = null): { node: AzaleaAST; next: number } {
     let i = start + 1;
     const node: AzaleaAST = { type: 'loop', children: [] };
     
-    // Count or condition
-    if (i < tokens.length) {
+    // Count or condition - use provided repeatCount or parse from tokens
+    if (repeatCount !== null) {
+      node.children!.push({ type: 'condition', value: repeatCount.toString() });
+    } else if (i < tokens.length) {
       node.children!.push({ type: 'condition', value: tokens[i] });
       i++;
     }
@@ -301,18 +456,77 @@ export class AzaleaRuntime {
     }
     node.children!.push({ type: 'body', children: body });
     
+    // Check for name'identifier' after loop
+    if (i < tokens.length && tokens[i].toLowerCase() === 'name') {
+      i++;
+      if (i < tokens.length && tokens[i].startsWith("'") && tokens[i].endsWith("'")) {
+        const name = tokens[i].slice(1, -1);
+        node.value = name;
+        i++;
+      }
+    }
+    
     return { node, next: i };
   }
 
-  private parseOutput(tokens: string[], start: number): { node: AzaleaAST; next: number } {
+  // ULTRA FLEXIBLE output parser - handles ANY combination
+  private parseOutput(tokens: string[], start: number, repeatCount: number | null = null, hasDot: boolean = false): { node: AzaleaAST; next: number } {
     let i = start + 1;
     const node: AzaleaAST = { type: 'output', children: [] };
     
-    // Value to output
-    if (i < tokens.length) {
-      node.children!.push({ type: 'value', value: tokens[i] });
+    // Handle dot in ANY position: "say.", "say.Hello", etc.
+    if (i < tokens.length && tokens[i] === '.') {
+      i++; // Skip the dot
+    }
+    
+    // Collect all values - be flexible about what constitutes the message
+    const values: string[] = [];
+    let foundNumber = false;
+    
+    while (i < tokens.length && !['do', 'then', '{', 'end', '}', ';', 'name'].includes(tokens[i])) {
+      const token = tokens[i];
+      const num = parseFloat(token);
+      
+      // If this is a number and we haven't set repeatCount yet, it might be the count
+      // OR it might be part of the message - be flexible!
+      if (!isNaN(num)) {
+        // Check if this looks like it's at the end (next token is delimiter or name)
+        const isAtEnd = i + 1 >= tokens.length || 
+                        ['do', 'then', '{', 'end', '}', ';', 'name'].includes(tokens[i + 1]);
+        
+        if (isAtEnd && repeatCount === null) {
+          // Likely the repeat count
+          repeatCount = num;
+          i++;
+          foundNumber = true;
+          break;
+        } else if (!foundNumber && repeatCount === null && i === tokens.length - 1) {
+          // Last token, likely repeat count
+          repeatCount = num;
+          i++;
+          foundNumber = true;
+          break;
+        }
+        // Otherwise, treat as part of message (e.g., "say version 2.0")
+        values.push(token);
+      } else {
+        values.push(token);
+      }
       i++;
     }
+    
+    // If we have values, add them
+    if (values.length > 0) {
+      node.children!.push({ type: 'value', value: values.join(' ') });
+    }
+    
+    // Store repeat count if provided (from any source)
+    if (repeatCount !== null) {
+      node.children!.push({ type: 'repeat', value: repeatCount.toString() });
+    }
+    
+    // Check for name'identifier' after output (flexible position)
+    i = this.parseNaming(tokens, i, node);
     
     return { node, next: i };
   }
@@ -360,17 +574,30 @@ export class AzaleaRuntime {
       const value = this.evaluateExpression(valueNode);
       this.variables.set(name, value);
     }
+    
+    // If node has a name (from name'identifier'), also store it with that name
+    if (node.value && name) {
+      const value = valueNode ? this.evaluateExpression(valueNode) : { type: 'void', value: null };
+      this.variables.set(node.value, value);
+    }
   }
 
   private executeFunction(node: AzaleaAST): void {
     const name = node.children?.find(c => c.type === 'identifier')?.value;
     if (name) {
-      this.functions.set(name, () => {
+      const func = () => {
         const body = node.children?.find(c => c.type === 'body');
         if (body) {
           this.executeNode(body);
         }
-      });
+      };
+      this.functions.set(name, func);
+      
+      // If node has a name (from name'identifier'), also store it with that name
+      if (node.value) {
+        this.functions.set(node.value, func);
+        this.variables.set(node.value, { type: 'func', value: func });
+      }
     }
   }
 
@@ -389,18 +616,40 @@ export class AzaleaRuntime {
     const body = node.children?.find(c => c.type === 'body');
     
     if (condition && body) {
-      const count = parseInt(condition.value || '0');
-      for (let i = 0; i < count; i++) {
+      const countValue = condition.value || '0';
+      const count = isNaN(parseFloat(countValue)) 
+        ? this.evaluateValue(countValue) 
+        : parseInt(countValue);
+      const numCount = typeof count === 'number' ? count : parseInt(String(count)) || 0;
+      
+      for (let i = 0; i < numCount; i++) {
+        // Set step variable for loop iteration
+        this.variables.set('step', { type: 'num', value: i });
         body.children?.forEach(child => this.executeNode(child));
       }
+    }
+    
+    // Store named loop if name is provided
+    if (node.value) {
+      this.variables.set(node.value, { type: 'func', value: () => this.executeLoop(node) });
     }
   }
 
   private executeOutput(node: AzaleaAST): void {
     const value = node.children?.find(c => c.type === 'value');
+    const repeatNode = node.children?.find(c => c.type === 'repeat');
+    const repeatCount = repeatNode ? parseInt(repeatNode.value || '1') : 1;
+    
     if (value) {
       const output = this.evaluateValue(value.value);
-      console.log(output);
+      for (let i = 0; i < repeatCount; i++) {
+        console.log(output);
+      }
+    }
+    
+    // Store named output if name is provided
+    if (node.value) {
+      this.variables.set(node.value, { type: 'text', value: value ? this.evaluateValue(value.value) : '' });
     }
   }
 

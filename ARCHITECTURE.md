@@ -2,21 +2,38 @@
 
 ## Overview
 
-Azalea is a **dual-mode programming language** - the most efficient language on the planet. It supports both compiled (C++) and interpreted (TypeScript) execution modes, with super flexible grammar that allows many ways to write the same code.
+Azalea is a **true hybrid programming language** - the most efficient language on the planet. It uses BOTH compiled (WASM/C++) AND interpreted (TypeScript) execution **simultaneously**, with super flexible grammar that allows unlimited ways to write the same code.
 
-## Dual Mode Architecture
+## Hybrid Runtime Architecture
 
-### C++ Compiler (High Performance)
+### Simultaneous Execution
+Azalea executes code in **both** runtimes at the same time:
+- **TypeScript Interpreter** - Fast startup, easy debugging, rapid iteration
+- **WASM-Compiled C++** - Maximum performance, native speed
+
+### C++ Runtime (WASM - High Performance)
 - **Location**: `src/azalea.cpp`, `src/azalea.h`
-- **Purpose**: Compiles Azalea to optimized C++
-- **Performance**: Maximum speed, native execution
+- **Purpose**: Compiled to WASM for browser execution
+- **Performance**: Maximum speed, near-native execution
 - **Use Case**: Production applications, performance-critical code
+- **Build**: `make wasm` compiles to `web/azalea.js` and `web/azalea.wasm`
 
 ### TypeScript Interpreter (Rapid Development)
-- **Location**: `src/azalea.ts`
+- **Location**: `src/azalea.ts`, `web/azalea-browser.js`
 - **Purpose**: Interprets Azalea code directly
 - **Performance**: Fast iteration, easy debugging
 - **Use Case**: Development, prototyping, browser execution
+- **Build**: Included in browser bundle
+
+### Hybrid Runtime Coordinator
+- **Location**: `web/azalea-hybrid.js`
+- **Purpose**: Coordinates both runtimes simultaneously
+- **Features**: 
+  - Executes code in both runtimes
+  - Validates results against each other
+  - Automatic fallback if one fails
+  - Performance profiling
+  - Result merging
 
 ## Components
 

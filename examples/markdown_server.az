@@ -1,0 +1,28 @@
+// Azalea Markdown Server Example
+// Serve static markdown pages using hybrid runtime
+
+// Serve markdown file
+act serve_markdown path do
+    form text html from call markdown serve path
+    call serve json html
+end
+
+// Serve markdown with custom styling
+act serve_styled_markdown path do
+    form text style from "
+        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        h1 { color: white; }
+    "
+    form text html from call markdown serve path style style
+    call serve json html
+end
+
+// Routes
+call serve get "/" give serve_markdown "index.md"
+call serve get "/about" give serve_markdown "about.md"
+call serve get "/styled" give serve_styled_markdown "index.md"
+
+// Start server
+call serve on 3000
+say Markdown server running on port 3000!
+
