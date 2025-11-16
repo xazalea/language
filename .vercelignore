@@ -1,0 +1,4 @@
+index.az
+*.az
+!api/**/*.js
+
