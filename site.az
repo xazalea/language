@@ -1,162 +1,133 @@
-// Azalea Site - Hyper-Efficient, Pure Server-Side, Zero JavaScript
+// Azalea - Super Simple, Super Loose, Professional
 
 // Colors
-form text bg from "#F0DAD5"
-form text pri from "#6C739C"
-form text acc from "#C56B62"
-form text d from "#424658"
-
-// CSS
-act css do
-    form text s from "*{margin:0;padding:0;box-sizing:border-box}body{font-family:system-ui;background:" plus bg plus ";min-height:100vh;padding:20px}.card{background:#fff;border-radius:12px;box-shadow:0 4px 16px rgba(66,70,88,0.1);padding:32px;margin-bottom:24px}.btn{background:" plus pri plus ";color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;display:inline-block;font-weight:600}.btn:hover{background:#5a6085}h1,h2{color:" plus d plus ";font-weight:700}p{color:" plus d plus ";line-height:1.6}pre{background:" plus d plus ";color:" plus bg plus ";padding:20px;border-radius:8px;overflow-x:auto;font-family:monospace}code{background:" plus bg plus ";padding:2px 8px;border-radius:4px;color:" plus d plus "}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px}.container{max-width:1200px;margin:0 auto}textarea{width:100%;min-height:300px;padding:16px;border:2px solid " plus bg plus ";border-radius:8px;font-family:monospace;font-size:14px;background:" plus d plus ";color:" plus bg plus "}#out{background:" plus bg plus ";border:2px solid " plus pri plus ";padding:16px;border-radius:8px;min-height:200px;font-family:monospace;white-space:pre-wrap}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0;min-height:calc(100vh - 100px)}.p{padding:16px;display:flex;flex-direction:column}.ph{background:" plus bg plus ";padding:12px;border-radius:8px;margin-bottom:8px;display:flex;justify-content:space-between}"
-    give s
-end
+bg = #F5F7FA
+pri = #6366F1
+acc = #8B5CF6
+text = #1F2937
+light = #F9FAFB
 
 // Landing
-act landing do
-    form text h from "<!DOCTYPE html><html><head><meta charset=UTF-8><meta name=viewport content=width=device-width><title>Azalea</title><style>"
-    h give h plus call css
-    h give h plus "</style></head><body><div class=container>"
-    h give h plus "<header class=card style=background:linear-gradient(135deg," plus pri plus " 0%," plus acc plus " 100%);color:#fff;text-align:center;padding:48px>"
-    h give h plus "<h1 style=font-size:4rem;margin-bottom:16px;color:#fff>🌺 Azalea</h1>"
-    h give h plus "<p style=font-size:1.5rem;margin-bottom:32px>Elegant, minimal, powerful</p>"
-    h give h plus "<a href=/playground class=btn style=background:rgba(255,255,255,0.2);border:2px solid #fff>Get Started</a> "
-    h give h plus "<a href=/lessons class=btn style=background:rgba(255,255,255,0.2);border:2px solid #fff>Learn</a>"
-    h give h plus "</header>"
-    h give h plus "<section class=card><h2 style=text-align:center;font-size:2.5rem;margin-bottom:32px>Why Azalea?</h2>"
-    h give h plus "<div class=grid>"
-    h give h plus "<div class=card style=background:" plus bg plus "><h3>🎯 Super Easy</h3><p>Start coding in minutes! No complex syntax.</p></div>"
-    h give h plus "<div class=card style=background:" plus bg plus "><h3>🚀 Learn JavaScript Next</h3><p>Azalea concepts map directly to JavaScript.</p></div>"
-    h give h plus "<div class=card style=background:" plus bg plus "><h3>✨ Super Flexible</h3><p>12+ ways to create variables, 8+ ways to write functions.</p></div>"
-    h give h plus "</div></section>"
-    h give h plus "<section class=card><h2 style=font-size:2rem;margin-bottom:16px>Try It Now</h2>"
-    h give h plus "<pre><code>say Hello World\nform num a from ten\nsay a</code></pre>"
-    h give h plus "<a href=/playground class=btn style=background:" plus acc plus ">Run in Playground</a></section>"
-    h give h plus "<footer class=card style=text-align:center;background:" plus bg plus "><p>Made with Azalea</p></footer>"
-    h give h plus "</div></body></html>"
-    give h
-end
+landing
+    page title Azalea
+    style bg bg color text font Inter
+    
+    header bg pri color white
+        big 🌺 Azalea
+        text Elegant minimal powerful
+        button Get Started go /playground
+        button Learn go /lessons
+    
+    section
+        big Why Azalea
+        grid 3
+            box
+                emoji 🎯
+                big Super Easy
+                text Start coding in minutes
+            box
+                emoji 🚀
+                big Learn JavaScript Next
+                text Concepts map to JavaScript
+            box
+                emoji ✨
+                big Super Flexible
+                text 12+ ways to create variables
+    
+    section
+        big Try It Now
+        code say Hello World
+        button Run in Playground go /playground
+    
+    footer
+        text Made with Azalea
 
-// Execute code server-side
-act exec code do
-    form text out from ""
-    if code same "" do
-        give "Ready to run code..."
-    end
-    form list lines from code.split "\n"
-    form num i from 0
-    loop lines.length do
-        form text line from lines[i]
-        line give line.trim
-        if line same "" do
-            i give i plus 1
-            continue
-        end
-        if line.startsWith "say" do
-            form text val from line.substring 4
-            out give out plus val.trim plus "\n"
-        end
-        if line.startsWith "form" do
-            // Variable - simplified
-        end
-        if line.startsWith "loop" do
-            // Loop - simplified
-            form text numStr from line.split " " [1]
-            form num count from 0
-            if numStr same "five" do
-                count give 5
-            end
-            if numStr same "ten" do
-                count give 10
-            end
-            if numStr same "one" do
-                count give 1
-            end
-            if numStr same "two" do
-                count give 2
-            end
-            if numStr same "three" do
-                count give 3
-            end
-            if numStr same "four" do
-                count give 4
-            end
-            form num n from 0
-            if numStr same "0" or numStr same "1" or numStr same "2" or numStr same "3" or numStr same "4" or numStr same "5" or numStr same "6" or numStr same "7" or numStr same "8" or numStr same "9" do
-                n give parseInt numStr
-                count give n
-            end
-            form num step from 0
-            loop count do
-                out give out plus step plus "\n"
-                step give step plus 1
-            end
-        end
-        i give i plus 1
-    end
-    if out same "" do
-        out give "Code executed (no output)\n\nTip: Use 'say' to print"
-    end
+// Execute code
+exec code
+    if code empty give Ready to run code
+    
+    lines = code split \n
+    out = 
+    i = 0
+    
+    loop lines.length
+        line = lines[i]
+        line = line.trim
+        
+        if line empty i = i + 1 continue
+        
+        if line starts say
+            val = line after say
+            out = out + val.trim + \n
+        
+        if line starts loop
+            parts = line split  
+            numStr = parts[1]
+            count = 0
+            
+            if numStr = five count = 5
+            if numStr = ten count = 10
+            if numStr = one count = 1
+            if numStr = two count = 2
+            if numStr = three count = 3
+            if numStr = four count = 4
+            
+            step = 0
+            loop count
+                out = out + step + \n
+                step = step + 1
+        
+        i = i + 1
+    
+    if out empty out = Code executed no output\n\nTip Use say to print
     give out
-end
 
 // Playground
-act playground code do
-    form text h from "<!DOCTYPE html><html><head><meta charset=UTF-8><meta name=viewport content=width=device-width><title>Playground</title><style>"
-    h give h plus call css
-    h give h plus "</style></head><body><div class=container>"
-    h give h plus "<header class=card style=background:linear-gradient(135deg," plus pri plus " 0%," plus acc plus " 100%);color:#fff;padding:20px;margin-bottom:20px>"
-    h give h plus "<div style=display:flex;justify-content:space-between;align-items:center>"
-    h give h plus "<h1 style=color:#fff;margin:0>🎮 Playground</h1>"
-    h give h plus "<div><a href=/ class=btn style=background:rgba(255,255,255,0.2);border:2px solid #fff>Home</a> "
-    h give h plus "<a href=/lessons class=btn style=background:rgba(255,255,255,0.2);border:2px solid #fff>Lessons</a></div></div></header>"
-    form text defaultCode from "say Hello World\nform num a from ten\nsay a\nloop five do\n    say step\nend"
-    if code same "" do
-        code give defaultCode
-    end
-    form text output from call exec code
-    h give h plus "<div class=grid2 card style=padding:0>"
-    h give h plus "<div class=p><div class=ph><strong>Code Editor</strong></div>"
-    h give h plus "<form method=post action=/playground style=display:flex;flex-direction:column;height:100%>"
-    h give h plus "<textarea name=code>" plus code plus "</textarea>"
-    h give h plus "<button type=submit class=btn style=margin-top:8px>▶ Run</button>"
-    h give h plus "</form></div>"
-    h give h plus "<div class=p><div class=ph><strong>Output</strong></div>"
-    h give h plus "<div id=out>" plus output plus "</div></div></div>"
-    h give h plus "</div></body></html>"
-    give h
-end
+playground code
+    if code empty code = say Hello World\nform num a from ten\nsay a\nloop five do\n    say step\nend
+    
+    output = exec code
+    
+    page title Playground
+    style bg bg color text
+    
+    header bg pri color white
+        big 🎮 Playground
+        link Home go /
+        link Lessons go /lessons
+    
+    grid 2
+        panel
+            big Code Editor
+            form action /playground method post
+                textarea name code code
+                button ▶ Run
+        
+        panel
+            big Output
+            box output
 
 // Lessons
-act lessons do
-    form text h from "<!DOCTYPE html><html><head><meta charset=UTF-8><meta name=viewport content=width=device-width><title>Lessons</title><style>"
-    h give h plus call css
-    h give h plus "</style></head><body><div class=container>"
-    h give h plus "<header class=card style=background:linear-gradient(135deg," plus pri plus " 0%," plus acc plus " 100%);color:#fff;padding:20px;margin-bottom:20px>"
-    h give h plus "<h1 style=color:#fff;margin:0>📚 Learn Azalea</h1>"
-    h give h plus "<div style=display:flex;gap:12px;margin-top:12px>"
-    h give h plus "<a href=/ class=btn style=background:rgba(255,255,255,0.2);border:2px solid #fff>Home</a> "
-    h give h plus "<a href=/playground class=btn style=background:rgba(255,255,255,0.2);border:2px solid #fff>Playground</a></div></header>"
-    h give h plus "<div class=card><h2>Lessons</h2>"
-    h give h plus "<p>Interactive lessons coming soon!</p>"
-    h give h plus "<p>For now, try the playground to learn Azalea.</p></div>"
-    h give h plus "</div></body></html>"
-    give h
-end
+lessons
+    page title Lessons
+    style bg bg color text
+    
+    header bg pri color white
+        big 📚 Learn Azalea
+        link Home go /
+        link Playground go /playground
+    
+    box
+        big Lessons
+        text Interactive lessons coming soon
+        text For now try the playground to learn Azalea
 
 // Router
-act serve path code do
-    if path same "/" do
-        give call landing
-    end
-    if path same "/playground" do
-        give call playground code
-    end
-    if path same "/lessons" do
-        give call lessons
-    end
-    give call landing
-end
+serve path code
+    if path = / give landing
+    if path = /playground give playground code
+    if path = /lessons give lessons
+    give landing
 
-// Entry
-say call serve "/" ""
+// Start
+serve / 

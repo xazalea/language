@@ -100,7 +100,13 @@ module.exports = async (req, res) => {
           
           console.log = originalLog;
           
-          // Return HTML
+          // Get view output (HTML from view components)
+          const viewHTML = runtime.getViewOutput();
+          if (viewHTML && viewHTML.includes('<!DOCTYPE html>')) {
+            return res.status(200).end(viewHTML);
+          }
+          
+          // Fallback to say outputs
           if (outputs.length > 0) {
             for (let i = outputs.length - 1; i >= 0; i--) {
               if (outputs[i] && outputs[i].includes('<!DOCTYPE html>')) {
@@ -402,7 +408,7 @@ end</textarea>
             <h3 style="margin-bottom: 1rem; color: #424658;">🤖 Need Help? Ask AI</h3>
             <textarea id="ai_question" placeholder="Ask a question about Azalea..." style="width: 100%; padding: 1rem; border-radius: 8px; border: 2px solid #BABBB1; font-size: 14px; min-height: 100px; margin-bottom: 1rem; background: #FFFFFF; color: #424658;"></textarea>
             <button class="btn btn-primary" onclick="getAIHelp()" style="padding: 0.75rem 1.5rem;">Get AI Help</button>
-        </div>
+    </div>
     </div>
     <script>
         // Embedded Azalea Runtime
@@ -767,7 +773,7 @@ function getLessonsPageHTML() {
                 <div class="lesson-card" onclick="loadLesson(8)">8. Styling</div>
                 <div class="lesson-card" onclick="loadLesson(9)">9. Forms</div>
                 <div class="lesson-card" onclick="loadLesson(10)">10. Advanced</div>
-            </div>
+        </div>
             <div class="content" id="lesson-content">
                 <div class="info-box goal">
                     <p style="font-weight: bold; margin-bottom: 8px; color: #424658;">🎯 Why Azalea?</p>
@@ -783,7 +789,7 @@ function getLessonsPageHTML() {
                 <div class="info-box hint">
                     <p style="font-weight: bold; margin-bottom: 8px; color: #424658;">💡 Hint:</p>
                     <p style="color: #424658;">Use the 'say' keyword to print text. You can also use: print, output, display, log, echo, show, write - they all work the same!</p>
-                    </div>
+            </div>
                 <div class="info-box tip">
                     <p style="font-weight: bold; margin-bottom: 8px; color: #424658;">✨ Try This:</p>
                     <p style="color: #424658;">Try using different keywords: <code>print Hello World</code> or <code>display Hello World</code> - they all work!</p>
@@ -791,15 +797,15 @@ function getLessonsPageHTML() {
                 <div style="display: flex; gap: 12px; margin-top: 24px;">
                     <a href="/playground" class="btn btn-primary">Try in Playground</a>
                     <button class="btn btn-success" onclick="completeLesson(0)">Mark Complete</button>
-                </div>
+                    </div>
                 <div class="card" style="padding: 1.5rem; margin-top: 2rem;">
                     <h3 style="margin-bottom: 1rem; color: #424658;">🤖 Need Help? Ask AI</h3>
                     <textarea id="lesson_question" placeholder="Ask about this lesson..."></textarea>
                     <button class="btn btn-primary" onclick="getAIHelp()" style="padding: 0.75rem 1.5rem;">Get AI Help</button>
+                </div>
             </div>
             </div>
-        </div>
-    </div>
+            </div>
     <script>
         const lessons = [
             {

@@ -74,19 +74,21 @@ export class AzaleaRuntime {
     return this.parseTokens(tokens);
   }
 
-  // ULTIMATE FLEXIBLE tokenizer - no rigid rules, handles ANY combination
+  // ULTIMATE FLEXIBLE tokenizer - super loose, no grammar needed!
+  // Supports: name = value, name, numbers, punctuation, whitespace is flexible
   private tokenize(source: string): string[] {
     // Handle comments
     source = source.replace(/\/\/.*$/gm, '');
     source = source.replace(/\/\*[\s\S]*?\*\//g, '');
     source = source.replace(/#.*$/gm, '');
     
-    // Ultra-flexible tokenization: preserve everything, split only on meaningful boundaries
+    // Ultra-flexible tokenization: split on whitespace, keep punctuation with words
     const tokens: string[] = [];
     let current = '';
     let inString = false;
     let stringChar = '';
-    let inNameQuote = false;
+    
+    // Super loose: whitespace separates, but punctuation can attach
     
     for (let i = 0; i < source.length; i++) {
       const char = source[i];
@@ -130,25 +132,24 @@ export class AzaleaRuntime {
       } else if (inString) {
         current += char;
       } 
-      // Block delimiters - always separate
+      // Super loose: whitespace separates tokens
+      else if (/\s/.test(char)) {
+        if (current.trim()) {
+          tokens.push(current.trim());
+          current = '';
+        }
+        // Add newline as token for structure
+        if (char === '\n') {
+          tokens.push('\n');
+        }
+      }
+      // Block delimiters
       else if (/[{}()\[\]]/.test(char)) {
         if (current.trim()) tokens.push(current.trim());
         tokens.push(char);
         current = '';
       }
-      // Whitespace - can be separator OR part of token (for flexibility)
-      else if (/\s/.test(char)) {
-        // Only split if we have a meaningful token
-        // Allow "say.Hello" to stay together, but "say Hello" can split
-        if (current.trim() && !current.match(/[a-zA-Z0-9_]+[\.\d]+$/)) {
-          tokens.push(current.trim());
-          current = '';
-        } else if (current.trim().length > 0) {
-          // Keep whitespace in token for ultra-flexible parsing
-          current += char;
-        }
-      }
-      // Everything else goes into current token (dots, numbers, letters, etc.)
+      // Everything else (letters, numbers, punctuation) goes into token
       else {
         current += char;
       }
@@ -194,13 +195,82 @@ export class AzaleaRuntime {
     return processed.filter(t => t && t.length > 0);
   }
 
-  // ULTIMATE FLEXIBLE parser - pattern-agnostic, handles ANY combination
+  // ULTIMATE FLEXIBLE parser - super simple, kids can use it!
+  // Supports: name = value, name:, if/loop/say, numbers, punctuation
   private parseTokens(tokens: string[]): AzaleaAST[] {
     const ast: AzaleaAST[] = [];
     let i = 0;
     
     while (i < tokens.length) {
       const token = tokens[i];
+      
+      // Super loose: name = value (assignment)
+      if (i + 1 < tokens.length && tokens[i + 1] === '=') {
+        const name = token;
+        i += 2; // skip name and =
+        const valueTokens: string[] = [];
+        while (i < tokens.length && tokens[i] !== '\n') {
+          valueTokens.push(tokens[i]);
+          i++;
+        }
+        const value = valueTokens.join(' ').trim();
+        ast.push({
+          type: 'variable',
+          children: [
+            { type: 'identifier', value: name },
+            { type: 'expression', children: [{ type: 'literal', value: value }] }
+          ]
+        });
+        continue;
+      }
+      
+      // Super loose: name (function/block) - no colon needed!
+      // Just check if next token is newline and following tokens are indented
+      const hasColon = i + 1 < tokens.length && tokens[i + 1] === ':';
+      const nextIsNewline = i + 1 < tokens.length && tokens[i + 1] === '\n';
+      const isKeyword = ['if', 'loop', 'say', 'give', 'form', 'act', 'call', 'page', 'header', 'section', 'box', 'big', 'text', 'button', 'link', 'form', 'textarea', 'code', 'emoji', 'grid', 'panel', 'footer'].includes(token.toLowerCase());
+      
+      // If it's a block definition (not a keyword statement)
+      if (hasColon || (nextIsNewline && !isKeyword && token.match(/^[a-zA-Z_][a-zA-Z0-9_]*$/))) {
+        const name = token;
+        if (hasColon) i += 2; // skip name and :
+        else i += 1; // skip name
+        
+        // Skip newline if present
+        if (i < tokens.length && tokens[i] === '\n') i++;
+        
+        // Collect body until next top-level definition (word at start of line with = or : or newline after)
+        const body: AzaleaAST[] = [];
+        while (i < tokens.length) {
+          const tok = tokens[i];
+          
+          // Check if this is a new top-level definition
+          if (tok === '\n' && i + 1 < tokens.length) {
+            const nextTok = tokens[i + 1];
+            // If next token is a word (not indented) and followed by = or : or another newline, it's a new definition
+            if (nextTok && nextTok.match(/^[a-zA-Z_][a-zA-Z0-9_]*$/) && 
+                (i + 2 >= tokens.length || tokens[i + 2] === '=' || tokens[i + 2] === ':' || tokens[i + 2] === '\n')) {
+              // Check if it's not a keyword (keywords continue the current block)
+              if (!['if', 'loop', 'say', 'give', 'form', 'act', 'call', 'page', 'header', 'section', 'box', 'big', 'text', 'button', 'link', 'form', 'textarea', 'code', 'emoji', 'grid', 'panel', 'footer'].includes(nextTok.toLowerCase())) {
+                break; // New top-level definition
+              }
+            }
+          }
+          
+          body.push({ type: 'statement', value: tok });
+          i++;
+        }
+        
+        ast.push({
+          type: 'function',
+          children: [
+            { type: 'identifier', value: name },
+            { type: 'body', children: body }
+          ]
+        });
+        continue;
+      }
+      
       const normalized = this.normalizeKeyword(token);
       
       // ULTRA FLEXIBLE: Look for patterns in ANY order
@@ -590,16 +660,152 @@ export class AzaleaRuntime {
         }
       }
       
-      // Add argument (no quotes needed!)
-      if (token !== '\n' && token.trim()) {
         args.push(tokens[i]);
+      i++;
+    }
+    
+    // Add arguments to node
+    args.forEach(arg => {
+      node.children!.push({ type: 'literal', value: arg });
+    });
+    
+    // Handle do block
+    if (i < tokens.length && ['do', 'then', '{', 'begin'].includes(tokens[i])) {
+      i++; // skip 'do'
+      
+      // Parse body
+      const body: AzaleaAST[] = [];
+      let depth = 1;
+      while (i < tokens.length && depth > 0) {
+        if (['end', '}', 'finish', 'done'].includes(tokens[i])) {
+          depth--;
+          if (depth === 0) break;
+        } else if (['do', 'then', '{', 'begin'].includes(tokens[i])) {
+          depth++;
+        }
+        
+        // Parse statement in body
+        const token = tokens[i];
+        const normalized = this.normalizeKeyword(token);
+        
+        if (normalized === 'call' && i + 1 < tokens.length && tokens[i + 1].toLowerCase() === 'view') {
+          // Nested view call
+          const nestedCall = this.parseDirectModuleCall(tokens, i + 1);
+          if (nestedCall) {
+            body.push(nestedCall.node);
+            i = nestedCall.next;
+            continue;
+          }
+        } else if (normalized === 'form') {
+          const varNode = this.parseVariable(tokens, i);
+          body.push(varNode.node);
+          i = varNode.next;
+          continue;
+        } else if (normalized === 'if') {
+          const ifNode = this.parseConditional(tokens, i);
+          body.push(ifNode.node);
+          i = ifNode.next;
+          continue;
+        } else if (normalized === 'loop') {
+          const loopNode = this.parseLoop(tokens, i, null);
+          body.push(loopNode.node);
+          i = loopNode.next;
+          continue;
+        } else if (normalized === 'say') {
+          const sayNode = this.parseOutput(tokens, i, null, false);
+          body.push(sayNode.node);
+          i = sayNode.next;
+          continue;
+        } else {
+          // Literal or identifier
+          body.push({ type: 'literal', value: token });
+        }
+        
+      i++;
+    }
+    
+      node.children!.push({ type: 'body', children: body });
+      
+      if (i < tokens.length && ['end', '}', 'finish', 'done'].includes(tokens[i])) {
+        i++;
+      }
+    }
+    
+    return { node, next: i };
+  }
+  
+  // Parse direct web elements (super simple syntax)
+  private parseDirectWebElement(tokens: string[], start: number): { node: AzaleaAST; next: number } | null {
+    let i = start;
+    const elementName = tokens[i].toLowerCase();
+    const webElements = ['page', 'header', 'footer', 'section', 'box', 'big', 'text', 'button', 'link', 'form', 'textarea', 'code', 'emoji', 'grid', 'panel'];
+    if (!webElements.includes(elementName)) return null;
+    i++;
+    
+    const node: AzaleaAST = {
+      type: 'call',
+      value: elementName,
+      children: []
+    };
+    
+    // Collect arguments until : or newline with next definition
+    const args: string[] = [];
+    while (i < tokens.length) {
+      const token = tokens[i];
+      
+      // Stop at : (block start)
+      if (token === ':') {
+        i++; // skip :
+        break;
+      }
+      
+      // Stop at newline if next is definition
+      if (token === '\n' && i + 2 < tokens.length) {
+        const next = tokens[i + 1];
+        const nextNext = tokens[i + 2];
+        if (nextNext === ':' || nextNext === '=') {
+          break;
+        }
+      }
+      
+      if (token.trim()) {
+        args.push(token);
       }
       i++;
     }
     
-    // Add all arguments as single value (flexible parsing)
-    if (args.length > 0) {
-      node.children!.push({ type: 'literal', value: args.join(' ') });
+    // Add arguments
+    args.forEach(arg => {
+      node.children!.push({ type: 'literal', value: arg });
+    });
+    
+    // Handle body after :
+    if (i > start + 1 && tokens[i - 1] === ':') {
+      const body: AzaleaAST[] = [];
+      let depth = 0;
+      while (i < tokens.length) {
+        if (tokens[i] === '\n' && i + 2 < tokens.length) {
+          const next = tokens[i + 1];
+          const nextNext = tokens[i + 2];
+          if (nextNext === ':' || nextNext === '=') {
+            // Check if it's at same indentation level
+            if (depth === 0) break;
+          }
+        }
+        if (webElements.includes(tokens[i]?.toLowerCase()) && i + 1 < tokens.length && tokens[i + 1] === ':') {
+          // Nested element
+          depth++;
+          const nested = this.parseDirectWebElement(tokens, i);
+          if (nested) {
+            body.push(nested.node);
+            i = nested.next;
+            continue;
+          }
+        }
+        body.push({ type: 'statement', value: tokens[i] });
+        i++;
+      }
+      node.children!.push({ type: 'body', children: body });
     }
     
     return { node, next: i };
@@ -705,23 +911,271 @@ export class AzaleaRuntime {
     }
   }
   
-  private executeCall(node: AzaleaAST): void {
+  private viewOutput: string[] = [];
+  
+  private renderViewToHTML(component: any, depth: number = 0): string {
+    if (!component || typeof component !== 'object') {
+      return String(component || '');
+    }
+    
+    const tag = component.tag || 'div';
+    const content = component.content || '';
+    const children = component.children || [];
+    const style = component.style || '';
+    const class_ = component.class || '';
+    const id = component.id || '';
+    const href = component.href || '';
+    const name = component.name || '';
+    const type = component.type || '';
+    const action = component.action || '';
+    const method = component.method || '';
+    
+    let attrs = '';
+    if (id) attrs += ` id="${id}"`;
+    if (class_) attrs += ` class="${class_}"`;
+    if (style) attrs += ` style="${style}"`;
+    if (href) attrs += ` href="${href}"`;
+    if (name) attrs += ` name="${name}"`;
+    if (type) attrs += ` type="${type}"`;
+    if (action) attrs += ` action="${action}"`;
+    if (method) attrs += ` method="${method}"`;
+    
+    let html = '';
+    if (tag === 'html' || tag === 'page') {
+      html = '<!DOCTYPE html><html><head>';
+      if (title) html += `<title>${title}</title>`;
+      html += '<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">';
+      html += '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">';
+      html += '<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Inter,system-ui,-apple-system,sans-serif;line-height:1.6;color:#1F2937}';
+      if (style) {
+        const bgMatch = style.match(/background:([^;]+)/);
+        if (bgMatch) html += `body{background:${bgMatch[1]}}`;
+      }
+      html += '.container{max-width:1200px;margin:0 auto;padding:0 20px}.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:24px}.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}@media(max-width:768px){.grid-2,.grid-3{grid-template-columns:1fr}}';
+      html += 'h1,h2,h3{font-weight:600;margin-bottom:16px}h1{font-size:2.5rem}h2{font-size:2rem}h3{font-size:1.5rem}';
+      html += 'button,a.btn{display:inline-block;padding:12px 24px;background:#6366F1;color:white;border:none;border-radius:8px;text-decoration:none;font-weight:500;cursor:pointer;transition:all 0.2s}button:hover,a.btn:hover{opacity:0.9;transform:translateY(-1px)}';
+      html += 'header{padding:32px 0;margin-bottom:32px}section{padding:48px 0}footer{padding:32px 0;text-align:center;margin-top:64px}';
+      html += 'box,div.card{background:white;padding:24px;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,0.1)}';
+      html += 'code,pre{background:#F3F4F6;padding:16px;border-radius:8px;font-family:Monaco,monospace;overflow-x:auto}';
+      html += 'textarea,input{width:100%;padding:12px;border:2px solid #E5E7EB;border-radius:8px;font-family:inherit;font-size:14px}textarea{min-height:200px;resize:vertical}';
+      html += 'form{display:flex;flex-direction:column;gap:16px}';
+      html += '</style>';
+      if (style) {
+        const customStyle = style.replace(/background:[^;]+;?/g, '').replace(/color:[^;]+;?/g, '').replace(/font-family:[^;]+;?/g, '');
+        if (customStyle.trim()) html += `<style>${customStyle}</style>`;
+      }
+      html += '</head><body class="container">';
+    } else if (tag === 'head') {
+      html = '<head>';
+      if (title) html += `<title>${title}</title>`;
+    } else if (tag === 'body') {
+      html = '<body>';
+    } else if (tag === 'style') {
+      html = '<style>';
+    } else {
+      html = `<${tag}${attrs}>`;
+    }
+    
+    // Handle content
+    if (content) {
+      if (typeof content === 'string') {
+        html += content;
+      } else if (Array.isArray(content)) {
+        html += content.map(c => this.renderViewToHTML(c, depth + 1)).join('');
+      } else {
+        html += this.renderViewToHTML(content, depth + 1);
+      }
+    }
+    
+    // Handle children
+    if (children.length > 0) {
+      html += children.map((child: any) => this.renderViewToHTML(child, depth + 1)).join('');
+    }
+    
+    // Handle body content (from do blocks)
+    if (component.body) {
+      if (Array.isArray(component.body)) {
+        html += component.body.map((child: any) => this.renderViewToHTML(child, depth + 1)).join('');
+      } else {
+        html += this.renderViewToHTML(component.body, depth + 1);
+      }
+    }
+    
+    // Close tag
+    if (tag === 'html' || tag === 'page') {
+      html += '</body></html>';
+    } else if (tag === 'head') {
+      html += '</head>';
+    } else if (tag === 'body') {
+      html += '</body>';
+    } else if (tag === 'style') {
+      html += '</style>';
+    } else if (!['meta', 'link', 'input', 'img', 'br', 'hr'].includes(tag)) {
+      html += `</${tag}>`;
+    }
+    
+    return html;
+  }
+  
+  private executeCall(node: AzaleaAST): any {
     if (node.children && node.children.length > 0) {
       const moduleOrFunc = node.value || node.children[0].value;
       
-      // Check if it's a module (view, web, net, etc.)
+      // Direct web elements - super simple! page, header, section, box, etc.
+      const webElements = ['page', 'header', 'footer', 'section', 'box', 'big', 'text', 'button', 'link', 'form', 'textarea', 'code', 'emoji', 'grid', 'panel'];
+      if (webElements.includes(moduleOrFunc)) {
+        // Direct web element - render directly
+        const method = moduleOrFunc;
+        const args: any[] = [];
+        
+        // Collect arguments
+        for (let i = 1; i < node.children.length; i++) {
+          const child = node.children[i];
+          if (child.type === 'literal') {
+            args.push(this.evaluateValue(child.value));
+          } else if (child.type === 'identifier') {
+            args.push(child.value);
+          } else {
+            args.push(this.executeNode(child));
+          }
+        }
+        
+        // Build component
+        const component: any = { tag: method === 'page' ? 'html' : method === 'big' ? 'h1' : method === 'text' ? 'p' : method === 'box' ? 'div' : method };
+        
+        // Super loose parsing - no quotes needed, flexible order
+        let i = 0;
+        while (i < args.length) {
+          const arg = String(args[i]).toLowerCase();
+          const next = i + 1 < args.length ? args[i + 1] : null;
+          
+          // Keywords that take a value
+          if (['title', 'bg', 'color', 'font', 'style', 'go', 'action', 'method', 'name'].includes(arg) && next !== null) {
+            let value = String(next);
+            // Remove quotes if present
+            if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+              value = value.slice(1, -1);
+            }
+            
+            if (arg === 'title') component.title = value;
+            else if (arg === 'style') component.style = (component.style || '') + value + ';';
+            else if (arg === 'bg') {
+              // Handle "bg pri to acc" gradient
+              if (i + 3 < args.length && String(args[i + 2]).toLowerCase() === 'to') {
+                const toColor = String(args[i + 3]);
+                component.style = (component.style || '') + `background:linear-gradient(135deg,${value} 0%,${toColor} 100%);`;
+                i += 3; // skip "to" and color
+              } else {
+                component.style = (component.style || '') + `background:${value};`;
+              }
+            }
+            else if (arg === 'color') component.style = (component.style || '') + `color:${value};`;
+            else if (arg === 'font') component.style = (component.style || '') + `font-family:${value};`;
+            else if (arg === 'go') component.href = value;
+            else if (arg === 'action') component.action = value;
+            else if (arg === 'method') component.method = value;
+            else if (arg === 'name') component.name = value;
+            
+            i += 2;
+          } else {
+            // Single word = content (no quotes needed)
+            let content = String(args[i]);
+            // Remove quotes if present
+            if ((content.startsWith('"') && content.endsWith('"')) || (content.startsWith("'") && content.endsWith("'"))) {
+              content = content.slice(1, -1);
+            }
+            if (!component.content) {
+              component.content = content;
+            }
+            i++;
+          }
+        }
+        
+        // Handle body
+        const bodyNode = node.children.find((c: any) => c.type === 'body');
+        if (bodyNode && bodyNode.children) {
+          component.body = bodyNode.children.map((child: any) => this.executeNode(child));
+        }
+        
+        // Render
+        const html = this.renderViewToHTML(component);
+        this.viewOutput.push(html);
+        return html;
+      }
+      
+      // View module - render to HTML
+      if (moduleOrFunc === 'view') {
+        if (node.children.length > 1) {
+          const method = node.children[1].value;
+          const args: any[] = [];
+          
+          // Collect arguments
+          for (let i = 2; i < node.children.length; i++) {
+            const child = node.children[i];
+            if (child.type === 'literal') {
+              args.push(this.evaluateValue(child.value));
+            } else if (child.type === 'identifier') {
+              args.push(child.value);
+            } else {
+              args.push(this.executeNode(child));
+            }
+          }
+          
+          // Build component object
+          const component: any = { tag: method };
+          
+          // Parse arguments (key-value pairs or content)
+          for (let i = 0; i < args.length; i += 2) {
+            if (i + 1 < args.length) {
+              const key = String(args[i]);
+              const value = args[i + 1];
+              if (key === 'class') {
+                component.class = String(value);
+              } else if (key === 'style') {
+                component.style = String(value);
+              } else if (key === 'id') {
+                component.id = String(value);
+              } else if (key === 'href') {
+                component.href = String(value);
+              } else if (key === 'name') {
+                component.name = String(value);
+              } else if (key === 'type') {
+                component.type = String(value);
+              } else if (key === 'action') {
+                component.action = String(value);
+              } else if (key === 'method') {
+                component.method = String(value);
+              } else {
+                component[key] = value;
+              }
+            } else {
+              // Single argument = content
+              component.content = args[i];
+            }
+          }
+          
+          // Check for do block (body)
+          const bodyNode = node.children.find((c: any) => c.type === 'body');
+          if (bodyNode && bodyNode.children) {
+            component.body = bodyNode.children.map((child: any) => this.executeNode(child));
+          }
+          
+          // Render to HTML and output
+          const html = this.renderViewToHTML(component);
+          this.viewOutput.push(html);
+          return html;
+        }
+        return '';
+      }
+      
+      // Other modules
       const modules = [
-        'view', 'web', 'net', 'file', 'serve', 'play', 'markdown',
+        'web', 'net', 'file', 'serve', 'play', 'markdown',
         'query', 'database', 'csv', 'go', 'channel', 'run'
       ];
       if (modules.includes(moduleOrFunc)) {
-        // Module call - in browser, this would create DOM elements or call APIs
-        // For now, just acknowledge
-        if (node.children.length > 1) {
-          const method = node.children[1].value;
-          // Module method called - would execute in browser
-        }
-        return;
+        // Module call - acknowledge
+        return '';
       }
       
       // Regular function call
@@ -736,6 +1190,17 @@ export class AzaleaRuntime {
         return func(args);
       }
     }
+    return null;
+  }
+  
+  // Get accumulated view output
+  getViewOutput(): string {
+    return this.viewOutput.join('');
+  }
+  
+  // Clear view output
+  clearViewOutput(): void {
+    this.viewOutput = [];
   }
 
   private executeVariable(node: AzaleaAST): void {
