@@ -304,7 +304,7 @@ function getPlaygroundPageHTML() {
                 <div class="panel-header">
                     <strong style="color: #424658;">Code Editor</strong>
                     <button class="btn btn-primary" onclick="runCode()" style="padding: 8px 16px; font-size: 14px;">▶ Run</button>
-                </div>
+            </div>
                 <textarea id="editor" spellcheck="false">say Hello World
 form num a from ten
 say a
@@ -315,7 +315,7 @@ end</textarea>
             <div class="panel">
                 <div class="panel-header">
                     <strong style="color: #424658;">Output</strong>
-                </div>
+        </div>
                 <div id="output">Ready to run code...</div>
             </div>
         </div>
@@ -325,22 +325,133 @@ end</textarea>
             <button class="btn btn-primary" onclick="getAIHelp()" style="padding: 0.75rem 1.5rem;">Get AI Help</button>
         </div>
     </div>
-    <script src="/azalea-browser.js"></script>
     <script>
+        // Embedded Azalea Runtime
+        class AzaleaRuntime {
+            constructor() {
+                this.variables = new Map();
+                this.output = [];
+            }
+            
+            getValue(str) {
+                str = str.trim();
+                if (str === 'step') {
+                    return this.loopStep !== undefined ? this.loopStep : 0;
+                }
+                if (this.variables.has(str)) {
+                    return this.variables.get(str);
+                }
+                const numberWords = {
+                    'zero': 0, 'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5,
+                    'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10
+                };
+                if (numberWords[str.toLowerCase()]) {
+                    return numberWords[str.toLowerCase()];
+                }
+                if (!isNaN(parseFloat(str))) {
+                    return parseFloat(str);
+                }
+                return str;
+            }
+            
+            execute(source) {
+                this.output = [];
+                const lines = source.split('\\n');
+                let i = 0;
+                
+                while (i < lines.length) {
+                    const line = lines[i];
+                    const trimmed = line.trim();
+                    
+                    if (!trimmed || trimmed.startsWith('//')) {
+                        i++;
+                        continue;
+                    }
+                    
+                    // Handle say/print/output
+                    const sayMatch = trimmed.match(/^(say|print|output|display|log|echo|show|write)\\s+(.+)$/i);
+                    if (sayMatch) {
+                        const value = this.getValue(sayMatch[2]);
+                        this.output.push(String(value));
+                        i++;
+                        continue;
+                    }
+                    
+                    // Handle form/let/var (variable declaration)
+                    const varMatch = trimmed.match(/^(form|let|var|const|set|create|make|declare|define|init|new)\\s+(num|text|bool)?\\s*([a-zA-Z_][a-zA-Z0-9_]*)\\s+(from|is|equals|=|to|as|becomes)\\s+(.+)$/i);
+                    if (varMatch) {
+                        const varName = varMatch[3];
+                        const value = this.getValue(varMatch[5]);
+                        this.variables.set(varName, value);
+                        i++;
+                        continue;
+                    }
+                    
+                    // Handle loops
+                    const loopMatch = trimmed.match(/^loop\\s+(\\d+|[a-zA-Z_][a-zA-Z0-9_]*)\\s+do$/i);
+                    if (loopMatch) {
+                        let count = this.getValue(loopMatch[1]);
+                        count = parseInt(count);
+                        
+                        // Find matching 'end'
+                        let depth = 1;
+                        let loopEnd = i + 1;
+                        for (let j = i + 1; j < lines.length; j++) {
+                            const l = lines[j].trim();
+                            if (l === 'end' || l === '}' || l === 'finish' || l === 'done') {
+                                depth--;
+                                if (depth === 0) {
+                                    loopEnd = j;
+                                    break;
+                                }
+                            } else if (l.match(/^(loop|if)\\s+.*\\s+do$/i)) {
+                                depth++;
+                            }
+                        }
+                        
+                        // Execute loop body
+                        for (let step = 0; step < count; step++) {
+                            this.loopStep = step;
+                            for (let j = i + 1; j < loopEnd; j++) {
+                                const loopLine = lines[j].trim();
+                                if (!loopLine || loopLine.startsWith('//')) continue;
+                                
+                                const loopSayMatch = loopLine.match(/^(say|print|output|display|log|echo|show|write)\\s+(.+)$/i);
+                                if (loopSayMatch) {
+                                    const value = this.getValue(loopSayMatch[2]);
+                                    this.output.push(String(value));
+                                }
+                                
+                                const loopVarMatch = loopLine.match(/^(form|let|var|const|set|create|make|declare|define|init|new)\\s+(num|text|bool)?\\s*([a-zA-Z_][a-zA-Z0-9_]*)\\s+(from|is|equals|=|to|as|becomes)\\s+(.+)$/i);
+                                if (loopVarMatch) {
+                                    const varName = loopVarMatch[3];
+                                    const value = this.getValue(loopVarMatch[5]);
+                                    this.variables.set(varName, value);
+                                }
+                            }
+                        }
+                        
+                        i = loopEnd + 1;
+                        continue;
+                    }
+                    
+                    i++;
+                }
+            }
+        }
+        
         let runtime = null;
         let azaleaReady = false;
         
-        async function initAzalea() {
+        function initAzalea() {
             try {
-                if (typeof AzaleaRuntime !== 'undefined') {
-                    runtime = new AzaleaRuntime();
-                    azaleaReady = true;
-                } else {
-                    throw new Error('Azalea runtime not loaded');
-                }
+                runtime = new AzaleaRuntime();
+                azaleaReady = true;
+                return true;
             } catch (e) {
                 console.error('Init error:', e);
                 azaleaReady = false;
+                return false;
             }
         }
         
@@ -360,9 +471,8 @@ end</textarea>
             
             if (!azaleaReady || !runtime) {
                 output.textContent = 'Initializing runtime...';
-                await initAzalea();
-                if (!azaleaReady || !runtime) {
-                    output.textContent = 'Error: Runtime not initialized. Please refresh the page.\\n\\nMake sure /azalea-browser.js is available.';
+                if (!initAzalea()) {
+                    output.textContent = 'Error: Failed to initialize runtime.';
                     return;
                 }
             }
@@ -370,31 +480,18 @@ end</textarea>
             try {
                 output.textContent = 'Running...';
                 
-                // Capture console.log output
-                const originalLog = console.log;
-                const logs = [];
-                console.log = (...args) => {
-                    logs.push(args.map(a => String(a)).join(' '));
-                    originalLog.apply(console, args);
-                };
+                // Create fresh runtime instance
+                runtime = new AzaleaRuntime();
+                runtime.execute(code);
                 
-                // Execute code
-                if (runtime && typeof runtime.execute === 'function') {
-                    runtime.execute(code);
-                } else {
-                    throw new Error('Runtime execute method not available');
-                }
-                
-                // Restore console.log
-                console.log = originalLog;
-                
-                if (logs.length > 0) {
-                    output.textContent = logs.join('\\n');
+                if (runtime.output.length > 0) {
+                    output.textContent = runtime.output.join('\\n');
                 } else {
                     output.textContent = 'Code executed successfully (no output)\\n\\nTip: Use "say" to print: say Hello World';
                 }
             } catch (e) {
                 output.textContent = 'Error: ' + e.message + '\\n\\nMake sure your code is valid Azalea syntax.';
+                console.error(e);
             }
         }
         
@@ -562,22 +659,22 @@ function getLessonsPageHTML() {
                 <div class="info-box goal">
                     <p style="font-weight: bold; margin-bottom: 8px; color: #424658;">🎯 Why Azalea?</p>
                     <p style="color: #424658; font-size: 0.9rem;">Azalea is SUPER easy! No complex syntax. Once you master Azalea, learning JavaScript will be a breeze. The concepts are the same, just different words!</p>
-                </div>
+            </div>
                 <h2 style="font-size: 2rem; margin-bottom: 16px;">Lesson 0: Hello World</h2>
                 <div class="info-box goal">
                     <p style="font-weight: bold; margin-bottom: 8px; color: #424658;">Goal:</p>
                     <p style="color: #424658;">Print 'Hello World' - Your first program!</p>
-                </div>
+            </div>
                 <p style="margin-bottom: 16px;">In Azalea, printing is super simple. Just use <code>say</code> (or any of 8+ other words like <code>print</code>, <code>output</code>, <code>display</code>, <code>log</code>!).</p>
                 <pre><code>say Hello World</code></pre>
                 <div class="info-box hint">
                     <p style="font-weight: bold; margin-bottom: 8px; color: #424658;">💡 Hint:</p>
                     <p style="color: #424658;">Use the 'say' keyword to print text. You can also use: print, output, display, log, echo, show, write - they all work the same!</p>
-                </div>
+                    </div>
                 <div class="info-box tip">
                     <p style="font-weight: bold; margin-bottom: 8px; color: #424658;">✨ Try This:</p>
                     <p style="color: #424658;">Try using different keywords: <code>print Hello World</code> or <code>display Hello World</code> - they all work!</p>
-                </div>
+                    </div>
                 <div style="display: flex; gap: 12px; margin-top: 24px;">
                     <a href="/playground" class="btn btn-primary">Try in Playground</a>
                     <button class="btn btn-success" onclick="completeLesson(0)">Mark Complete</button>
@@ -586,7 +683,7 @@ function getLessonsPageHTML() {
                     <h3 style="margin-bottom: 1rem; color: #424658;">🤖 Need Help? Ask AI</h3>
                     <textarea id="lesson_question" placeholder="Ask about this lesson..."></textarea>
                     <button class="btn btn-primary" onclick="getAIHelp()" style="padding: 0.75rem 1.5rem;">Get AI Help</button>
-                </div>
+            </div>
             </div>
         </div>
     </div>
