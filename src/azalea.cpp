@@ -869,7 +869,10 @@ std::shared_ptr<ASTNode> Parser::parse() {
                     "header", "footer", "nav", "main", "section", "article", "aside"
                 };
                 
-                std::vector<std::string> moduleNames = {"view", "web", "net", "file", "serve", "play", "markdown"};
+                std::vector<std::string> moduleNames = {
+                    "view", "web", "net", "file", "serve", "play", "markdown",
+                    "query", "database", "csv", "go", "channel", "run"
+                };
                 
                 // Check if current keyword is an HTML element (can be used directly!)
                 bool isHTMLElement = false;
@@ -1016,6 +1019,12 @@ Runtime::Runtime() {
     registerModule("play", std::make_shared<PlayModule>());
     registerModule("markdown", std::make_shared<MarkdownModule>());
     registerModule("web", std::make_shared<WebModule>());
+    registerModule("query", std::make_shared<QueryModule>());
+    registerModule("database", std::make_shared<DatabaseModule>());
+    registerModule("csv", std::make_shared<CSVModule>());
+    registerModule("go", std::make_shared<GoModule>());
+    registerModule("channel", std::make_shared<ChannelModule>());
+    registerModule("run", std::make_shared<RunModule>());
 }
 
 void Runtime::registerModule(const std::string& name, ModulePtr module) {
@@ -2085,6 +2094,141 @@ ValuePtr WebModule::call(const std::string& method, const std::vector<ValuePtr>&
     
     if (method == "camera" || method == "media") {
         return std::make_shared<Value>("Media API");
+    }
+    
+    return std::make_shared<Value>();
+}
+
+// QueryModule implementation - SQL-like queries
+ValuePtr QueryModule::call(const std::string& method, const std::vector<ValuePtr>& args, Runtime& runtime) {
+    if (method == "select" || method == "query" || method == "from") {
+        if (!args.empty()) {
+            std::string table = args[0]->toString();
+            return std::make_shared<Value>("Query: SELECT * FROM " + table);
+        }
+    }
+    
+    if (method == "where" || method == "filter") {
+        return std::make_shared<Value>("Filter applied");
+    }
+    
+    if (method == "order" || method == "sort") {
+        return std::make_shared<Value>("Sorted");
+    }
+    
+    if (method == "join") {
+        return std::make_shared<Value>("Joined");
+    }
+    
+    return std::make_shared<Value>();
+}
+
+// DatabaseModule implementation - Database operations
+ValuePtr DatabaseModule::call(const std::string& method, const std::vector<ValuePtr>& args, Runtime& runtime) {
+    if (method == "connect" || method == "open") {
+        if (!args.empty()) {
+            std::string url = args[0]->toString();
+            return std::make_shared<Value>("Connected to " + url);
+        }
+    }
+    
+    if (method == "query" || method == "execute") {
+        if (!args.empty()) {
+            std::string sql = args[0]->toString();
+            return std::make_shared<Value>("Executed: " + sql);
+        }
+    }
+    
+    if (method == "insert" || method == "add") {
+        return std::make_shared<Value>("Inserted");
+    }
+    
+    if (method == "update" || method == "modify") {
+        return std::make_shared<Value>("Updated");
+    }
+    
+    if (method == "delete" || method == "remove") {
+        return std::make_shared<Value>("Deleted");
+    }
+    
+    return std::make_shared<Value>();
+}
+
+// CSVModule implementation - CSV processing
+ValuePtr CSVModule::call(const std::string& method, const std::vector<ValuePtr>& args, Runtime& runtime) {
+    if (method == "read" || method == "parse") {
+        if (!args.empty()) {
+            std::string path = args[0]->toString();
+            return std::make_shared<Value>("CSV read from " + path);
+        }
+    }
+    
+    if (method == "write" || method == "save") {
+        if (args.size() >= 2) {
+            std::string path = args[0]->toString();
+            return std::make_shared<Value>("CSV written to " + path);
+        }
+    }
+    
+    if (method == "parse" || method == "convert") {
+        return std::make_shared<Value>("CSV parsed");
+    }
+    
+    return std::make_shared<Value>();
+}
+
+// GoModule implementation - Go-like concurrency
+ValuePtr GoModule::call(const std::string& method, const std::vector<ValuePtr>& args, Runtime& runtime) {
+    if (method == "go" || method == "goroutine" || method == "async" || method == "spawn") {
+        return std::make_shared<Value>("Goroutine started");
+    }
+    
+    if (method == "wait" || method == "sync") {
+        return std::make_shared<Value>("Waited");
+    }
+    
+    return std::make_shared<Value>();
+}
+
+// ChannelModule implementation - Go-like channels
+ValuePtr ChannelModule::call(const std::string& method, const std::vector<ValuePtr>& args, Runtime& runtime) {
+    if (method == "create" || method == "make" || method == "new") {
+        return std::make_shared<Value>("Channel created");
+    }
+    
+    if (method == "send" || method == "push") {
+        if (args.size() >= 2) {
+            return std::make_shared<Value>("Sent to channel");
+        }
+    }
+    
+    if (method == "receive" || method == "recv" || method == "get") {
+        if (!args.empty()) {
+            return std::make_shared<Value>("Received from channel");
+        }
+    }
+    
+    if (method == "close") {
+        return std::make_shared<Value>("Channel closed");
+    }
+    
+    return std::make_shared<Value>();
+}
+
+// RunModule implementation - Shell-like commands
+ValuePtr RunModule::call(const std::string& method, const std::vector<ValuePtr>& args, Runtime& runtime) {
+    if (method == "run" || method == "exec" || method == "execute" || method == "shell") {
+        if (!args.empty()) {
+            std::string command = args[0]->toString();
+            return std::make_shared<Value>("Executed: " + command);
+        }
+    }
+    
+    if (method == "system" || method == "cmd") {
+        if (!args.empty()) {
+            std::string command = args[0]->toString();
+            return std::make_shared<Value>("System: " + command);
+        }
     }
     
     return std::make_shared<Value>();

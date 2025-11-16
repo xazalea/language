@@ -1,0 +1,130 @@
+// Azalea - Universal Language Examples
+// One language for everything!
+
+// ============================================
+// STATIC SITE GENERATION
+// ============================================
+each pages {
+    form html from render page
+    file.write page.path html
+}
+
+// ============================================
+// FRONTEND (React/Vue/Angular replacement)
+// ============================================
+header {
+    h1 My App
+    nav {
+        a / Home
+        a /about About
+    }
+}
+
+main {
+    form {
+        input name placeholder Name
+        button Submit {
+            web fetch /api/submit data
+        }
+    }
+}
+
+// ============================================
+// BACKEND API (Node.js/Express replacement)
+// ============================================
+serve get /api/users {
+    give users
+}
+
+serve post /api/users {
+    form user from request.body
+    users.append user
+    give user
+}
+
+serve on 3000
+
+// ============================================
+// DATABASE QUERIES (SQL replacement)
+// ============================================
+form db from database.connect "postgres://localhost/db"
+
+form users from query {
+    select * from users
+    where age > 18
+    order by name
+}
+
+// Or direct database calls
+form users from db.query "SELECT * FROM users WHERE age > 18"
+
+// ============================================
+// DATA PROCESSING (Python/Pandas replacement)
+// ============================================
+form data from csv.read "data.csv"
+form filtered from data.filter { step.age > 18 }
+csv.write "filtered.csv" filtered
+
+// ============================================
+// CONCURRENCY (Go replacement)
+// ============================================
+go {
+    say "Running in parallel"
+}
+
+form ch from channel.create
+ch.send "message"
+form msg from ch.receive
+
+// ============================================
+// SHELL SCRIPTING (Bash replacement)
+// ============================================
+run "ls -la"
+run "git status"
+form output from run "echo Hello"
+
+// ============================================
+// COMPLETE FULL-STACK APP
+// ============================================
+// Frontend
+web title My App
+
+header {
+    h1 Welcome
+    nav {
+        a / Home
+        a /api API
+    }
+}
+
+// Backend API
+serve get /api/data {
+    form data from database.query "SELECT * FROM data"
+    give data
+}
+
+serve post /api/data {
+    form item from request.body
+    database.insert "data" item
+    give item
+}
+
+// Data processing
+act processData {
+    form raw from csv.read "input.csv"
+    form processed from raw.map { step.transform }
+    csv.write "output.csv" processed
+}
+
+// CLI tool
+act main args {
+    if args.length > 0 {
+        processData
+    } else {
+        say "Usage: azalea process"
+    }
+}
+
+// Start server
+serve on 8080
+

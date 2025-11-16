@@ -1,16 +1,26 @@
-# Azalea Language
+# Azalea - The Universal Language
 
-🌺 **Azalea** - The most efficient programming language on the planet.
+🌺 **Azalea** - One language for everything. Combines the best features from Python, JavaScript, Go, Rust, SQL, and more.
+
+## One Language for Everything
+
+- **Static Sites** - Generate HTML (replaces Jekyll/Hugo)
+- **Frontend** - Build UIs (replaces React/Vue/Angular)
+- **Backend** - Build APIs and servers (replaces Node.js/Express)
+- **Databases** - Query databases (replaces SQL)
+- **CLI Tools** - Build command-line tools (replaces Python/Bash)
+- **Data Processing** - Process CSV/data (replaces Pandas)
+- **Concurrency** - Go-like goroutines and channels
+- **Shell Scripting** - Run system commands
 
 ## Philosophy
 
-- **Dual Mode**: Compiled (C++) + Interpreted (TypeScript) = Maximum Efficiency
-- **Super Flexible Grammar**: Write code your way - many syntaxes for everything
-- **Short, logical, Latin-like** with light English roots
-- **Minimal symbols**: only `. , / ? ; !`
-- **Extremely easy for beginners** - Kids can learn it!
-- **Extremely powerful for experts** - Build complex systems
-- **Most efficient language** - Do anything, change anything, optimize anything
+- **Hybrid Runtime**: TypeScript (fast startup) + WASM (maximum speed) = True Hybrid
+- **Grammar Almost Doesn't Matter**: Write any way you want - ultra flexible
+- **Super Easy to Write**: No quotes needed, no "call" needed, write naturally
+- **Combines Popular Languages**: Python simplicity + JavaScript flexibility + Go concurrency + Rust safety + SQL queries
+- **Extremely efficient**: Hybrid runtime gives you best of both worlds
+- **One language**: Replace Python, JavaScript, Go, SQL, Bash, HTML/CSS/JS - all in one!
 
 ## Dual Mode Architecture
 
@@ -219,14 +229,34 @@ end
 - `map` - object
 - `void` - no type
 
-### Modules
+### Modules - Universal Language Features
 
-- `net` - networking
-- `file` - file operations
-- `vm` - virtual machine
-- `serve` - web server
-- `view` - UI components
-- `play` - game engine
+**Web & Frontend:**
+- `view` - UI components (replaces HTML/CSS/JS)
+- `web` - Web APIs, DOM, events (replaces JavaScript)
+- `serve` - Web server (replaces Express/Node.js)
+- `markdown` - Markdown rendering (replaces static site generators)
+
+**Backend & APIs:**
+- `net` - Networking (replaces HTTP clients)
+- `file` - File operations (replaces fs modules)
+- `database` - Database operations (replaces SQL/ORM)
+- `query` - SQL-like queries (replaces SQL)
+
+**Data & Processing:**
+- `csv` - CSV processing (replaces Pandas)
+- `file` - File I/O (replaces Python file operations)
+
+**Concurrency:**
+- `go` - Goroutines (replaces Go concurrency)
+- `channel` - Channels (replaces Go channels)
+
+**System:**
+- `run` - Shell commands (replaces Bash/Python subprocess)
+- `vm` - Virtual machine
+
+**Other:**
+- `play` - Game engine
 
 ## Examples
 

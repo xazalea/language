@@ -274,7 +274,10 @@ export class AzaleaRuntime {
           'video', 'audio', 'canvas', 'svg', 'textarea', 'select', 'option'
         ];
         
-        const moduleNames = ['view', 'web', 'net', 'file', 'serve', 'play', 'markdown'];
+        const moduleNames = [
+          'view', 'web', 'net', 'file', 'serve', 'play', 'markdown',
+          'query', 'database', 'csv', 'go', 'channel', 'run'
+        ];
         
         // Check if current token is an HTML element (can be used directly!)
         if (htmlElements.includes(token.toLowerCase())) {
@@ -707,7 +710,10 @@ export class AzaleaRuntime {
       const moduleOrFunc = node.value || node.children[0].value;
       
       // Check if it's a module (view, web, net, etc.)
-      const modules = ['view', 'web', 'net', 'file', 'serve', 'play', 'markdown'];
+      const modules = [
+        'view', 'web', 'net', 'file', 'serve', 'play', 'markdown',
+        'query', 'database', 'csv', 'go', 'channel', 'run'
+      ];
       if (modules.includes(moduleOrFunc)) {
         // Module call - in browser, this would create DOM elements or call APIs
         // For now, just acknowledge

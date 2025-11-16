@@ -1,0 +1,127 @@
+// Full-Stack Application in Azalea
+// One language for frontend, backend, database, and more!
+
+// ============================================
+// FRONTEND
+// ============================================
+web title My Full-Stack App
+
+header {
+    h1 Welcome
+    nav {
+        a / Home
+        a /api API
+        a /users Users
+    }
+}
+
+main {
+    h2 Dashboard
+    
+    // Form to add user
+    form {
+        input name placeholder Name
+        input email placeholder Email
+        button Submit {
+            web fetch /api/users method POST data {
+                name: name.value
+                email: email.value
+            }
+            say User added!
+        }
+    }
+    
+    // Display users
+    div id "users" {
+        // Will be populated by API call
+    }
+}
+
+// Load users on page load
+web on "load" {
+    web fetch /api/users {
+        each result {
+            div {
+                p result.name
+                p result.email
+            }
+        }
+    }
+}
+
+// ============================================
+// BACKEND API
+// ============================================
+form users from []
+
+serve get /api/users {
+    give users
+}
+
+serve post /api/users {
+    form user from request.body
+    users.append user
+    database.insert "users" user
+    give user
+}
+
+serve get /api/users/:id {
+    form id from request.params.id
+    form user from database.query "SELECT * FROM users WHERE id = " + id
+    give user
+}
+
+serve on 3000
+
+// ============================================
+// DATABASE
+// ============================================
+form db from database.connect "postgres://localhost/mydb"
+
+// Initialize database
+db.query "CREATE TABLE IF NOT EXISTS users (id SERIAL, name TEXT, email TEXT)"
+
+// ============================================
+// DATA PROCESSING
+// ============================================
+act processUsers {
+    form data from csv.read "users.csv"
+    each data {
+        if step.email.contains "@" {
+            database.insert "users" step
+        }
+    }
+}
+
+// ============================================
+// CONCURRENCY
+// ============================================
+// Process users in parallel
+each users {
+    go {
+        processUser step
+    }
+}
+
+// Use channels for communication
+form ch from channel.create
+go {
+    ch.send "processing"
+    processUsers
+    ch.send "done"
+}
+
+// ============================================
+// CLI TOOL
+// ============================================
+act main args {
+    if args[0] == "import" {
+        processUsers
+        say "Users imported!"
+    } else if args[0] == "server" {
+        serve on 3000
+    } else {
+        say "Usage: azalea [import|server]"
+    }
+}
+

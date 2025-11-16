@@ -213,6 +213,42 @@ public:
     ValuePtr call(const std::string& method, const std::vector<ValuePtr>& args, Runtime& runtime) override;
 };
 
+class QueryModule : public Module {
+public:
+    std::string getName() const override { return "query"; }
+    ValuePtr call(const std::string& method, const std::vector<ValuePtr>& args, Runtime& runtime) override;
+};
+
+class DatabaseModule : public Module {
+public:
+    std::string getName() const override { return "database"; }
+    ValuePtr call(const std::string& method, const std::vector<ValuePtr>& args, Runtime& runtime) override;
+};
+
+class CSVModule : public Module {
+public:
+    std::string getName() const override { return "csv"; }
+    ValuePtr call(const std::string& method, const std::vector<ValuePtr>& args, Runtime& runtime) override;
+};
+
+class GoModule : public Module {
+public:
+    std::string getName() const override { return "go"; }
+    ValuePtr call(const std::string& method, const std::vector<ValuePtr>& args, Runtime& runtime) override;
+};
+
+class ChannelModule : public Module {
+public:
+    std::string getName() const override { return "channel"; }
+    ValuePtr call(const std::string& method, const std::vector<ValuePtr>& args, Runtime& runtime) override;
+};
+
+class RunModule : public Module {
+public:
+    std::string getName() const override { return "run"; }
+    ValuePtr call(const std::string& method, const std::vector<ValuePtr>& args, Runtime& runtime) override;
+};
+
 // Number word conversion
 double wordToNumber(const std::string& word);
 std::string numberToWord(double num);
