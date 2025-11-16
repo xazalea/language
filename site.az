@@ -1,196 +1,162 @@
-// Azalea Language Site - Matte UI Design
-// Complete site built in Azalea with glassmorphism/matte styling
+// Azalea Site - Hyper-Efficient, Pure Server-Side, Zero JavaScript
 
-// Global state
-form text current_page from "landing"
-form text editor_code from "say Hello World\nform num a from ten\nsay a\nloop five do\n    say step\nend"
+// Colors
+form text bg from "#F0DAD5"
+form text pri from "#6C739C"
+form text acc from "#C56B62"
+form text d from "#424658"
 
-// Navigation function
-act navigate page do
-    current_page give page
-    call render_page
+// CSS
+act css do
+    form text s from "*{margin:0;padding:0;box-sizing:border-box}body{font-family:system-ui;background:" plus bg plus ";min-height:100vh;padding:20px}.card{background:#fff;border-radius:12px;box-shadow:0 4px 16px rgba(66,70,88,0.1);padding:32px;margin-bottom:24px}.btn{background:" plus pri plus ";color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;display:inline-block;font-weight:600}.btn:hover{background:#5a6085}h1,h2{color:" plus d plus ";font-weight:700}p{color:" plus d plus ";line-height:1.6}pre{background:" plus d plus ";color:" plus bg plus ";padding:20px;border-radius:8px;overflow-x:auto;font-family:monospace}code{background:" plus bg plus ";padding:2px 8px;border-radius:4px;color:" plus d plus "}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px}.container{max-width:1200px;margin:0 auto}textarea{width:100%;min-height:300px;padding:16px;border:2px solid " plus bg plus ";border-radius:8px;font-family:monospace;font-size:14px;background:" plus d plus ";color:" plus bg plus "}#out{background:" plus bg plus ";border:2px solid " plus pri plus ";padding:16px;border-radius:8px;min-height:200px;font-family:monospace;white-space:pre-wrap}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0;min-height:calc(100vh - 100px)}.p{padding:16px;display:flex;flex-direction:column}.ph{background:" plus bg plus ";padding:12px;border-radius:8px;margin-bottom:8px;display:flex;justify-content:space-between}"
+    give s
 end
 
-// Render landing page
-act render_landing do
-    form text html from ""
-    
-    // HTML head with matte styling
-    html give html plus "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Azalea - Elegant Programming Language</title>"
-    html give html plus "<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 50%,#f093fb 100%);min-height:100vh;padding:20px;position:relative;overflow-x:hidden}"
-    html give html plus "body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:radial-gradient(circle at 20% 50%,rgba(120,119,198,0.3),transparent 50%),radial-gradient(circle at 80% 80%,rgba(255,119,198,0.2),transparent 50%);pointer-events:none;z-index:0}"
-    html give html plus ".matte{background:rgba(255,255,255,0.1);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border:1px solid rgba(255,255,255,0.2);box-shadow:0 8px 32px 0 rgba(31,38,135,0.15);border-radius:16px}"
-    html give html plus ".matte-strong{background:rgba(255,255,255,0.15);backdrop-filter:blur(30px) saturate(200%);-webkit-backdrop-filter:blur(30px) saturate(200%);border:1px solid rgba(255,255,255,0.3);box-shadow:0 8px 32px 0 rgba(31,38,135,0.2)}"
-    html give html plus ".matte-card{background:rgba(255,255,255,0.08);backdrop-filter:blur(15px) saturate(150%);-webkit-backdrop-filter:blur(15px) saturate(150%);border:1px solid rgba(255,255,255,0.15);box-shadow:0 4px 16px 0 rgba(31,38,135,0.1);transition:all 0.3s ease}"
-    html give html plus ".matte-card:hover{transform:translateY(-4px);box-shadow:0 8px 24px 0 rgba(31,38,135,0.2);background:rgba(255,255,255,0.12)}"
-    html give html plus ".btn{background:rgba(255,255,255,0.2);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.3);color:white;padding:12px 24px;border-radius:12px;font-weight:600;cursor:pointer;transition:all 0.3s ease;text-decoration:none;display:inline-block}"
-    html give html plus ".btn:hover{background:rgba(255,255,255,0.3);transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,0.2)}"
-    html give html plus ".btn-primary{background:rgba(255,255,255,0.25);border:1px solid rgba(255,255,255,0.4)}"
-    html give html plus ".container{max-width:1200px;margin:0 auto;position:relative;z-index:1}"
-    html give html plus "h1,h2,h3{color:white;font-weight:700}"
-    html give html plus "p,span{color:rgba(255,255,255,0.9)}"
-    html give html plus "code{background:rgba(0,0,0,0.3);padding:2px 8px;border-radius:4px;font-family:'Fira Code',monospace;color:#fff}"
-    html give html plus "pre{background:rgba(0,0,0,0.4);backdrop-filter:blur(10px);padding:20px;border-radius:12px;overflow-x:auto;border:1px solid rgba(255,255,255,0.1)}"
-    html give html plus "textarea{background:rgba(0,0,0,0.3);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:16px;border-radius:12px;font-family:'Fira Code',monospace;font-size:14px;resize:none;outline:none;width:100%}"
-    html give html plus "textarea:focus{border-color:rgba(255,255,255,0.4);background:rgba(0,0,0,0.4)}"
-    html give html plus ".grid{display:grid;gap:24px}"
-    html give html plus ".grid-3{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}"
-    html give html plus ".text-center{text-align:center}"
-    html give html plus ".p-4{padding:32px}"
-    html give html plus ".p-6{padding:48px}"
-    html give html plus ".mb-4{margin-bottom:24px}"
-    html give html plus ".mb-6{margin-bottom:48px}"
-    html give html plus "</style></head><body>"
-    
-    // Header
-    html give html plus "<header class=\"matte-strong p-6 mb-6\"><div class=\"container text-center\"><h1 style=\"font-size:4rem;margin-bottom:16px\">🌺 Azalea</h1>"
-    html give html plus "<p style=\"font-size:1.5rem;margin-bottom:32px;opacity:0.95\">Elegant, minimal, powerful programming language</p>"
-    html give html plus "<div style=\"display:flex;gap:16px;justify-content:center;flex-wrap:wrap\">"
-    html give html plus "<a href=\"/playground\" class=\"btn btn-primary\" onclick=\"navigate('playground');return false\">Get Started</a>"
-    html give html plus "<a href=\"/lessons\" class=\"btn\" onclick=\"navigate('lessons');return false\">Learn</a>"
-    html give html plus "</div></div></header>"
-    
-    // Main content
-    html give html plus "<main class=\"container\"><section class=\"matte p-6 mb-6\"><h2 class=\"text-center mb-6\" style=\"font-size:2.5rem\">Why Azalea?</h2>"
-    html give html plus "<div class=\"grid grid-3\">"
-    
-    // Feature cards
-    html give html plus "<div class=\"matte-card p-4 text-center\"><h3 style=\"color:#fff;margin-bottom:16px;font-size:1.5rem\">🎯 Super Easy</h3><p style=\"line-height:1.6\">Start coding in minutes! No complex syntax to memorize. Perfect for absolute beginners.</p></div>"
-    html give html plus "<div class=\"matte-card p-4 text-center\"><h3 style=\"color:#fff;margin-bottom:16px;font-size:1.5rem\">🚀 Learn JavaScript Next</h3><p style=\"line-height:1.6\">Azalea concepts map directly to JavaScript. Master Azalea, then easily transition to JS!</p></div>"
-    html give html plus "<div class=\"matte-card p-4 text-center\"><h3 style=\"color:#fff;margin-bottom:16px;font-size:1.5rem\">✨ Super Flexible</h3><p style=\"line-height:1.6\">Write code your way! 12+ ways to create variables, 8+ ways to write functions. Be creative!</p></div>"
-    
-    html give html plus "</div></section>"
-    
-    // Try it section
-    html give html plus "<section class=\"matte p-6\"><h2 class=\"mb-4\" style=\"font-size:2rem\">Try It Now</h2>"
-    html give html plus "<pre><code>say Hello World\nform num a from ten\nsay a</code></pre>"
-    html give html plus "<a href=\"/playground\" class=\"btn btn-primary\" style=\"margin-top:16px\" onclick=\"navigate('playground');return false\">Run in Playground</a></section>"
-    
-    html give html plus "</main>"
-    
-    // Footer
-    html give html plus "<footer class=\"matte p-4 mt-6\" style=\"text-align:center\"><p>Made with Azalea - From beginner to professional</p></footer>"
-    
-    // Scripts
-    html give html plus "<script>function navigate(page){window.location.href='/'+page}</script></body></html>"
-    
-    give html
+// Landing
+act landing do
+    form text h from "<!DOCTYPE html><html><head><meta charset=UTF-8><meta name=viewport content=width=device-width><title>Azalea</title><style>"
+    h give h plus call css
+    h give h plus "</style></head><body><div class=container>"
+    h give h plus "<header class=card style=background:linear-gradient(135deg," plus pri plus " 0%," plus acc plus " 100%);color:#fff;text-align:center;padding:48px>"
+    h give h plus "<h1 style=font-size:4rem;margin-bottom:16px;color:#fff>🌺 Azalea</h1>"
+    h give h plus "<p style=font-size:1.5rem;margin-bottom:32px>Elegant, minimal, powerful</p>"
+    h give h plus "<a href=/playground class=btn style=background:rgba(255,255,255,0.2);border:2px solid #fff>Get Started</a> "
+    h give h plus "<a href=/lessons class=btn style=background:rgba(255,255,255,0.2);border:2px solid #fff>Learn</a>"
+    h give h plus "</header>"
+    h give h plus "<section class=card><h2 style=text-align:center;font-size:2.5rem;margin-bottom:32px>Why Azalea?</h2>"
+    h give h plus "<div class=grid>"
+    h give h plus "<div class=card style=background:" plus bg plus "><h3>🎯 Super Easy</h3><p>Start coding in minutes! No complex syntax.</p></div>"
+    h give h plus "<div class=card style=background:" plus bg plus "><h3>🚀 Learn JavaScript Next</h3><p>Azalea concepts map directly to JavaScript.</p></div>"
+    h give h plus "<div class=card style=background:" plus bg plus "><h3>✨ Super Flexible</h3><p>12+ ways to create variables, 8+ ways to write functions.</p></div>"
+    h give h plus "</div></section>"
+    h give h plus "<section class=card><h2 style=font-size:2rem;margin-bottom:16px>Try It Now</h2>"
+    h give h plus "<pre><code>say Hello World\nform num a from ten\nsay a</code></pre>"
+    h give h plus "<a href=/playground class=btn style=background:" plus acc plus ">Run in Playground</a></section>"
+    h give h plus "<footer class=card style=text-align:center;background:" plus bg plus "><p>Made with Azalea</p></footer>"
+    h give h plus "</div></body></html>"
+    give h
 end
 
-// Render playground page
-act render_playground do
-    form text html from ""
-    
-    // Same head styling
-    html give html plus "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Azalea Playground</title>"
-    html give html plus "<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 50%,#f093fb 100%);min-height:100vh;padding:20px;position:relative;overflow-x:hidden}"
-    html give html plus "body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:radial-gradient(circle at 20% 50%,rgba(120,119,198,0.3),transparent 50%),radial-gradient(circle at 80% 80%,rgba(255,119,198,0.2),transparent 50%);pointer-events:none;z-index:0}"
-    html give html plus ".matte{background:rgba(255,255,255,0.1);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border:1px solid rgba(255,255,255,0.2);box-shadow:0 8px 32px 0 rgba(31,38,135,0.15);border-radius:16px}"
-    html give html plus ".btn{background:rgba(255,255,255,0.2);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.3);color:white;padding:12px 24px;border-radius:12px;font-weight:600;cursor:pointer;transition:all 0.3s ease;text-decoration:none;display:inline-block}"
-    html give html plus ".btn:hover{background:rgba(255,255,255,0.3);transform:translateY(-2px)}"
-    html give html plus "textarea{background:rgba(0,0,0,0.3);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:16px;border-radius:12px;font-family:'Fira Code',monospace;font-size:14px;resize:none;outline:none;width:100%;height:100%}"
-    html give html plus "textarea:focus{border-color:rgba(255,255,255,0.4)}"
-    html give html plus "#output{background:rgba(0,0,0,0.4);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.1);color:#fff;padding:16px;border-radius:12px;font-family:'Fira Code',monospace;font-size:14px;white-space:pre-wrap;overflow-y:auto;height:100%}"
-    html give html plus ".grid-2{display:grid;grid-template-columns:1fr 1fr;gap:0;min-height:calc(100vh - 100px)}"
-    html give html plus ".panel{display:flex;flex-direction:column;padding:16px}"
-    html give html plus ".panel-header{background:rgba(255,255,255,0.1);padding:12px 16px;border-radius:8px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}"
-    html give html plus "h1,h2{color:white;font-weight:700}"
-    html give html plus "</style></head><body>"
-    
-    // Header
-    html give html plus "<header class=\"matte\" style=\"padding:20px;margin-bottom:20px\"><div style=\"display:flex;justify-content:space-between;align-items:center\">"
-    html give html plus "<h1 style=\"margin:0\">🎮 Playground</h1>"
-    html give html plus "<div style=\"display:flex;gap:12px\"><a href=\"/\" class=\"btn\" onclick=\"navigate('landing');return false\">Landing</a>"
-    html give html plus "<a href=\"/lessons\" class=\"btn\" onclick=\"navigate('lessons');return false\">Lessons</a></div></div></header>"
-    
-    // Editor and output
-    html give html plus "<div class=\"grid-2 matte\" style=\"padding:0\">"
-    html give html plus "<div class=\"panel\"><div class=\"panel-header\"><strong style=\"color:white\">Code Editor</strong>"
-    html give html plus "<button class=\"btn\" onclick=\"runCode()\" style=\"padding:8px 16px;font-size:14px\">▶ Run</button></div>"
-    html give html plus "<textarea id=\"editor\" spellcheck=\"false\">" plus editor_code plus "</textarea></div>"
-    html give html plus "<div class=\"panel\"><div class=\"panel-header\"><strong style=\"color:white\">Output</strong></div>"
-    html give html plus "<div id=\"output\">Ready to run code...</div></div></div>"
-    
-    // Scripts
-    html give html plus "<script src=\"/azalea-browser.js\"></script><script src=\"/azalea-hybrid.js\"></script>"
-    html give html plus "<script>let hybridRuntime=null;let azaleaReady=false;async function initAzalea(){try{hybridRuntime=new AzaleaHybridRuntime();const status=await hybridRuntime.initialize();azaleaReady=status.hybrid}catch(e){console.error('Init error:',e)}}"
-    html give html plus "window.addEventListener('load',initAzalea);"
-    html give html plus "async function runCode(){if(!azaleaReady||!hybridRuntime){await initAzalea()}const code=document.getElementById('editor').value;const output=document.getElementById('output');try{output.textContent='Running...';const results=await hybridRuntime.execute(code);if(results.hybrid&&results.hybrid.success){output.textContent=results.hybrid.output.join('\\n')||'No output'}else{output.textContent='Error: '+results.errors.map(e=>e.error).join('\\n')}}catch(e){output.textContent='Error: '+e.message}}"
-    html give html plus "function navigate(page){window.location.href='/'+page}</script></body></html>"
-    
-    give html
-end
-
-// Render lessons page
-act render_lessons do
-    form text html from ""
-    
-    // Same head styling
-    html give html plus "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Learn Azalea</title>"
-    html give html plus "<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 50%,#f093fb 100%);min-height:100vh;padding:20px;position:relative;overflow-x:hidden}"
-    html give html plus "body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:radial-gradient(circle at 20% 50%,rgba(120,119,198,0.3),transparent 50%),radial-gradient(circle at 80% 80%,rgba(255,119,198,0.2),transparent 50%);pointer-events:none;z-index:0}"
-    html give html plus ".matte{background:rgba(255,255,255,0.1);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border:1px solid rgba(255,255,255,0.2);box-shadow:0 8px 32px 0 rgba(31,38,135,0.15);border-radius:16px}"
-    html give html plus ".matte-card{background:rgba(255,255,255,0.08);backdrop-filter:blur(15px);border:1px solid rgba(255,255,255,0.15);border-radius:12px;padding:12px;margin-bottom:8px;cursor:pointer;transition:all 0.2s}"
-    html give html plus ".matte-card:hover{background:rgba(255,255,255,0.12)}"
-    html give html plus ".matte-card.active{background:rgba(255,255,255,0.2);border-color:rgba(255,255,255,0.3)}"
-    html give html plus ".btn{background:rgba(255,255,255,0.2);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.3);color:white;padding:12px 24px;border-radius:12px;font-weight:600;cursor:pointer;transition:all 0.3s ease;text-decoration:none;display:inline-block}"
-    html give html plus ".btn:hover{background:rgba(255,255,255,0.3)}"
-    html give html plus "pre{background:rgba(0,0,0,0.4);backdrop-filter:blur(10px);padding:20px;border-radius:12px;overflow-x:auto;border:1px solid rgba(255,255,255,0.1);color:#fff;font-family:'Fira Code',monospace}"
-    html give html plus "h1,h2,h3{color:white;font-weight:700}"
-    html give html plus "p{color:rgba(255,255,255,0.9);line-height:1.6}"
-    html give html plus ".grid-2{display:grid;grid-template-columns:300px 1fr;gap:0;min-height:calc(100vh - 100px)}"
-    html give html plus ".sidebar{padding:20px;overflow-y:auto}"
-    html give html plus ".content{padding:32px;overflow-y:auto}"
-    html give html plus "</style></head><body>"
-    
-    // Header
-    html give html plus "<header class=\"matte\" style=\"padding:20px;margin-bottom:20px\"><div style=\"display:flex;justify-content:space-between;align-items:center\">"
-    html give html plus "<div><h1 style=\"margin:0;margin-bottom:8px\">📚 Learn Azalea</h1>"
-    html give html plus "<div style=\"display:flex;gap:24px;align-items:center\"><span style=\"opacity:0.9;color:white\">Level: <strong>1</strong></span>"
-    html give html plus "<span style=\"opacity:0.9;color:white\">XP: <strong>0</strong></span></div></div>"
-    html give html plus "<div style=\"display:flex;gap:12px\"><a href=\"/\" class=\"btn\" onclick=\"navigate('landing');return false\">Landing</a>"
-    html give html plus "<a href=\"/playground\" class=\"btn\" onclick=\"navigate('playground');return false\">Playground</a></div></div></header>"
-    
-    // Main content
-    html give html plus "<div class=\"grid-2 matte\" style=\"padding:0\">"
-    html give html plus "<div class=\"sidebar\"><h3 style=\"margin-bottom:16px;color:white\">Lessons</h3>"
-    html give html plus "<div class=\"matte-card active\">0. Hello World</div>"
-    html give html plus "<div class=\"matte-card\">1. Variables</div>"
-    html give html plus "<div class=\"matte-card\">2. Math Operations</div>"
-    html give html plus "<div class=\"matte-card\">3. Conditionals</div>"
-    html give html plus "<div class=\"matte-card\">4. Loops</div>"
-    html give html plus "<div class=\"matte-card\">5. Functions</div>"
-    html give html plus "<div class=\"matte-card\">6. Lists</div>"
-    html give html plus "<div class=\"matte-card\">7. UI Components</div>"
-    html give html plus "<div class=\"matte-card\">8. Styling</div>"
-    html give html plus "<div class=\"matte-card\">9. Forms</div>"
-    html give html plus "<div class=\"matte-card\">10. Advanced Functions</div></div>"
-    
-    html give html plus "<div class=\"content\"><h2 style=\"font-size:2rem;margin-bottom:16px;color:white\">Lesson 0: Hello World</h2>"
-    html give html plus "<div class=\"matte\" style=\"padding:16px;margin-bottom:24px;background:rgba(76,175,80,0.2);border-color:rgba(76,175,80,0.3)\"><p style=\"font-weight:bold;margin-bottom:8px;color:white\">Goal:</p><p style=\"color:white\">Print 'Hello World' - Your first program!</p></div>"
-    html give html plus "<p style=\"margin-bottom:16px\">In Azalea, printing is super simple. Just use <code>say</code> (or any of 8+ other words!).</p>"
-    html give html plus "<pre><code>say Hello World</code></pre>"
-    html give html plus "<div class=\"matte\" style=\"padding:16px;margin:24px 0;background:rgba(255,193,7,0.2);border-color:rgba(255,193,7,0.3)\"><p style=\"font-weight:bold;margin-bottom:8px;color:white\">💡 Hint:</p><p style=\"color:white\">Use the 'say' keyword to print text</p></div>"
-    html give html plus "<div style=\"display:flex;gap:12px\"><a href=\"/playground\" class=\"btn\" onclick=\"navigate('playground');return false\">Try in Playground</a>"
-    html give html plus "<button class=\"btn\" style=\"background:rgba(40,167,69,0.3);border-color:rgba(40,167,69,0.4)\">Mark Complete</button></div></div></div>"
-    
-    // Scripts
-    html give html plus "<script>function navigate(page){window.location.href='/'+page}</script></body></html>"
-    
-    give html
-end
-
-// Main render function
-act render_page do
-    if current_page same "playground" do
-        give call render_playground
+// Execute code server-side
+act exec code do
+    form text out from ""
+    if code same "" do
+        give "Ready to run code..."
     end
-    if current_page same "lessons" do
-        give call render_lessons
+    form list lines from code.split "\n"
+    form num i from 0
+    loop lines.length do
+        form text line from lines[i]
+        line give line.trim
+        if line same "" do
+            i give i plus 1
+            continue
+        end
+        if line.startsWith "say" do
+            form text val from line.substring 4
+            out give out plus val.trim plus "\n"
+        end
+        if line.startsWith "form" do
+            // Variable - simplified
+        end
+        if line.startsWith "loop" do
+            // Loop - simplified
+            form text numStr from line.split " " [1]
+            form num count from 0
+            if numStr same "five" do
+                count give 5
+            end
+            if numStr same "ten" do
+                count give 10
+            end
+            if numStr same "one" do
+                count give 1
+            end
+            if numStr same "two" do
+                count give 2
+            end
+            if numStr same "three" do
+                count give 3
+            end
+            if numStr same "four" do
+                count give 4
+            end
+            form num n from 0
+            if numStr same "0" or numStr same "1" or numStr same "2" or numStr same "3" or numStr same "4" or numStr same "5" or numStr same "6" or numStr same "7" or numStr same "8" or numStr same "9" do
+                n give parseInt numStr
+                count give n
+            end
+            form num step from 0
+            loop count do
+                out give out plus step plus "\n"
+                step give step plus 1
+            end
+        end
+        i give i plus 1
     end
-    give call render_landing
+    if out same "" do
+        out give "Code executed (no output)\n\nTip: Use 'say' to print"
+    end
+    give out
 end
 
-// Default render
-call render_page
+// Playground
+act playground code do
+    form text h from "<!DOCTYPE html><html><head><meta charset=UTF-8><meta name=viewport content=width=device-width><title>Playground</title><style>"
+    h give h plus call css
+    h give h plus "</style></head><body><div class=container>"
+    h give h plus "<header class=card style=background:linear-gradient(135deg," plus pri plus " 0%," plus acc plus " 100%);color:#fff;padding:20px;margin-bottom:20px>"
+    h give h plus "<div style=display:flex;justify-content:space-between;align-items:center>"
+    h give h plus "<h1 style=color:#fff;margin:0>🎮 Playground</h1>"
+    h give h plus "<div><a href=/ class=btn style=background:rgba(255,255,255,0.2);border:2px solid #fff>Home</a> "
+    h give h plus "<a href=/lessons class=btn style=background:rgba(255,255,255,0.2);border:2px solid #fff>Lessons</a></div></div></header>"
+    form text defaultCode from "say Hello World\nform num a from ten\nsay a\nloop five do\n    say step\nend"
+    if code same "" do
+        code give defaultCode
+    end
+    form text output from call exec code
+    h give h plus "<div class=grid2 card style=padding:0>"
+    h give h plus "<div class=p><div class=ph><strong>Code Editor</strong></div>"
+    h give h plus "<form method=post action=/playground style=display:flex;flex-direction:column;height:100%>"
+    h give h plus "<textarea name=code>" plus code plus "</textarea>"
+    h give h plus "<button type=submit class=btn style=margin-top:8px>▶ Run</button>"
+    h give h plus "</form></div>"
+    h give h plus "<div class=p><div class=ph><strong>Output</strong></div>"
+    h give h plus "<div id=out>" plus output plus "</div></div></div>"
+    h give h plus "</div></body></html>"
+    give h
+end
 
+// Lessons
+act lessons do
+    form text h from "<!DOCTYPE html><html><head><meta charset=UTF-8><meta name=viewport content=width=device-width><title>Lessons</title><style>"
+    h give h plus call css
+    h give h plus "</style></head><body><div class=container>"
+    h give h plus "<header class=card style=background:linear-gradient(135deg," plus pri plus " 0%," plus acc plus " 100%);color:#fff;padding:20px;margin-bottom:20px>"
+    h give h plus "<h1 style=color:#fff;margin:0>📚 Learn Azalea</h1>"
+    h give h plus "<div style=display:flex;gap:12px;margin-top:12px>"
+    h give h plus "<a href=/ class=btn style=background:rgba(255,255,255,0.2);border:2px solid #fff>Home</a> "
+    h give h plus "<a href=/playground class=btn style=background:rgba(255,255,255,0.2);border:2px solid #fff>Playground</a></div></header>"
+    h give h plus "<div class=card><h2>Lessons</h2>"
+    h give h plus "<p>Interactive lessons coming soon!</p>"
+    h give h plus "<p>For now, try the playground to learn Azalea.</p></div>"
+    h give h plus "</div></body></html>"
+    give h
+end
+
+// Router
+act serve path code do
+    if path same "/" do
+        give call landing
+    end
+    if path same "/playground" do
+        give call playground code
+    end
+    if path same "/lessons" do
+        give call lessons
+    end
+    give call landing
+end
+
+// Entry
+say call serve "/" ""

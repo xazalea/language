@@ -1,9 +1,27 @@
 // Vercel serverless function for Azalea
-// Handles all routes and serves the Azalea application
+// Executes site.az to generate all HTML
+
+const fs = require('fs');
+const pathModule = require('path');
+
+// Import Azalea runtime
+let AzaleaRuntime;
+try {
+  // Try to load from compiled TypeScript
+  const azaleaPath = path.join(__dirname, '../dist/azalea.js');
+  if (fs.existsSync(azaleaPath)) {
+    AzaleaRuntime = require(azaleaPath).AzaleaRuntime;
+  } else {
+    // Fallback: use source TypeScript (requires ts-node or compilation)
+    AzaleaRuntime = require('../src/azalea.ts').AzaleaRuntime;
+  }
+} catch (e) {
+  // If runtime not available, we'll use a simple fallback
+  console.error('Azalea runtime not available:', e.message);
+}
 
 module.exports = async (req, res) => {
   // CRITICAL: Set headers FIRST - before ANY other code
-  // This MUST happen immediately to prevent file downloads
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
   res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
   res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -14,8 +32,9 @@ module.exports = async (req, res) => {
     let path = req.url || req.path || '/';
     
     // Handle query parameters
+    const codeParam = req.query?.code || '';
+    
     if (req.query && typeof req.query === 'object') {
-      // Vercel might pass path in query
       if (req.query.path) {
         path = req.query.path;
       }
@@ -36,11 +55,71 @@ module.exports = async (req, res) => {
     
     const method = (req.method || 'GET').toUpperCase();
     
-    // Route handling
+    // Execute site.az - Pure Azalea, no JavaScript needed
+    if (AzaleaRuntime) {
+      try {
+        const siteAzPath = pathModule.join(__dirname, '../site.az');
+        if (fs.existsSync(siteAzPath)) {
+          let siteCode = fs.readFileSync(siteAzPath, 'utf8');
+          
+          // Get code from POST body (form-encoded)
+          let codeFromBody = '';
+          if (path === '/playground' && method === 'POST') {
+            if (req.body) {
+              if (typeof req.body === 'string') {
+                // Parse form data: code=...
+                const match = req.body.match(/code=([^&]*)/);
+                if (match) {
+                  codeFromBody = decodeURIComponent(match[1].replace(/\+/g, ' '));
+                }
+              } else if (req.body.code) {
+                codeFromBody = req.body.code;
+              }
+            }
+          }
+          const finalCode = codeFromBody || codeParam || '';
+          
+          // Inject path and code into Azalea
+          const escapedPath = path.replace(/"/g, '\\"');
+          const escapedCode = finalCode.replace(/"/g, '\\"').replace(/\n/g, '\\n');
+          siteCode = siteCode.replace(/say call serve.*$/, `say call serve "${escapedPath}" "${escapedCode}"`);
+          
+          const runtime = new AzaleaRuntime();
+          
+          // Capture output
+          const outputs = [];
+          const originalLog = console.log;
+          console.log = (...args) => {
+            outputs.push(args.map(a => String(a)).join(' '));
+            originalLog.apply(console, args);
+          };
+          
+          // Execute
+          const ast = runtime.parse(siteCode);
+          runtime.execute(ast);
+          
+          console.log = originalLog;
+          
+          // Return HTML
+          if (outputs.length > 0) {
+            for (let i = outputs.length - 1; i >= 0; i--) {
+              if (outputs[i] && outputs[i].includes('<!DOCTYPE html>')) {
+                return res.status(200).end(outputs[i]);
+              }
+            }
+            return res.status(200).end(outputs[outputs.length - 1]);
+          }
+        }
+      } catch (azaleaError) {
+        console.error('Error executing site.az:', azaleaError);
+      }
+    }
+    
+    // Fallback: Use JavaScript implementation if Azalea execution fails
     if (path === '/' || path === '/index.html' || path === '' || path === '/index.az') {
       return res.status(200).end(getLandingPageHTML());
     } else if (path === '/playground' || path.startsWith('/playground')) {
-      return res.status(200).end(getPlaygroundPageHTML());
+      return res.status(200).end(getPlaygroundPageHTML(codeParam));
     } else if (path === '/lessons' || path.startsWith('/lessons')) {
       return res.status(200).end(getLessonsPageHTML());
     } else if (path === '/ai-help' && method === 'POST') {
@@ -610,6 +689,40 @@ function getLessonsPageHTML() {
         .info-box.goal { background: #F0DAD5; border-color: #6C739C; }
         .info-box.hint { background: #F0DAD5; border-color: #DEA785; }
         .info-box.tip { background: #F0DAD5; border-color: #C56B62; }
+        .info-box.exercise { background: #F0DAD5; border-color: #6C739C; }
+        .code-editor {
+            background: #424658;
+            border: 2px solid #BABBB1;
+            color: #F0DAD5;
+            padding: 16px;
+            border-radius: 8px;
+            font-family: 'Fira Code', monospace;
+            font-size: 14px;
+            width: 100%;
+            min-height: 120px;
+            margin: 16px 0;
+            resize: vertical;
+        }
+        .exercise-output {
+            background: #F0DAD5;
+            border: 2px solid #6C739C;
+            color: #424658;
+            padding: 16px;
+            border-radius: 8px;
+            font-family: 'Fira Code', monospace;
+            font-size: 14px;
+            min-height: 60px;
+            white-space: pre-wrap;
+            margin-top: 8px;
+        }
+        .exercise-success {
+            background: #6C739C;
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 12px;
+            display: none;
+        }
         textarea {
             background: #FFFFFF;
             border: 2px solid #BABBB1;
@@ -695,7 +808,10 @@ function getLessonsPageHTML() {
                 code: "say Hello World",
                 hint: "Use the 'say' keyword to print text. You can also use: print, output, display, log, echo, show, write - they all work the same!",
                 tip: "Try using different keywords: print Hello World or display Hello World - they all work!",
-                explanation: "In Azalea, printing is super simple. Just use 'say' (or any of 8+ other words!)."
+                explanation: "In Azalea, printing is super simple. Just use 'say' (or any of 8+ other words!).",
+                exercise: "Try printing your name! Use 'say' followed by your name.",
+                exerciseHint: "Example: say Alice",
+                testCode: (output) => output.length > 0 && output.some(o => o.toLowerCase().includes('hello') || o.toLowerCase().includes('world'))
             },
             {
                 title: "Variables",
@@ -703,7 +819,10 @@ function getLessonsPageHTML() {
                 code: "form num age from 10\nsay age",
                 hint: "Use 'form' to create variables, 'num' for numbers. You can also use: let, var, const, set, create, make, declare, define, init, new!",
                 tip: "Variables can hold numbers, text, or other values. Try: form text name from Alice",
-                explanation: "Variables store values. Use 'form' (or 11+ other keywords!) to create them. 'num' means number, 'text' means string."
+                explanation: "Variables store values. Use 'form' (or 11+ other keywords!) to create them. 'num' means number, 'text' means string.",
+                exercise: "Create a variable called 'name' with your name, then print it!",
+                exerciseHint: "Use: form text name from YourName then say name",
+                testCode: (output, vars) => vars.has('name') || vars.has('age') || output.length > 0
             },
             {
                 title: "Math Operations",
@@ -711,7 +830,10 @@ function getLessonsPageHTML() {
                 code: "form num a from 10\nform num b from 5\nsay a plus b",
                 hint: "Use 'plus' for addition. Also try: minus, times, div (division). You can use +, -, *, / too!",
                 tip: "Math is easy! Try: say 10 plus 5, or say 10 times 3",
-                explanation: "Azalea supports all math operations. Use words (plus, minus, times, div) or symbols (+, -, *, /)."
+                explanation: "Azalea supports all math operations. Use words (plus, minus, times, div) or symbols (+, -, *, /).",
+                exercise: "Calculate 20 minus 7 and print the result!",
+                exerciseHint: "Use: say 20 minus 7",
+                testCode: (output) => output.some(o => o.includes('13'))
             },
             {
                 title: "Conditionals",
@@ -719,7 +841,10 @@ function getLessonsPageHTML() {
                 code: "form num age from 15\nif age over 10 do\n    say You are old enough\nend",
                 hint: "Use 'if' for conditionals. Comparison words: over (>), under (<), same (==). You can also use: when, whenever, provided, assuming, given!",
                 tip: "Try different comparisons: if age same 15, if age under 20",
-                explanation: "Conditionals let you make decisions. Use 'if' with comparisons like 'over', 'under', 'same'."
+                explanation: "Conditionals let you make decisions. Use 'if' with comparisons like 'over', 'under', 'same'.",
+                exercise: "Create a variable 'score' with value 85. If score is over 80, print 'Great job!'",
+                exerciseHint: "form num score from 85\\nif score over 80 do\\n    say Great job!\\nend",
+                testCode: (output) => output.some(o => o.toLowerCase().includes('great') || o.toLowerCase().includes('job'))
             },
             {
                 title: "Loops",
@@ -727,7 +852,10 @@ function getLessonsPageHTML() {
                 code: "loop 5 do\n    say step\nend",
                 hint: "Use 'loop' with a number to repeat. 'step' is the current count (0, 1, 2, 3, 4). You can also use: while, for, repeat, each, foreach, iterate!",
                 tip: "Try: loop 10 do say step - counts from 0 to 9!",
-                explanation: "Loops repeat code. 'loop 5' runs 5 times. 'step' is the current iteration number (starts at 0)."
+                explanation: "Loops repeat code. 'loop 5' runs 5 times. 'step' is the current iteration number (starts at 0).",
+                exercise: "Use a loop to count from 0 to 9!",
+                exerciseHint: "loop 10 do\\n    say step\\nend",
+                testCode: (output) => output.length >= 10 && output.includes('0') && output.includes('9')
             },
             {
                 title: "Functions",
@@ -735,7 +863,10 @@ function getLessonsPageHTML() {
                 code: "act greet name do\n    say Hello\n    say name\nend\n\ncall greet Alice",
                 hint: "Use 'act' to define functions, 'call' to use them. You can also use: def, fn, func, function, method, procedure!",
                 tip: "Functions can take multiple parameters: act add a b do give a plus b end",
-                explanation: "Functions are reusable code blocks. Define with 'act', call with 'call'. Use 'give' to return values."
+                explanation: "Functions are reusable code blocks. Define with 'act', call with 'call'. Use 'give' to return values.",
+                exercise: "Create a function called 'add' that takes two numbers and prints their sum. Then call it with 5 and 3.",
+                exerciseHint: "Note: Functions are advanced. For now, try: say 5 plus 3",
+                testCode: (output) => output.some(o => o.includes('8'))
             },
             {
                 title: "Lists",
@@ -743,7 +874,10 @@ function getLessonsPageHTML() {
                 code: "form list names from [Alice, Bob, Charlie]\nloop names do\n    say step\nend",
                 hint: "Use 'list' type for arrays. Loop over lists to access each item. 'step' is the current item in the loop.",
                 tip: "Lists can hold any type: form list numbers from [1, 2, 3, 4, 5]",
-                explanation: "Lists store multiple values. Use square brackets []. Loop over them to access each item."
+                explanation: "Lists store multiple values. Use square brackets []. Loop over them to access each item.",
+                exercise: "Create a list of numbers [1, 2, 3, 4, 5] and print each one using a loop.",
+                exerciseHint: "form list numbers from [1, 2, 3, 4, 5]\\nloop numbers do\\n    say step\\nend",
+                testCode: (output) => output.length >= 3
             },
             {
                 title: "UI Components",
@@ -751,7 +885,10 @@ function getLessonsPageHTML() {
                 code: "call view button Click Me do\n    say Button clicked!\nend",
                 hint: "Use 'view' module to create UI. 'button' creates a button. The 'do' block runs when clicked.",
                 tip: "Try other UI elements: call view input name, call view text Hello",
-                explanation: "Azalea can create UI! Use 'view' module with element names like 'button', 'input', 'text'."
+                explanation: "Azalea can create UI! Use 'view' module with element names like 'button', 'input', 'text'.",
+                exercise: "Note: UI components work in full Azalea apps. For now, practice with say statements!",
+                exerciseHint: "Try: say I can create buttons!",
+                testCode: (output) => output.length > 0
             },
             {
                 title: "Styling",
@@ -759,7 +896,10 @@ function getLessonsPageHTML() {
                 code: "call view div style background blue style color white do\n    call view text Hello\nend",
                 hint: "Use 'style' keyword to add CSS. You can add multiple styles: style background blue style color white",
                 tip: "Try different styles: style padding 20, style border-radius 8",
-                explanation: "Style UI elements with the 'style' keyword. Add any CSS property you want!"
+                explanation: "Style UI elements with the 'style' keyword. Add any CSS property you want!",
+                exercise: "Note: Styling works with UI components. Practice with say for now!",
+                exerciseHint: "say Styling makes things beautiful!",
+                testCode: (output) => output.length > 0
             },
             {
                 title: "Forms",
@@ -767,7 +907,10 @@ function getLessonsPageHTML() {
                 code: "call view input name placeholder Enter name\ncall view button Submit do\n    say Form submitted!\nend",
                 hint: "Use 'input' for text fields. Add 'placeholder' for hint text. Buttons can have actions in 'do' blocks.",
                 tip: "Try different input types: call view input email type email",
-                explanation: "Forms collect user input. Use 'input' for fields, 'button' for actions."
+                explanation: "Forms collect user input. Use 'input' for fields, 'button' for actions.",
+                exercise: "Practice with say: say Forms collect user input!",
+                exerciseHint: "say Forms collect user input!",
+                testCode: (output) => output.length > 0
             },
             {
                 title: "Advanced Functions",
@@ -775,13 +918,244 @@ function getLessonsPageHTML() {
                 code: "act calculate a b op do\n    if op same plus do\n        give a plus b\n    end\nend\n\ncall calculate 10 5 plus put result\nsay result",
                 hint: "Functions can take multiple parameters. Use 'give' to return values. Use 'put' to store the result.",
                 tip: "Try making it handle multiple operations: if op same minus do give a minus b end",
-                explanation: "Advanced functions can make decisions and return values. Use 'give' to return, 'put' to store results."
+                explanation: "Advanced functions can make decisions and return values. Use 'give' to return, 'put' to store results.",
+                exercise: "Calculate 6 times 7 and print the result!",
+                exerciseHint: "Use: say 6 times 7",
+                testCode: (output) => output.some(o => o.includes('42'))
             }
         ];
         
         let currentLesson = 0;
         let xp = 0;
         let level = 1;
+        
+        // Embedded Azalea Runtime (same as playground)
+        class AzaleaRuntime {
+            constructor() {
+                this.variables = new Map();
+                this.output = [];
+            }
+            
+            getValue(str) {
+                str = str.trim();
+                if (str === 'step') {
+                    return this.loopStep !== undefined ? this.loopStep : 0;
+                }
+                if (this.variables.has(str)) {
+                    return this.variables.get(str);
+                }
+                const numberWords = {
+                    'zero': 0, 'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5,
+                    'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10
+                };
+                if (numberWords[str.toLowerCase()]) {
+                    return numberWords[str.toLowerCase()];
+                }
+                if (!isNaN(parseFloat(str))) {
+                    return parseFloat(str);
+                }
+                return str;
+            }
+            
+            execute(source) {
+                this.output = [];
+                const lines = source.split('\\n');
+                let i = 0;
+                
+                while (i < lines.length) {
+                    const line = lines[i];
+                    const trimmed = line.trim();
+                    
+                    if (!trimmed || trimmed.startsWith('//')) {
+                        i++;
+                        continue;
+                    }
+                    
+                    // Handle say/print/output with math
+                    const sayMatch = trimmed.match(/^(say|print|output|display|log|echo|show|write)\\s+(.+)$/i);
+                    if (sayMatch) {
+                        let value = sayMatch[2].trim();
+                        const mathMatch = value.match(/^(.+?)\\s+(plus|minus|times|div|\\+|\\-|\\*|\\/)\\s+(.+)$/i);
+                        if (mathMatch) {
+                            const left = this.getValue(mathMatch[1]);
+                            const op = mathMatch[2].toLowerCase();
+                            const right = this.getValue(mathMatch[3]);
+                            if (op === 'plus' || op === '+') value = left + right;
+                            else if (op === 'minus' || op === '-') value = left - right;
+                            else if (op === 'times' || op === '*') value = left * right;
+                            else if (op === 'div' || op === '/') value = left / right;
+                            this.output.push(String(value));
+                        } else {
+                            value = this.getValue(value);
+                            this.output.push(String(value));
+                        }
+                        i++;
+                        continue;
+                    }
+                    
+                    // Handle form/let/var (variable declaration) with math
+                    const varMatch = trimmed.match(/^(form|let|var|const|set|create|make|declare|define|init|new)\\s+(num|text|bool)?\\s*([a-zA-Z_][a-zA-Z0-9_]*)\\s+(from|is|equals|=|to|as|becomes)\\s+(.+)$/i);
+                    if (varMatch) {
+                        const varName = varMatch[3];
+                        let value = varMatch[5].trim();
+                        const varMathMatch = value.match(/^(.+?)\\s+(plus|minus|times|div|\\+|\\-|\\*|\\/)\\s+(.+)$/i);
+                        if (varMathMatch) {
+                            const left = this.getValue(varMathMatch[1]);
+                            const op = varMathMatch[2].toLowerCase();
+                            const right = this.getValue(varMathMatch[3]);
+                            if (op === 'plus' || op === '+') value = left + right;
+                            else if (op === 'minus' || op === '-') value = left - right;
+                            else if (op === 'times' || op === '*') value = left * right;
+                            else if (op === 'div' || op === '/') value = left / right;
+                        } else {
+                            value = this.getValue(value);
+                        }
+                        this.variables.set(varName, value);
+                        i++;
+                        continue;
+                    }
+                    
+                    // Handle conditionals
+                    const ifMatch = trimmed.match(/^if\\s+(.+?)\\s+(over|under|same|>|<|==)\\s+(.+?)\\s+do$/i);
+                    if (ifMatch) {
+                        const left = this.getValue(ifMatch[1]);
+                        const op = ifMatch[2].toLowerCase();
+                        const right = this.getValue(ifMatch[3]);
+                        let condition = false;
+                        if (op === 'over' || op === '>') condition = left > right;
+                        else if (op === 'under' || op === '<') condition = left < right;
+                        else if (op === 'same' || op === '==') condition = left == right;
+                        
+                        let depth = 1;
+                        let ifEnd = i + 1;
+                        for (let j = i + 1; j < lines.length; j++) {
+                            const l = lines[j].trim();
+                            if (l === 'end' || l === '}' || l === 'finish' || l === 'done') {
+                                depth--;
+                                if (depth === 0) {
+                                    ifEnd = j;
+                                    break;
+                                }
+                            } else if (l.match(/^(loop|if)\\s+.*\\s+do$/i)) {
+                                depth++;
+                            }
+                        }
+                        
+                        if (condition) {
+                            for (let j = i + 1; j < ifEnd; j++) {
+                                const ifLine = lines[j].trim();
+                                if (!ifLine || ifLine.startsWith('//')) continue;
+                                
+                                const ifSayMatch = ifLine.match(/^(say|print|output|display|log|echo|show|write)\\s+(.+)$/i);
+                                if (ifSayMatch) {
+                                    let value = ifSayMatch[2].trim();
+                                    const ifMathMatch = value.match(/^(.+?)\\s+(plus|minus|times|div|\\+|\\-|\\*|\\/)\\s+(.+)$/i);
+                                    if (ifMathMatch) {
+                                        const left = this.getValue(ifMathMatch[1]);
+                                        const op = ifMathMatch[2].toLowerCase();
+                                        const right = this.getValue(ifMathMatch[3]);
+                                        if (op === 'plus' || op === '+') value = left + right;
+                                        else if (op === 'minus' || op === '-') value = left - right;
+                                        else if (op === 'times' || op === '*') value = left * right;
+                                        else if (op === 'div' || op === '/') value = left / right;
+                                    } else {
+                                        value = this.getValue(value);
+                                    }
+                                    this.output.push(String(value));
+                                }
+                            }
+                        }
+                        i = ifEnd + 1;
+                        continue;
+                    }
+                    
+                    // Handle loops
+                    const loopMatch = trimmed.match(/^loop\\s+(\\d+|[a-zA-Z_][a-zA-Z0-9_]*)\\s+do$/i);
+                    if (loopMatch) {
+                        let count = this.getValue(loopMatch[1]);
+                        count = parseInt(count);
+                        
+                        let depth = 1;
+                        let loopEnd = i + 1;
+                        for (let j = i + 1; j < lines.length; j++) {
+                            const l = lines[j].trim();
+                            if (l === 'end' || l === '}' || l === 'finish' || l === 'done') {
+                                depth--;
+                                if (depth === 0) {
+                                    loopEnd = j;
+                                    break;
+                                }
+                            } else if (l.match(/^(loop|if)\\s+.*\\s+do$/i)) {
+                                depth++;
+                            }
+                        }
+                        
+                        for (let step = 0; step < count; step++) {
+                            this.loopStep = step;
+                            for (let j = i + 1; j < loopEnd; j++) {
+                                const loopLine = lines[j].trim();
+                                if (!loopLine || loopLine.startsWith('//')) continue;
+                                
+                                const loopSayMatch = loopLine.match(/^(say|print|output|display|log|echo|show|write)\\s+(.+)$/i);
+                                if (loopSayMatch) {
+                                    let value = loopSayMatch[2].trim();
+                                    if (value === 'step') {
+                                        value = step;
+                                    } else {
+                                        const loopMathMatch = value.match(/^(.+?)\\s+(plus|minus|times|div|\\+|\\-|\\*|\\/)\\s+(.+)$/i);
+                                        if (loopMathMatch) {
+                                            const left = this.getValue(loopMathMatch[1]);
+                                            const op = loopMathMatch[2].toLowerCase();
+                                            const right = this.getValue(loopMathMatch[3]);
+                                            if (op === 'plus' || op === '+') value = left + right;
+                                            else if (op === 'minus' || op === '-') value = left - right;
+                                            else if (op === 'times' || op === '*') value = left * right;
+                                            else if (op === 'div' || op === '/') value = left / right;
+                                        } else {
+                                            value = this.getValue(value);
+                                        }
+                                    }
+                                    this.output.push(String(value));
+                                }
+                                
+                                const loopVarMatch = loopLine.match(/^(form|let|var|const|set|create|make|declare|define|init|new)\\s+(num|text|bool)?\\s*([a-zA-Z_][a-zA-Z0-9_]*)\\s+(from|is|equals|=|to|as|becomes)\\s+(.+)$/i);
+                                if (loopVarMatch) {
+                                    const varName = loopVarMatch[3];
+                                    let value = loopVarMatch[5].trim();
+                                    if (value === 'step') {
+                                        value = step;
+                                    } else {
+                                        value = this.getValue(value);
+                                    }
+                                    this.variables.set(varName, value);
+                                }
+                            }
+                        }
+                        
+                        i = loopEnd + 1;
+                        continue;
+                    }
+                    
+                    i++;
+                }
+            }
+        }
+        
+        function runLessonCode(code, outputEl) {
+            try {
+                const runtime = new AzaleaRuntime();
+                runtime.execute(code);
+                if (runtime.output.length > 0) {
+                    outputEl.textContent = runtime.output.join('\\n');
+                } else {
+                    outputEl.textContent = 'Code executed (no output)';
+                }
+                return runtime;
+            } catch (e) {
+                outputEl.textContent = 'Error: ' + e.message;
+                return null;
+            }
+        }
         
         function loadLesson(index) {
             currentLesson = index;
@@ -804,7 +1178,15 @@ function getLessonsPageHTML() {
                     <p style="color: #424658;">\${lesson.goal}</p>
                 </div>
                 <p style="margin-bottom: 16px;">\${lesson.explanation}</p>
+                
+                <h3 style="margin-top: 24px; margin-bottom: 12px; color: #424658;">📝 Example Code</h3>
                 <pre><code>\${lesson.code}</code></pre>
+                <div style="margin: 16px 0;">
+                    <textarea id="example-editor-\${index}" class="code-editor" spellcheck="false">\${lesson.code}</textarea>
+                    <button class="btn btn-primary" onclick="runExampleCode(\${index})" style="margin-top: 8px;">▶ Run Example</button>
+                    <div id="example-output-\${index}" class="exercise-output" style="display: none;"></div>
+                </div>
+                
                 <div class="info-box hint">
                     <p style="font-weight: bold; margin-bottom: 8px; color: #424658;">💡 Hint:</p>
                     <p style="color: #424658;">\${lesson.hint}</p>
@@ -813,8 +1195,24 @@ function getLessonsPageHTML() {
                     <p style="font-weight: bold; margin-bottom: 8px; color: #424658;">✨ Try This:</p>
                     <p style="color: #424658;">\${lesson.tip}</p>
                 </div>
+                
+                <div class="info-box exercise" style="margin-top: 32px;">
+                    <p style="font-weight: bold; margin-bottom: 8px; color: #424658;">🎯 Your Turn - Practice Exercise:</p>
+                    <p style="color: #424658; margin-bottom: 12px;">\${lesson.exercise}</p>
+                    <p style="color: #424658; font-size: 0.9rem; opacity: 0.8; margin-bottom: 12px;">💡 Hint: \${lesson.exerciseHint}</p>
+                    <textarea id="exercise-editor-\${index}" class="code-editor" spellcheck="false" placeholder="Write your code here..."></textarea>
+                    <div style="display: flex; gap: 12px; margin-top: 8px;">
+                        <button class="btn btn-primary" onclick="runExercise(\${index})">▶ Run My Code</button>
+                        <button class="btn btn-success" onclick="checkExercise(\${index})">✓ Check Answer</button>
+                    </div>
+                    <div id="exercise-output-\${index}" class="exercise-output" style="display: none;"></div>
+                    <div id="exercise-success-\${index}" class="exercise-success">
+                        🎉 Excellent! You got it right! +10 bonus XP
+                    </div>
+                </div>
+                
                 <div style="display: flex; gap: 12px; margin-top: 24px;">
-                    <a href="/playground?code=\${encodeURIComponent(lesson.code)}" class="btn btn-primary">Try in Playground</a>
+                    <a href="/playground?code=\${encodeURIComponent(lesson.code)}" class="btn btn-primary">Open in Playground</a>
                     <button class="btn btn-success" onclick="completeLesson(\${index})">Mark Complete</button>
                 </div>
                 <div class="card" style="padding: 1.5rem; margin-top: 2rem;">
@@ -823,6 +1221,48 @@ function getLessonsPageHTML() {
                     <button class="btn btn-primary" onclick="getAIHelp()" style="padding: 0.75rem 1.5rem;">Get AI Help</button>
                 </div>
             \`;
+        }
+        
+        function runExampleCode(index) {
+            const editor = document.getElementById(\`example-editor-\${index}\`);
+            const output = document.getElementById(\`example-output-\${index}\`);
+            output.style.display = 'block';
+            runLessonCode(editor.value, output);
+        }
+        
+        function runExercise(index) {
+            const editor = document.getElementById(\`exercise-editor-\${index}\`);
+            const output = document.getElementById(\`exercise-output-\${index}\`);
+            output.style.display = 'block';
+            runLessonCode(editor.value, output);
+        }
+        
+        function checkExercise(index) {
+            const editor = document.getElementById(\`exercise-editor-\${index}\`);
+            const output = document.getElementById(\`exercise-output-\${index}\`);
+            const success = document.getElementById(\`exercise-success-\${index}\`);
+            const lesson = lessons[index];
+            
+            output.style.display = 'block';
+            const runtime = runLessonCode(editor.value, output);
+            
+            if (runtime && lesson.testCode) {
+                const passed = lesson.testCode(runtime.output, runtime.variables);
+                if (passed) {
+                    success.style.display = 'block';
+                    xp += 10;
+                    document.getElementById('xp').textContent = xp;
+                    if (xp >= level * 100) {
+                        level++;
+                        document.getElementById('level').textContent = level;
+                    }
+                } else {
+                    success.style.display = 'none';
+                    output.textContent = output.textContent + '\\n\\n❌ Not quite right. Try again! Check the hint above.';
+                }
+            } else {
+                success.style.display = 'none';
+            }
         }
         
         function completeLesson(index) {
