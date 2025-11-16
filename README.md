@@ -1,39 +1,168 @@
 # Azalea Language
 
-🌺 **Azalea** - An elegant, minimal, powerful interpreted programming language.
+🌺 **Azalea** - The most efficient programming language on the planet.
 
 ## Philosophy
 
+- **Dual Mode**: Compiled (C++) + Interpreted (TypeScript) = Maximum Efficiency
+- **Super Flexible Grammar**: Write code your way - many syntaxes for everything
 - **Short, logical, Latin-like** with light English roots
 - **Minimal symbols**: only `. , / ? ; !`
-- **Not sentence-based, not verbose**
 - **Extremely easy for beginners** - Kids can learn it!
 - **Extremely powerful for experts** - Build complex systems
-- **Fully interpreted, no compile step**
-- **Hyper efficient** - Combines the best of major languages
-- **Perfect for UI** - Beautiful, clean syntax
-- **Great for backends** - Simple to complex APIs
+- **Most efficient language** - Do anything, change anything, optimize anything
+
+## Dual Mode Architecture
+
+### C++ Compiler (High Performance)
+- Compiles Azalea to optimized C++
+- Maximum performance for production
+- Native speed execution
+- Low-level control
+
+### TypeScript Interpreter (Rapid Development)
+- Interprets Azalea code directly
+- Fast iteration during development
+- Easy debugging and testing
+- Browser-compatible execution
+
+## Super Flexible Grammar
+
+Azalea has the **loosest grammar** of any language. Write code your way!
+
+### Variables (12+ ways!)
+```azalea
+form num x from 10
+let num x = 10
+var num x is 10
+const num x equals 10
+set num x to 10
+create num x from 10
+make num x = 10
+declare num x as 10
+define num x = 10
+init num x = 10
+new num x = 10
+```
+
+### Functions (8+ ways!)
+```azalea
+act add a b do
+    give a plus b
+end
+
+def add a b {
+    return a + b
+}
+
+fn add a b then
+    return a + b
+end
+
+function add a b {
+    return a + b
+}
+
+method add a b do
+    give a plus b
+end
+
+procedure add a b {
+    return a + b
+}
+```
+
+### Conditionals (6+ ways!)
+```azalea
+if x > 10 do
+    say Big
+end
+
+when x > 10 then
+    say Big
+end
+
+whenever x > 10 do
+    say Big
+end
+
+provided x > 10 {
+    say Big
+}
+
+assuming x > 10 do
+    say Big
+end
+
+given x > 10 {
+    say Big
+}
+```
+
+### Loops (7+ ways!)
+```azalea
+loop 10 do
+    say step
+end
+
+while x < 10 {
+    say x
+}
+
+for 10 do
+    say step
+end
+
+repeat 5 do
+    say step
+end
+
+each items do
+    say step
+end
+
+foreach items {
+    say step
+}
+
+iterate items do
+    say step
+end
+```
+
+### Output (8+ ways!)
+```azalea
+say Hello
+print World
+output Test
+display Result
+log Debug
+echo Message
+show Data
+write Text
+```
 
 ## Quick Start
 
 ### Installation
 
 ```bash
-# Build native interpreter
+# Build C++ compiler
 make native
+
+# Build TypeScript interpreter
+npm install
+npm run build:ts
 
 # Build WASM for browser
 make wasm
-
-# Run examples
-make examples
 ```
 
 ### Hello World
 
 ```azalea
 say Hello World
-form num a from 10
+form num a from ten
 say a
 ```
 
@@ -72,14 +201,14 @@ end
 
 ### Core Words
 
-- `form` - declare variable
-- `act` - define function
+- `form`/`let`/`var`/`const`/`set`/`create`/`make`/`declare`/`define`/`init`/`new` - declare variable
+- `act`/`def`/`fn`/`func`/`function`/`method`/`procedure` - define function
 - `call` - invoke function
-- `give` - return value
-- `say` - print output
-- `if` - conditional
-- `loop` - iteration
-- `put` - assign value
+- `give`/`return`/`yield`/`send` - return value
+- `say`/`print`/`output`/`display`/`log`/`echo`/`show`/`write` - print output
+- `if`/`when`/`whenever`/`provided`/`assuming`/`given` - conditional
+- `loop`/`while`/`for`/`repeat`/`each`/`foreach`/`iterate` - iteration
+- `put`/`assign`/`update` - assign value
 
 ### Types
 
@@ -88,6 +217,7 @@ end
 - `bool` - boolean
 - `list` - array
 - `map` - object
+- `void` - no type
 
 ### Modules
 
@@ -120,6 +250,7 @@ See the `examples/` directory for:
 - `functions.az` - Function definitions
 - `conditionals.az` - If statements
 - `loops.az` - Loop constructs
+- `flexible_syntax.az` - All the flexible syntax variations
 
 ### Advanced
 - `vm_example.az` - VM creation
@@ -142,70 +273,60 @@ The web interpreter is available in `web/index.html`. To use it:
 
 ## Deployment
 
-### GitHub Pages
-
-1. Build WASM: `make wasm`
-2. Copy `bin/azalea.js` and `bin/azalea.wasm` to `web/`
-3. Push to GitHub
-4. Enable GitHub Pages for the `web/` directory
-
 ### Vercel
 
-1. Create `vercel.json`:
-```json
-{
-  "builds": [
-    {
-      "src": "web/**",
-      "use": "@vercel/static"
-    }
-  ]
-}
+The website is configured for Vercel deployment:
+- `api/index.js` - Serverless function
+- `vercel.json` - Routing configuration
+- All `.az` files are routed through the function to prevent downloads
+
+Deploy:
+```bash
+vercel --prod
 ```
-
-2. Deploy: `vercel --prod`
-
-## Architecture
-
-- **Lexer**: Tokenizes source code
-- **Parser**: Builds AST from tokens
-- **Runtime**: Executes AST with scoped variables
-- **Modules**: Extensible module system for net, file, vm, serve, view, play
 
 ## Building
 
 ### Requirements
 
 - C++17 compiler (g++ or clang++)
+- Node.js 20.x
+- TypeScript 5.x
 - Emscripten (for WASM builds)
 - Make
 
 ### Build Commands
 
 ```bash
-# Native build
+# Native C++ build
 make native
+
+# TypeScript build
+npm run build:ts
 
 # WASM build
 make wasm
 
-# Both
-make all
-
-# Clean
-make clean
+# All builds
+npm run build:all
 ```
 
 ## Key Features
 
-### 🎨 **Flexible Syntax - Code Your Way!**
+### 🎨 **Super Flexible Syntax - Write Your Way!**
 Write code in **any style** you prefer - all work perfectly:
-- Variables: `form`, `let`, `var`, `const`, `set`
-- Functions: `act`, `def`, `fn`, `func`, `function`
-- Conditionals: `if`, `when`
-- Loops: `loop`, `while`, `for`, `repeat`, `each`
+- Variables: `form`, `let`, `var`, `const`, `set`, `create`, `make`, `declare`, `define`, `init`, `new`
+- Functions: `act`, `def`, `fn`, `func`, `function`, `method`, `procedure`
+- Conditionals: `if`, `when`, `whenever`, `provided`, `assuming`, `given`
+- Loops: `loop`, `while`, `for`, `repeat`, `each`, `foreach`, `iterate`
 - Operators: `plus`/`+`, `minus`/`-`, `times`/`*`, `div`/`/`
-- Output: `say`, `print`, `output`, `display`
+- Output: `say`, `print`, `output`, `display`, `log`, `echo`, `show`, `write`
+
+### ⚡ **Dual Mode - Maximum Efficiency**
+- **Compile to C++** for maximum performance
+- **Interpret with TypeScript** for rapid development
+- **Choose your mode** based on needs
+- **Most efficient language** on the planet
 
 ### 💅 **Full CSS Support - Stunning UIs!**
 Complete CSS capabilities with shortcuts:
@@ -215,12 +336,6 @@ Complete CSS capabilities with shortcuts:
 - Flexbox, Grid, positioning
 - Hover effects and responsive design
 
-### 🌐 **Perfect for UI Development**
-- HTML-like components: `h1`, `p`, `button`, `div`, `section`
-- Semantic HTML: `header`, `footer`, `nav`, `main`
-- Modern layouts: `card`, `grid`, `row`, `col`
-- Beautiful by default, fully customizable
-
 ## Documentation
 
 - **[Language Specification](docs/language_spec.md)** - Complete syntax reference
@@ -228,11 +343,20 @@ Complete CSS capabilities with shortcuts:
 - **[For Kids](docs/FOR_KIDS.md)** - Super simple guide for beginners
 - **[UI Guide](docs/UI_GUIDE.md)** - Build beautiful interfaces
 - **[CSS Guide](docs/CSS_GUIDE.md)** - Full CSS styling reference
-- **[Flexible Syntax](docs/FLEXIBLE_SYNTAX.md)** - Code your way guide
+- **[Flexible Syntax](docs/FLEXIBLE_SYNTAX.md)** - All syntax variations
+- **[Dual Mode](docs/DUAL_MODE.md)** - C++ + TypeScript architecture
+- **[Command Reference](docs/AZALEA_COMMANDS.md)** - All commands
 - **[Backend Guide](docs/BACKEND_GUIDE.md)** - Create powerful APIs
-- **[Architecture](docs/ARCHITECTURE.md)** - How Azalea works
+- **[Architecture](ARCHITECTURE.md)** - How Azalea works
+
+## Why Azalea is the Most Efficient Language
+
+1. **Dual Mode**: Compile for performance, interpret for speed
+2. **Super Flexible Grammar**: Write code your way
+3. **Universal**: Works everywhere - browser, server, native, embedded
+4. **Optimizable**: Change syntax, change mode, optimize anything
+5. **Complete**: Do anything - UI, backend, system programming, everything
 
 ## License
 
 MIT
-

@@ -299,9 +299,11 @@ std::shared_ptr<ASTNode> Parser::parseForm() {
     Token tok = current();
     std::string keyword = tok.value;
     
-    // Flexible: accept "form", "let", "var", "const", "set"
+    // SUPER FLEXIBLE: accept many variations
     if (keyword == "form" || keyword == "let" || keyword == "var" || 
-        keyword == "const" || keyword == "set" || keyword == "create") {
+        keyword == "const" || keyword == "set" || keyword == "create" ||
+        keyword == "make" || keyword == "declare" || keyword == "define" ||
+        keyword == "init" || keyword == "new") {
         advance();
     } else {
         return nullptr;
@@ -326,8 +328,9 @@ std::shared_ptr<ASTNode> Parser::parseForm() {
         advance();
     }
     
-    // Flexible assignment: "from", "is", "equals", "=", or just value
-    if (match("from") || match("is") || match("equals") || 
+    // SUPER FLEXIBLE assignment: many variations
+    if (match("from") || match("is") || match("equals") || match("to") ||
+        match("as") || match("becomes") ||
         (current().type == TokenType::SYMBOL && current().value == "=")) {
         if (current().type == TokenType::SYMBOL && current().value == "=") {
             advance(); // consume "="
@@ -346,9 +349,10 @@ std::shared_ptr<ASTNode> Parser::parseAct() {
     Token tok = current();
     std::string keyword = tok.value;
     
-    // Flexible: accept "act", "def", "fn", "func", "function"
+    // SUPER FLEXIBLE: accept many variations
     if (keyword == "act" || keyword == "def" || keyword == "fn" || 
-        keyword == "func" || keyword == "function") {
+        keyword == "func" || keyword == "function" || keyword == "method" ||
+        keyword == "procedure") {
         advance();
     } else {
         return nullptr;
@@ -371,7 +375,7 @@ std::shared_ptr<ASTNode> Parser::parseAct() {
     }
     
     while (pos < tokens.size() && current().type != TokenType::EOF_TOKEN) {
-        if (match("do") || match("then") || match("when")) {
+        if (match("do") || match("then") || match("when") || match("begin")) {
             break;
         }
         
@@ -394,8 +398,8 @@ std::shared_ptr<ASTNode> Parser::parseAct() {
         }
     }
     
-    // Flexible block start: "do", "then", "{", or just start
-    if (match("do") || match("then") || match("when")) {
+    // SUPER FLEXIBLE block start: many variations
+    if (match("do") || match("then") || match("when") || match("begin")) {
         node->children.push_back(parseBlock());
     } else if (current().type == TokenType::SYMBOL && current().value == "{") {
         advance(); // consume "{"
@@ -459,7 +463,9 @@ std::shared_ptr<ASTNode> Parser::parseIf() {
     std::string keyword = tok.value;
     
     // Flexible: accept "if", "when"
-    if (keyword == "if" || keyword == "when") {
+    // SUPER FLEXIBLE: accept many conditional variations
+    if (keyword == "if" || keyword == "when" || keyword == "whenever" ||
+        keyword == "provided" || keyword == "assuming" || keyword == "given") {
         advance();
     } else {
         return nullptr;
@@ -469,7 +475,7 @@ std::shared_ptr<ASTNode> Parser::parseIf() {
     node->children.push_back(parseExpression());
     
     // Flexible block start: "do", "then", "{"
-    if (match("do") || match("then")) {
+    if (match("do") || match("then") || match("begin")) {
         node->children.push_back(parseBlock());
     } else if (current().type == TokenType::SYMBOL && current().value == "{") {
         advance(); // consume "{"
@@ -505,8 +511,10 @@ std::shared_ptr<ASTNode> Parser::parseLoop() {
     std::string keyword = tok.value;
     
     // Flexible: accept "loop", "while", "for", "repeat", "each"
+    // SUPER FLEXIBLE: accept many loop variations
     if (keyword == "loop" || keyword == "while" || keyword == "for" || 
-        keyword == "repeat" || keyword == "each") {
+        keyword == "repeat" || keyword == "each" || keyword == "foreach" ||
+        keyword == "iterate") {
         advance();
     } else {
         return nullptr;
@@ -516,7 +524,7 @@ std::shared_ptr<ASTNode> Parser::parseLoop() {
     node->children.push_back(parseExpression());
     
     // Flexible block start
-    if (match("do") || match("then")) {
+    if (match("do") || match("then") || match("begin")) {
         node->children.push_back(parseBlock());
     } else if (current().type == TokenType::SYMBOL && current().value == "{") {
         advance();
@@ -552,8 +560,10 @@ std::shared_ptr<ASTNode> Parser::parseSay() {
     std::string keyword = tok.value;
     
     // Flexible: accept "say", "print", "output", "display"
+    // SUPER FLEXIBLE: accept many output variations
     if (keyword == "say" || keyword == "print" || keyword == "output" || 
-        keyword == "display" || keyword == "log") {
+        keyword == "display" || keyword == "log" || keyword == "echo" ||
+        keyword == "show" || keyword == "write") {
         advance();
     } else {
         return nullptr;
@@ -592,22 +602,26 @@ std::shared_ptr<ASTNode> Parser::parseBlock() {
     auto node = std::make_shared<ASTNode>(NodeType::BLOCK, current());
     
     while (pos < tokens.size() && current().type != TokenType::EOF_TOKEN) {
-        if (match("end")) {
+        // SUPER FLEXIBLE: accept many end block variations
+        if (match("end") || match("finish") || match("done") ||
+            (current().type == TokenType::SYMBOL && current().value == "}")) {
             break;
         }
         
         if (current().type == TokenType::KEYWORD) {
             std::string kw = current().value;
             
-            // Flexible variable declaration
+            // SUPER FLEXIBLE variable declaration
             if (kw == "form" || kw == "let" || kw == "var" || kw == "const" || 
-                kw == "set" || kw == "create") {
+                kw == "set" || kw == "create" || kw == "make" || kw == "declare" ||
+                kw == "define" || kw == "init" || kw == "new") {
                 auto formNode = parseForm();
                 if (formNode) node->children.push_back(formNode);
             }
-            // Flexible function definition
+            // SUPER FLEXIBLE function definition
             else if (kw == "act" || kw == "def" || kw == "fn" || 
-                     kw == "func" || kw == "function") {
+                     kw == "func" || kw == "function" || kw == "method" ||
+                     kw == "procedure") {
                 auto actNode = parseAct();
                 if (actNode) node->children.push_back(actNode);
             }
@@ -615,30 +629,33 @@ std::shared_ptr<ASTNode> Parser::parseBlock() {
             else if (kw == "call") {
                 node->children.push_back(parseCall());
             }
-            // Flexible conditionals
-            else if (kw == "if" || kw == "when") {
+            // SUPER FLEXIBLE conditionals
+            else if (kw == "if" || kw == "when" || kw == "whenever" ||
+                     kw == "provided" || kw == "assuming" || kw == "given") {
                 auto ifNode = parseIf();
                 if (ifNode) node->children.push_back(ifNode);
             }
-            // Flexible loops
+            // SUPER FLEXIBLE loops
             else if (kw == "loop" || kw == "while" || kw == "for" || 
-                     kw == "repeat" || kw == "each") {
+                     kw == "repeat" || kw == "each" || kw == "foreach" ||
+                     kw == "iterate") {
                 auto loopNode = parseLoop();
                 if (loopNode) node->children.push_back(loopNode);
             }
             // Return
-            else if (kw == "give" || kw == "return") {
+            else if (kw == "give" || kw == "return" || kw == "yield" || kw == "send") {
                 auto giveNode = parseGive();
                 if (giveNode) node->children.push_back(giveNode);
             }
-            // Flexible output
+            // SUPER FLEXIBLE output
             else if (kw == "say" || kw == "print" || kw == "output" || 
-                     kw == "display" || kw == "log") {
+                     kw == "display" || kw == "log" || kw == "echo" ||
+                     kw == "show" || kw == "write") {
                 auto sayNode = parseSay();
                 if (sayNode) node->children.push_back(sayNode);
             }
             // Assignment
-            else if (kw == "put") {
+            else if (kw == "put" || kw == "assign" || kw == "update") {
                 node->children.push_back(parsePut());
             }
             else {
@@ -730,32 +747,37 @@ std::shared_ptr<ASTNode> Parser::parse() {
         if (current().type == TokenType::KEYWORD) {
             std::string kw = current().value;
             
-            // Flexible parsing - try all variations
+            // SUPER FLEXIBLE parsing - try all variations
             if (kw == "form" || kw == "let" || kw == "var" || kw == "const" || 
-                kw == "set" || kw == "create") {
+                kw == "set" || kw == "create" || kw == "make" || kw == "declare" ||
+                kw == "define" || kw == "init" || kw == "new") {
                 auto formNode = parseForm();
                 if (formNode) program->children.push_back(formNode);
             } else if (kw == "act" || kw == "def" || kw == "fn" || 
-                       kw == "func" || kw == "function") {
+                       kw == "func" || kw == "function" || kw == "method" ||
+                       kw == "procedure") {
                 auto actNode = parseAct();
                 if (actNode) program->children.push_back(actNode);
             } else if (kw == "call") {
                 program->children.push_back(parseCall());
-            } else if (kw == "if" || kw == "when") {
+            } else if (kw == "if" || kw == "when" || kw == "whenever" ||
+                       kw == "provided" || kw == "assuming" || kw == "given") {
                 auto ifNode = parseIf();
                 if (ifNode) program->children.push_back(ifNode);
             } else if (kw == "loop" || kw == "while" || kw == "for" || 
-                       kw == "repeat" || kw == "each") {
+                       kw == "repeat" || kw == "each" || kw == "foreach" ||
+                       kw == "iterate") {
                 auto loopNode = parseLoop();
                 if (loopNode) program->children.push_back(loopNode);
-            } else if (kw == "give" || kw == "return") {
+            } else if (kw == "give" || kw == "return" || kw == "yield" || kw == "send") {
                 auto giveNode = parseGive();
                 if (giveNode) program->children.push_back(giveNode);
             } else if (kw == "say" || kw == "print" || kw == "output" || 
-                       kw == "display" || kw == "log") {
+                       kw == "display" || kw == "log" || kw == "echo" ||
+                       kw == "show" || kw == "write") {
                 auto sayNode = parseSay();
                 if (sayNode) program->children.push_back(sayNode);
-            } else if (kw == "put") {
+            } else if (kw == "put" || kw == "assign" || kw == "update") {
                 program->children.push_back(parsePut());
             } else {
                 advance();
