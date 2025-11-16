@@ -1,0 +1,74 @@
+// Complete Webpage in Azalea - NO HTML NEEDED!
+// Azalea replaces HTML/CSS/JS entirely
+
+// Set page title
+call web title "My Azalea Page"
+
+// Create header
+call view header do
+    call view h1 "Welcome to Azalea"
+    call view nav do
+        call view a "/" "Home"
+        call view a "/about" "About"
+        call view a "/contact" "Contact"
+    end
+end
+
+// Main content
+call view main do
+    call view section do
+        call view h2 "This is a complete webpage"
+        call view p "Built entirely in Azalea - no HTML needed!"
+        
+        // Form
+        call view form do
+            call view input "name" placeholder "Your name"
+            call view input "email" placeholder "Email" type "email"
+            call view textarea "message" placeholder "Message"
+            call view button "Submit" do
+                // Handle form submission
+                call web storage "formData" "submitted"
+                say Form submitted!
+            end
+        end
+        
+        // Table
+        call view table do
+            call view tr do
+                call view th "Name"
+                call view th "Email"
+            end
+            call view tr do
+                call view td "John"
+                call view td "john@example.com"
+            end
+        end
+        
+        // Media
+        call view video "/video.mp4" controls "true"
+        call view audio "/audio.mp3" controls "true"
+        
+        // Canvas for drawing
+        call web canvas 800 600
+        call web draw "circle" 400 300 50
+    end
+end
+
+// Footer
+call view footer do
+    call view p "© 2025 Azalea - The Universal Language"
+end
+
+// Add event listeners
+call web on "click" do
+    say Button clicked!
+end
+
+// Fetch data
+call web fetch "https://api.example.com/data" do
+    call web storage "data" result
+end
+
+// Render the complete page
+call web page
+

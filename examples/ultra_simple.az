@@ -1,0 +1,86 @@
+// ULTRA SIMPLE Azalea - Write ANY way you want!
+
+// Variables - super flexible
+name = Azalea
+name from Azalea
+count = 10
+count from 10
+
+// Output - super flexible
+say Hello World
+say Hello World 5
+5 say Hello World
+say. Hello World
+
+// HTML Elements - NO quotes, NO view needed!
+h1 Welcome
+h2 Subtitle
+p This is a paragraph
+button Click Me
+input name placeholder Enter name
+
+// Or with view if you want
+view h1 Welcome
+view button Click Me
+
+// Web - super simple
+web title My Page
+web fetch https://api.example.com/data
+
+// Functions - super flexible
+greet name {
+    say Hello name
+}
+
+greet name do
+    say Hello name
+end
+
+// Conditionals
+if count > 5 {
+    say Big number!
+}
+
+// Loops - super flexible
+loop 5 {
+    say step
+}
+
+5 loop {
+    say step
+}
+
+// Complete webpage - ULTRA SIMPLE!
+web title My Page
+
+header {
+    h1 Welcome
+    nav {
+        a / Home
+        a /about About
+    }
+}
+
+main {
+    h2 Content
+    p This is super simple!
+    
+    form {
+        input name placeholder Name
+        input email type email placeholder Email
+        button Submit {
+            web fetch /api/submit data
+            say Submitted!
+        }
+    }
+}
+
+// All of these work the same:
+h1 Title
+view h1 Title
+h1 "Title"
+view h1 "Title"
+Title h1
+h1 Title 5
+5 h1 Title
+

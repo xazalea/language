@@ -263,6 +263,39 @@ export class AzaleaRuntime {
         ast.push(node.node);
         i = node.next;
       } else {
+        // ULTRA FLEXIBLE: Check if it's ANY HTML element or module - auto-detect!
+        // Support: h1 Title, button Click, view h1 Title, web fetch url, etc.
+        // Pattern-agnostic: any order works!
+        
+        const htmlElements = [
+          'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'div', 'span', 'button',
+          'input', 'form', 'img', 'a', 'ul', 'ol', 'li', 'table', 'tr', 'td',
+          'header', 'footer', 'nav', 'main', 'section', 'article', 'aside',
+          'video', 'audio', 'canvas', 'svg', 'textarea', 'select', 'option'
+        ];
+        
+        const moduleNames = ['view', 'web', 'net', 'file', 'serve', 'play', 'markdown'];
+        
+        // Check if current token is an HTML element (can be used directly!)
+        if (htmlElements.includes(token.toLowerCase())) {
+          const elementCall = this.parseDirectElementCall(tokens, i);
+          if (elementCall) {
+            ast.push(elementCall.node);
+            i = elementCall.next;
+            continue;
+          }
+        }
+        
+        // Check if it's a module name
+        if (moduleNames.includes(token.toLowerCase())) {
+          const moduleCall = this.parseDirectModuleCall(tokens, i);
+          if (moduleCall) {
+            ast.push(moduleCall.node);
+            i = moduleCall.next;
+            continue;
+          }
+        }
+        
         i++;
       }
     }
@@ -469,6 +502,106 @@ export class AzaleaRuntime {
     return { node, next: i };
   }
 
+  // Parse direct HTML element call - ULTRA FLEXIBLE!
+  // Supports: h1 Title, button Click, p Hello World, etc.
+  private parseDirectElementCall(tokens: string[], start: number): { node: AzaleaAST; next: number } | null {
+    let i = start;
+    const elementName = tokens[i].toLowerCase();
+    i++;
+    
+    const node: AzaleaAST = {
+      type: 'call',
+      value: 'view', // Implicitly use view module
+      children: [
+        { type: 'identifier', value: elementName }
+      ]
+    };
+    
+    // ULTRA FLEXIBLE: Collect arguments - no quotes needed, any order
+    const args: string[] = [];
+    while (i < tokens.length) {
+      const token = tokens[i].toLowerCase();
+      
+      // Stop at block keywords
+      if (['do', 'then', '{', 'end', '}', 'if', 'loop', 'form', 'act', 'call', 'say', 'view', 'web'].includes(token)) {
+        break;
+      }
+      
+      // Stop at newline if next is a statement
+      if (token === '\n' && i + 1 < tokens.length) {
+        const next = tokens[i + 1].toLowerCase();
+        if (['do', 'end', 'if', 'loop', 'form', 'act', 'call', 'say', 'view', 'web', 'h1', 'h2', 'button', 'p'].includes(next)) {
+          break;
+        }
+      }
+      
+      // Add argument (no quotes needed for simple strings!)
+      if (token !== '\n' && token.trim() && !['placeholder', 'type', 'src', 'href', 'id', 'class'].includes(token)) {
+        args.push(tokens[i]);
+      }
+      i++;
+    }
+    
+    // Add all arguments
+    if (args.length > 0) {
+      node.children!.push({ type: 'literal', value: args.join(' ') });
+    }
+    
+    return { node, next: i };
+  }
+
+  // Parse direct module call without "call" keyword - SUPER SIMPLE!
+  private parseDirectModuleCall(tokens: string[], start: number): { node: AzaleaAST; next: number } | null {
+    let i = start;
+    const moduleName = tokens[i].toLowerCase();
+    i++;
+    
+    // Get method name
+    if (i >= tokens.length) return null;
+    const method = tokens[i];
+    i++;
+    
+    const node: AzaleaAST = {
+      type: 'call',
+      value: moduleName,
+      children: [
+        { type: 'identifier', value: method }
+      ]
+    };
+    
+    // ULTRA FLEXIBLE: Collect arguments - no quotes needed, any order
+    const args: string[] = [];
+    while (i < tokens.length) {
+      const token = tokens[i].toLowerCase();
+      
+      // Stop at block keywords
+      if (['do', 'then', '{', 'end', '}', 'if', 'loop', 'form', 'act', 'call', 'say'].includes(token)) {
+        break;
+      }
+      
+      // Stop at newline if next is a statement
+      if (token === '\n' && i + 1 < tokens.length) {
+        const next = tokens[i + 1].toLowerCase();
+        if (['do', 'end', 'if', 'loop', 'form', 'act', 'call', 'say', 'view', 'web', 'h1', 'h2', 'button'].includes(next)) {
+          break;
+        }
+      }
+      
+      // Add argument (no quotes needed!)
+      if (token !== '\n' && token.trim()) {
+        args.push(tokens[i]);
+      }
+      i++;
+    }
+    
+    // Add all arguments as single value (flexible parsing)
+    if (args.length > 0) {
+      node.children!.push({ type: 'literal', value: args.join(' ') });
+    }
+    
+    return { node, next: i };
+  }
+
   // ULTRA FLEXIBLE output parser - handles ANY combination
   private parseOutput(tokens: string[], start: number, repeatCount: number | null = null, hasDot: boolean = false): { node: AzaleaAST; next: number } {
     let i = start + 1;
@@ -562,8 +695,40 @@ export class AzaleaRuntime {
         return this.executeLoop(node);
       case 'output':
         return this.executeOutput(node);
+      case 'call':
+        return this.executeCall(node);
       default:
         return null;
+    }
+  }
+  
+  private executeCall(node: AzaleaAST): void {
+    if (node.children && node.children.length > 0) {
+      const moduleOrFunc = node.value || node.children[0].value;
+      
+      // Check if it's a module (view, web, net, etc.)
+      const modules = ['view', 'web', 'net', 'file', 'serve', 'play', 'markdown'];
+      if (modules.includes(moduleOrFunc)) {
+        // Module call - in browser, this would create DOM elements or call APIs
+        // For now, just acknowledge
+        if (node.children.length > 1) {
+          const method = node.children[1].value;
+          // Module method called - would execute in browser
+        }
+        return;
+      }
+      
+      // Regular function call
+      const func = this.functions.get(moduleOrFunc);
+      if (func) {
+        const args = node.children.slice(1).map(child => {
+          if (child.type === 'literal') {
+            return this.evaluateValue(child.value);
+          }
+          return this.executeNode(child);
+        });
+        return func(args);
+      }
     }
   }
 

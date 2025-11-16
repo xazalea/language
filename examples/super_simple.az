@@ -1,0 +1,75 @@
+// SUPER SIMPLE Azalea - No "call" needed!
+
+// Variables - super simple
+name = "Azalea"
+count = 10
+items = [1, 2, 3]
+
+// Or use "from" if you prefer
+name from "Azalea"
+
+// Functions - super simple
+greet name {
+    say "Hello" name
+}
+
+// Or with "do" if you prefer
+greet name do
+    say "Hello" name
+end
+
+// Module calls - NO "call" needed!
+view h1 "Welcome"
+view p "This is super simple!"
+view button "Click Me" {
+    say "Clicked!"
+}
+
+// Web module - also no "call"
+web title "My Page"
+web fetch "https://api.example.com/data"
+
+// Output - super simple
+say "Hello World"
+say name
+say count
+
+// Conditionals - super simple
+if count > 5 {
+    say "Big number!"
+}
+
+// Loops - super simple
+loop 5 {
+    say step
+}
+
+// Or
+each items {
+    say step
+}
+
+// Complete webpage - SUPER SIMPLE!
+web title "My Page"
+
+view header {
+    view h1 "Welcome"
+    view nav {
+        view a "/" "Home"
+        view a "/about" "About"
+    }
+}
+
+view main {
+    view h2 "Content"
+    view p "This is super simple!"
+    
+    view form {
+        view input "name" placeholder "Name"
+        view button "Submit" {
+            web fetch "/api/submit" data
+            say "Submitted!"
+        }
+    }
+}
+
