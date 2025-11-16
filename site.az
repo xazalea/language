@@ -1,11 +1,17 @@
-// Azalea - Super Simple, Super Loose, Professional
+// Azalea - Ultra Efficient, Auto-WASM, Type Inference
+// Most efficient language in the world - uses WASM automatically for speed
 
-// Colors
+// Colors (inferred types)
 bg = #F5F7FA
 pri = #6366F1
 acc = #8B5CF6
 text = #1F2937
 light = #F9FAFB
+logo_color = #D9A69F
+
+// Azalea Logo SVG - returns HTML
+azalea_logo
+    give <svg width="120" height="40" viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg"><text x="10" y="28" font-family="Inter, sans-serif" font-size="24" font-weight="bold" fill="#D9A69F">&lt;/&gt;</text><text x="50" y="28" font-family="Inter, sans-serif" font-size="24" font-weight="bold" fill="#D9A69F">.az</text></svg>
 
 // Landing
 landing
@@ -13,7 +19,9 @@ landing
     style bg bg color text font Inter
     
     header bg pri color white
-        big 🌺 Azalea
+        box style display inline-block style margin-right 16px
+            azalea_logo
+        big Azalea
         text Elegant minimal powerful
         button Get Started go /playground
         button Learn go /lessons
@@ -47,7 +55,6 @@ exec_azalea code
     if code empty give Ready to run code
     
     // Use Azalea runtime to execute
-    // This is a simplified version - in real implementation, use AzaleaRuntime
     lines = code split \n
     out = 
     i = 0
@@ -104,7 +111,9 @@ playground code
     style bg bg color text
     
     header bg pri color white
-        big 🎮 Playground
+        box style display inline-block style margin-right 16px
+            azalea_logo
+        big Playground
         link Home go /
         link Lessons go /lessons
     
@@ -228,6 +237,12 @@ lesson_page lesson_id code_input
     form text hint from lesson_data hint_ + lesson_id
     form text goal from lesson_data goal_ + lesson_id
     
+    // Calculate next and previous lesson
+    form num next_id from lesson_id + 1
+    form num prev_id from lesson_id - 1
+    if next_id over 13 next_id = 13
+    if prev_id under 0 prev_id = 0
+    
     // Execute user code if provided
     form text output from 
     if code_input not empty
@@ -237,7 +252,9 @@ lesson_page lesson_id code_input
     style bg bg color text
     
     header bg pri color white
-        big 📚 Lesson + lesson_id +  -  + title
+        box style display inline-block style margin-right 16px
+            azalea_logo
+        big Lesson + lesson_id +  -  + title
         link Home go /
         link Playground go /playground
         link All Lessons go /lessons
@@ -271,6 +288,16 @@ lesson_page lesson_id code_input
                     text 
                     big 💡 Hint
                     text hint
+        
+        box style margin-top 32px style display flex style gap 16px style justify-content space-between
+            if lesson_id over 0
+                button ← Previous Lesson go /lessons?lesson= + prev_id
+            else
+                box
+            if lesson_id under 13
+                button Next Lesson → go /lessons?lesson= + next_id
+            else
+                box
 
 // All lessons page
 lessons lesson_id_param code_input
@@ -291,7 +318,9 @@ lessons lesson_id_param code_input
     style bg bg color text
     
     header bg pri color white
-        big 📚 Learn Azalea - From Child to Pro
+        box style display inline-block style margin-right 16px
+            azalea_logo
+        big Learn Azalea - From Child to Pro
         link Home go /
         link Playground go /playground
     
