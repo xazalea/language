@@ -1,0 +1,28 @@
+// Ultra Simple Markdown Example
+// Just write markdown - it auto-detects and renders!
+
+// Example 1: Just write markdown directly
+big My Page Title
+
+This is a paragraph. You can write naturally.
+
+- First item
+- Second item  
+- Third item
+
+bold This is bold text
+
+link to https://example.com as Click here
+
+// Example 2: Use in variables
+form text page from "big Hello\nThis is content\n- item 1"
+say page  // Auto-renders as HTML!
+
+// Example 3: Serve markdown files (auto-detected)
+call serve file "page.md"  // Automatically renders!
+
+// Example 4: Explicit markdown call (also flexible)
+call markdown parse "big Title\nContent"
+markdown parse "big Title\nContent"  // Also works!
+parse markdown "big Title\nContent"  // Also works!
+

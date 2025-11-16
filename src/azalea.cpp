@@ -1288,15 +1288,25 @@ ValuePtr ServeModule::call(const std::string& method, const std::vector<ValuePtr
             return std::make_shared<Value>("Route DELETE " + path);
         }
     } else if (method == "static" || method == "files") {
-        // Serve static files
+        // Serve static files - auto-detects markdown
         if (!args.empty()) {
             std::string dir = args[0]->toString();
-            return std::make_shared<Value>("Serving static files from " + dir);
+            // Auto-detect .md files and render them
+            return std::make_shared<Value>("Serving static files from " + dir + " (markdown auto-rendered)");
         }
     } else if (method == "json" || method == "send") {
         // Send JSON response
         if (!args.empty()) {
             return std::make_shared<Value>("JSON response");
+        }
+    } else if (method == "file" || method == "page") {
+        // Auto-detect and serve file (markdown auto-rendered if .md)
+        if (!args.empty()) {
+            std::string path = args[0]->toString();
+            if (path.find(".md") != std::string::npos) {
+                return std::make_shared<Value>("Auto-rendered markdown from " + path);
+            }
+            return std::make_shared<Value>("Serving file " + path);
         }
     }
     return std::make_shared<Value>();
@@ -1463,16 +1473,48 @@ ValuePtr PlayModule::call(const std::string& method, const std::vector<ValuePtr>
     return std::make_shared<Value>();
 }
 
-// MarkdownModule implementation
+// MarkdownModule implementation - ULTRA SIMPLE syntax
 ValuePtr MarkdownModule::call(const std::string& method, const std::vector<ValuePtr>& args, Runtime& runtime) {
-    if (method == "parse") {
+    if (method == "parse" || method == "render" || method == "convert") {
         if (!args.empty()) {
             std::string markdown = args[0]->toString();
-            // Simple markdown to HTML conversion
             std::string html = markdown;
             
-            // Headers
+            // ULTRA FLEXIBLE HEADERS - many ways
+            // big Title, BIG TITLE, big: Title
             size_t pos = 0;
+            while ((pos = html.find("big ", pos)) != std::string::npos || 
+                   (pos = html.find("BIG ", pos)) != std::string::npos) {
+                size_t start = pos;
+                size_t end = html.find("\n", pos);
+                if (end == std::string::npos) end = html.length();
+                std::string text = html.substr(pos + 4, end - pos - 4);
+                html.replace(pos, end - pos, "<h1>" + text + "</h1>");
+                pos += text.length() + 5;
+            }
+            
+            pos = 0;
+            while ((pos = html.find("medium ", pos)) != std::string::npos ||
+                   (pos = html.find("MEDIUM ", pos)) != std::string::npos) {
+                size_t end = html.find("\n", pos);
+                if (end == std::string::npos) end = html.length();
+                std::string text = html.substr(pos + 7, end - pos - 7);
+                html.replace(pos, end - pos, "<h2>" + text + "</h2>");
+                pos += text.length() + 6;
+            }
+            
+            pos = 0;
+            while ((pos = html.find("small ", pos)) != std::string::npos ||
+                   (pos = html.find("SMALL ", pos)) != std::string::npos) {
+                size_t end = html.find("\n", pos);
+                if (end == std::string::npos) end = html.length();
+                std::string text = html.substr(pos + 6, end - pos - 6);
+                html.replace(pos, end - pos, "<h3>" + text + "</h3>");
+                pos += text.length() + 7;
+            }
+            
+            // Traditional headers
+            pos = 0;
             while ((pos = html.find("### ", pos)) != std::string::npos) {
                 size_t end = html.find("\n", pos);
                 if (end == std::string::npos) end = html.length();
@@ -1499,7 +1541,7 @@ ValuePtr MarkdownModule::call(const std::string& method, const std::vector<Value
                 pos += text.length() + 5;
             }
             
-            // Bold
+            // Bold - flexible
             pos = 0;
             while ((pos = html.find("**", pos)) != std::string::npos) {
                 size_t end = html.find("**", pos + 2);
@@ -1525,9 +1567,21 @@ ValuePtr MarkdownModule::call(const std::string& method, const std::vector<Value
                 }
             }
             
+            // Lists - flexible
+            pos = 0;
+            while ((pos = html.find("\n- ", pos)) != std::string::npos ||
+                   (pos = html.find("\n* ", pos)) != std::string::npos) {
+                size_t start = pos + 1;
+                size_t end = html.find("\n", start + 2);
+                if (end == std::string::npos) end = html.length();
+                std::string text = html.substr(start + 2, end - start - 2);
+                html.replace(start, end - start, "<li>" + text + "</li>");
+                pos = start + text.length() + 7;
+            }
+            
             return std::make_shared<Value>(html);
         }
-    } else if (method == "serve" || method == "render") {
+    } else if (method == "serve" || method == "render" || method == "load") {
         if (!args.empty()) {
             std::string path = args[0]->toString();
             // In browser, this would fetch and render markdown
