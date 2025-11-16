@@ -75,77 +75,153 @@ function getLandingPageHTML() {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Azalea - Elegant Programming Language</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        a { text-decoration: none; color: inherit; }
-        .btn { cursor: pointer; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; font-weight: bold; display: inline-block; }
-        pre[class*="language-"] { margin: 0; }
+        body { 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            min-height: 100vh; 
+            padding: 20px; 
+            position: relative; 
+            overflow-x: hidden;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3), transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 119, 198, 0.2), transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        .matte {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+            border-radius: 16px;
+        }
+        .matte-strong {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(30px) saturate(200%);
+            -webkit-backdrop-filter: blur(30px) saturate(200%);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+        }
+        .matte-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(15px) saturate(150%);
+            -webkit-backdrop-filter: blur(15px) saturate(150%);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 4px 16px 0 rgba(31, 38, 135, 0.1);
+            transition: all 0.3s ease;
+        }
+        .matte-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px 0 rgba(31, 38, 135, 0.2);
+            background: rgba(255, 255, 255, 0.12);
+        }
+        .btn {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        .btn-primary {
+            background: rgba(255, 255, 255, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+        h1, h2, h3 { color: white; font-weight: 700; }
+        p, span { color: rgba(255, 255, 255, 0.9); }
+        code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'Fira Code', monospace;
+            color: #fff;
+        }
+        pre {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 12px;
+            overflow-x: auto;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-family: 'Fira Code', monospace;
+        }
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+        }
+        .text-center { text-align: center; }
+        .p-6 { padding: 48px; }
+        .p-4 { padding: 32px; }
+        .mb-6 { margin-bottom: 48px; }
+        .mb-4 { margin-bottom: 24px; }
     </style>
 </head>
 <body>
-    <header style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 4rem 2rem; text-align: center;">
-        <h1 style="font-size: 4rem; margin-bottom: 1rem;">🌺 Azalea</h1>
-        <p style="font-size: 1.5rem; opacity: 0.9; margin-bottom: 2rem;">Super easy to learn • Perfect stepping stone to JavaScript & beyond</p>
-        <p style="font-size: 1rem; opacity: 0.8; margin-bottom: 2rem;">Write code your way with super flexible grammar • Build creativity while learning</p>
-        <div style="display: flex; gap: 1rem; justify-content: center;">
-            <a href="/playground" class="btn" style="background: white; color: #667eea; padding: 1rem 2rem; border-radius: 8px;">Get Started</a>
-            <a href="/lessons" class="btn" style="background: transparent; color: white; border: 2px solid white; padding: 1rem 2rem; border-radius: 8px;">Learn</a>
+    <header class="matte-strong p-6 mb-6">
+        <div class="container text-center">
+            <h1 style="font-size: 4rem; margin-bottom: 16px;">🌺 Azalea</h1>
+            <p style="font-size: 1.5rem; margin-bottom: 32px; opacity: 0.95;">Elegant, minimal, powerful programming language</p>
+            <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+                <a href="/playground" class="btn btn-primary">Get Started</a>
+                <a href="/lessons" class="btn">Learn</a>
+            </div>
         </div>
     </header>
-    <main style="padding: 4rem 2rem; max-width: 1200px; margin: 0 auto;">
-        <section style="margin-bottom: 4rem;">
-            <h2 style="text-align: center; font-size: 2.5rem; margin-bottom: 3rem;">Why Azalea?</h2>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
-                <div style="padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center;">
-                    <h3 style="color: #667eea; margin-bottom: 1rem;">🎯 Super Easy</h3>
-                    <p>Start coding in minutes! No complex syntax to memorize. Perfect for absolute beginners.</p>
+    <main class="container">
+        <section class="matte p-6 mb-6">
+            <h2 class="text-center mb-6" style="font-size: 2.5rem;">Why Azalea?</h2>
+            <div class="grid-3">
+                <div class="matte-card p-4 text-center">
+                    <h3 style="color: #fff; margin-bottom: 16px; font-size: 1.5rem;">🎯 Super Easy</h3>
+                    <p style="line-height: 1.6;">Start coding in minutes! No complex syntax to memorize. Perfect for absolute beginners.</p>
                 </div>
-                <div style="padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center;">
-                    <h3 style="color: #667eea; margin-bottom: 1rem;">🚀 Learn JavaScript Next</h3>
-                    <p>Azalea concepts map directly to JavaScript. Master Azalea, then easily transition to JS!</p>
+                <div class="matte-card p-4 text-center">
+                    <h3 style="color: #fff; margin-bottom: 16px; font-size: 1.5rem;">🚀 Learn JavaScript Next</h3>
+                    <p style="line-height: 1.6;">Azalea concepts map directly to JavaScript. Master Azalea, then easily transition to JS!</p>
                 </div>
-                <div style="padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center;">
-                    <h3 style="color: #667eea; margin-bottom: 1rem;">✨ Super Flexible</h3>
-                    <p>Write code your way! 12+ ways to create variables, 8+ ways to write functions. Be creative!</p>
+                <div class="matte-card p-4 text-center">
+                    <h3 style="color: #fff; margin-bottom: 16px; font-size: 1.5rem;">✨ Super Flexible</h3>
+                    <p style="line-height: 1.6;">Write code your way! 12+ ways to create variables, 8+ ways to write functions. Be creative!</p>
                 </div>
             </div>
         </section>
-        <section style="background: #f5f5f5; padding: 3rem; border-radius: 12px;">
-            <h2 style="margin-bottom: 2rem;">Try It Now</h2>
-            <pre class="language-azalea" style="background: #1e1e1e; padding: 1.5rem; border-radius: 8px; overflow-x: auto;"><code>say Hello World
+        <section class="matte p-6">
+            <h2 class="mb-4" style="font-size: 2rem;">Try It Now</h2>
+            <pre><code>say Hello World
 form num a from ten
 say a</code></pre>
-            <a href="/playground" class="btn" style="background: #667eea; color: white; margin-top: 1rem;">Run in Playground</a>
+            <a href="/playground" class="btn btn-primary" style="margin-top: 16px;">Run in Playground</a>
         </section>
     </main>
-    <footer style="background: #2d3748; color: white; padding: 2rem; text-align: center;">
+    <footer class="matte p-4" style="text-align: center; margin-top: 48px;">
         <p>Made with Azalea - From beginner to professional</p>
     </footer>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
-    <script>
-        // Azalea language definition for Prism.js
-        Prism.languages.azalea = {
-            'comment': {
-                pattern: /\/\/.*|\/\*[\s\S]*?\*\//,
-                greedy: true
-            },
-            'string': {
-                pattern: /"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'/,
-                greedy: true
-            },
-            'keyword': {
-                pattern: /\b(?:form|let|var|const|set|create|make|declare|define|init|new|act|def|fn|func|function|method|procedure|call|if|when|whenever|provided|assuming|given|else|elseif|loop|while|for|repeat|each|foreach|iterate|do|then|begin|end|finish|done|say|print|output|display|log|echo|show|write|from|is|equals|to|as|becomes|return|break|continue|true|false|null|num|text|bool|list|map)\b/i,
-                greedy: true
-            },
-            'number': /\b\d+(?:\.\d+)?\b/,
-            'operator': /[+\-*/=<>!&|]+/,
-            'punctuation': /[{}[\];(),.:]/
-        };
-        Prism.highlightAll();
-    </script>
 </body>
 </html>`;
 }
@@ -157,95 +233,176 @@ function getPlaygroundPageHTML() {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Azalea Playground</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .btn { cursor: pointer; border: none; padding: 0.5rem 1rem; border-radius: 6px; font-weight: bold; }
-        #editor { font-family: 'Consolas', 'Monaco', 'Courier New', monospace; font-size: 14px; resize: none; outline: none; background: #1e1e1e; color: #d4d4d4; padding: 1rem; line-height: 1.6; tab-size: 4; }
-        #editor-container { position: relative; }
-        #editor-highlight { position: absolute; top: 0; left: 0; right: 0; bottom: 0; padding: 1rem; font-family: 'Consolas', 'Monaco', 'Courier New', monospace; font-size: 14px; line-height: 1.6; color: transparent; background: transparent; pointer-events: none; white-space: pre-wrap; word-wrap: break-word; overflow: hidden; tab-size: 4; }
-        #editor { position: relative; z-index: 1; background: transparent; caret-color: #fff; }
-        .token.comment { color: #6a9955; }
-        .token.string { color: #ce9178; }
-        .token.keyword { color: #569cd6; }
-        .token.number { color: #b5cea8; }
-        .token.operator { color: #d4d4d4; }
-        .token.punctuation { color: #d4d4d4; }
+        body { 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            min-height: 100vh; 
+            padding: 20px; 
+            position: relative; 
+            overflow-x: hidden;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3), transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 119, 198, 0.2), transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        .matte {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+            border-radius: 16px;
+        }
+        .btn {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        textarea {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            padding: 16px;
+            border-radius: 12px;
+            font-family: 'Fira Code', monospace;
+            font-size: 14px;
+            resize: none;
+            outline: none;
+            width: 100%;
+            height: 100%;
+        }
+        textarea:focus {
+            border-color: rgba(255, 255, 255, 0.4);
+            background: rgba(0, 0, 0, 0.4);
+        }
+        #output {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            padding: 16px;
+            border-radius: 12px;
+            font-family: 'Fira Code', monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            overflow-y: auto;
+            height: 100%;
+        }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            min-height: calc(100vh - 100px);
+        }
+        .panel {
+            display: flex;
+            flex-direction: column;
+            padding: 16px;
+        }
+        .panel-header {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        h1, h2, h3 { color: white; font-weight: 700; }
+        .container { position: relative; z-index: 1; }
     </style>
 </head>
 <body>
-    <header style="background: #2d3748; color: white; padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center;">
+    <header class="matte" style="padding: 20px; margin-bottom: 20px;">
+        <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
         <h1 style="margin: 0;">🎮 Playground</h1>
-        <div style="display: flex; gap: 1rem;">
-            <a href="/" class="btn" style="background: transparent; color: white; border: 1px solid white;">Landing</a>
-            <a href="/lessons" class="btn" style="background: transparent; color: white; border: 1px solid white;">Lessons</a>
+            <div style="display: flex; gap: 12px;">
+                <a href="/" class="btn">Landing</a>
+                <a href="/lessons" class="btn">Lessons</a>
+            </div>
         </div>
     </header>
-    <main style="display: grid; grid-template-columns: 1fr 1fr; min-height: calc(100vh - 80px); gap: 0;">
-        <div style="display: flex; flex-direction: column; border-right: 1px solid #e0e0e0;">
-            <div style="background: #f5f5f5; padding: 1rem; border-bottom: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center;">
-                <strong>Code Editor</strong>
-                <button class="btn" style="background: #667eea; color: white;" onclick="runCode()">Run</button>
+    <div class="grid-2 matte" style="padding: 0;">
+        <div class="panel">
+            <div class="panel-header">
+                <strong style="color: white;">Code Editor</strong>
+                <button class="btn" onclick="runCode()" style="padding: 8px 16px; font-size: 14px;">▶ Run</button>
             </div>
-            <div id="editor-container" style="flex: 1; position: relative; overflow: hidden;">
-                <pre id="editor-highlight" class="language-azalea"><code id="highlight-code"></code></pre>
-                <textarea id="editor" spellcheck="false" style="flex: 1; border: none; width: 100%; height: 100%;">say Hello World
+            <textarea id="editor" spellcheck="false">say Hello World
 form num a from ten
 say a
 loop five do
     say step
 end</textarea>
             </div>
-        </div>
-        <div style="display: flex; flex-direction: column; background: #1e1e1e;">
-            <div style="background: #2d3748; color: white; padding: 1rem; border-bottom: 1px solid #333;">
-                <strong>Output</strong>
+        <div class="panel">
+            <div class="panel-header">
+                <strong style="color: white;">Output</strong>
             </div>
-            <div id="output" style="flex: 1; padding: 1rem; color: #d4d4d4; font-family: monospace; font-size: 14px; overflow-y: auto; white-space: pre-wrap;">Ready to run code...</div>
+            <div id="output">Ready to run code...</div>
         </div>
-    </main>
-    <div style="background: #f5f5f5; padding: 2rem; border-top: 1px solid #e0e0e0;">
-        <h3 style="margin-bottom: 1rem;">🤖 Need Help? Ask AI</h3>
-        <textarea id="ai_question" placeholder="Ask a question about Azalea..." style="width: 100%; padding: 1rem; border-radius: 8px; border: 1px solid #ccc; font-size: 14px; min-height: 100px; margin-bottom: 1rem;"></textarea>
-        <button class="btn" style="background: #667eea; color: white; padding: 0.75rem 1.5rem;" onclick="getAIHelp()">Get AI Help</button>
     </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <div class="matte" style="padding: 2rem; margin-top: 20px;">
+        <h3 style="margin-bottom: 1rem;">🤖 Need Help? Ask AI</h3>
+        <textarea id="ai_question" placeholder="Ask a question about Azalea..." style="width: 100%; padding: 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); font-size: 14px; min-height: 100px; margin-bottom: 1rem; background: rgba(0,0,0,0.2); color: white;"></textarea>
+        <button class="btn" onclick="getAIHelp()" style="padding: 0.75rem 1.5rem;">Get AI Help</button>
+    </div>
+    <script src="/azalea-browser.js"></script>
+    <script src="/azalea-hybrid.js"></script>
     <script>
-        // Azalea language definition
-        Prism.languages.azalea = {
-            'comment': { pattern: /\/\/.*|\/\*[\s\S]*?\*\//, greedy: true },
-            'string': { pattern: /"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'/, greedy: true },
-            'keyword': {
-                pattern: /\b(?:form|let|var|const|set|create|make|declare|define|init|new|act|def|fn|func|function|method|procedure|call|if|when|whenever|provided|assuming|given|else|elseif|loop|while|for|repeat|each|foreach|iterate|do|then|begin|end|finish|done|say|print|output|display|log|echo|show|write|from|is|equals|to|as|becomes|return|break|continue|true|false|null|num|text|bool|list|map)\b/i,
-                greedy: true
-            },
-            'number': /\b\d+(?:\.\d+)?\b/,
-            'operator': /[+\-*/=<>!&|]+/,
-            'punctuation': /[{}[\];(),.:]/
-        };
+        let hybridRuntime = null;
+        let azaleaReady = false;
         
-        const editor = document.getElementById('editor');
-        const highlightCode = document.getElementById('highlight-code');
-        const highlightPre = document.getElementById('editor-highlight');
-        
-        function updateHighlight() {
-            const code = editor.value;
-            highlightCode.textContent = code;
-            Prism.highlightElement(highlightCode);
+        async function initAzalea() {
+            try {
+                hybridRuntime = new AzaleaHybridRuntime();
+                const status = await hybridRuntime.initialize();
+                azaleaReady = status.hybrid;
+            } catch (e) {
+                console.error('Init error:', e);
+            }
         }
         
-        editor.addEventListener('input', updateHighlight);
-        editor.addEventListener('scroll', () => {
-            highlightPre.scrollTop = editor.scrollTop;
-            highlightPre.scrollLeft = editor.scrollLeft;
-        });
-        updateHighlight();
+        window.addEventListener('load', initAzalea);
         
-        function runCode() {
-            const code = editor.value;
+        async function runCode() {
+            if (!azaleaReady || !hybridRuntime) {
+                await initAzalea();
+            }
+            const code = document.getElementById('editor').value;
             const output = document.getElementById('output');
-            output.textContent = 'Running code...\\n\\nNote: Full code execution requires Azalea runtime integration.';
+            try {
+                output.textContent = 'Running...';
+                const results = await hybridRuntime.execute(code);
+                if (results.hybrid && results.hybrid.success) {
+                    output.textContent = results.hybrid.output.join('\\n') || 'No output';
+                } else {
+                    output.textContent = 'Error: ' + results.errors.map(e => e.error).join('\\n');
+                }
+            } catch (e) {
+                output.textContent = 'Error: ' + e.message;
+            }
         }
         
         async function getAIHelp() {
@@ -271,112 +428,168 @@ function getLessonsPageHTML() {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Learn Azalea</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .btn { cursor: pointer; border: none; padding: 0.5rem 1rem; border-radius: 6px; font-weight: bold; }
-        pre[class*="language-"] { margin: 0; }
+        body { 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            min-height: 100vh; 
+            padding: 20px; 
+            position: relative; 
+            overflow-x: hidden;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3), transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 119, 198, 0.2), transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        .matte {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+            border-radius: 16px;
+        }
+        .matte-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .matte-card:hover {
+            background: rgba(255, 255, 255, 0.12);
+        }
+        .matte-card.active {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        .btn {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        pre {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 12px;
+            overflow-x: auto;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-family: 'Fira Code', monospace;
+        }
+        h1, h2, h3 { color: white; font-weight: 700; }
+        p { color: rgba(255, 255, 255, 0.9); line-height: 1.6; }
+        code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'Fira Code', monospace;
+            color: #fff;
+        }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 0;
+            min-height: calc(100vh - 100px);
+        }
+        .sidebar { padding: 20px; overflow-y: auto; }
+        .content { padding: 32px; overflow-y: auto; }
+        .container { position: relative; z-index: 1; }
+        textarea {
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            font-size: 14px;
+            width: 100%;
+            min-height: 100px;
+            margin-bottom: 1rem;
+        }
     </style>
 </head>
 <body>
-    <header style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1.5rem 2rem;">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
+    <header class="matte" style="padding: 20px; margin-bottom: 20px;">
+        <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
             <div>
-                <h1 style="margin: 0; margin-bottom: 0.5rem;">📚 Learn Azalea</h1>
-                <div style="display: flex; gap: 2rem; align-items: center;">
-                    <span style="opacity: 0.9;">Level: <strong>1</strong></span>
-                    <span style="opacity: 0.9;">XP: <strong>0</strong></span>
+                <h1 style="margin: 0; margin-bottom: 8px;">📚 Learn Azalea</h1>
+                <div style="display: flex; gap: 24px; align-items: center;">
+                    <span style="opacity: 0.9; color: white;">Level: <strong>1</strong></span>
+                    <span style="opacity: 0.9; color: white;">XP: <strong>0</strong></span>
                 </div>
             </div>
-            <div style="display: flex; gap: 1rem;">
-                <a href="/" class="btn" style="background: transparent; color: white; border: 1px solid white;">Landing</a>
-                <a href="/playground" class="btn" style="background: transparent; color: white; border: 1px solid white;">Playground</a>
+            <div style="display: flex; gap: 12px;">
+                <a href="/" class="btn">Landing</a>
+                <a href="/playground" class="btn">Playground</a>
             </div>
         </div>
     </header>
-    <main style="display: grid; grid-template-columns: 300px 1fr; min-height: calc(100vh - 120px); gap: 0;">
-        <div style="background: #f5f5f5; border-right: 1px solid #e0e0e0; overflow-y: auto; padding: 1rem;">
-            <h3 style="margin-bottom: 1rem;">Lessons</h3>
-            <div style="padding: 0.75rem; margin-bottom: 0.5rem; border-radius: 6px; background: #667eea; color: white; cursor: pointer;">0. Hello World</div>
-            <div style="padding: 0.75rem; margin-bottom: 0.5rem; border-radius: 6px; cursor: pointer;">1. Variables</div>
-            <div style="padding: 0.75rem; margin-bottom: 0.5rem; border-radius: 6px; cursor: pointer;">2. Math Operations</div>
-            <div style="padding: 0.75rem; margin-bottom: 0.5rem; border-radius: 6px; cursor: pointer;">3. Conditionals</div>
-            <div style="padding: 0.75rem; margin-bottom: 0.5rem; border-radius: 6px; cursor: pointer;">4. Loops</div>
-            <div style="padding: 0.75rem; margin-bottom: 0.5rem; border-radius: 6px; cursor: pointer;">5. Functions</div>
-            <div style="padding: 0.75rem; margin-bottom: 0.5rem; border-radius: 6px; cursor: pointer;">6. Lists</div>
-            <div style="padding: 0.75rem; margin-bottom: 0.5rem; border-radius: 6px; cursor: pointer;">7. UI Components</div>
-            <div style="padding: 0.75rem; margin-bottom: 0.5rem; border-radius: 6px; cursor: pointer;">8. Styling</div>
-            <div style="padding: 0.75rem; margin-bottom: 0.5rem; border-radius: 6px; cursor: pointer;">9. Forms</div>
-            <div style="padding: 0.75rem; margin-bottom: 0.5rem; border-radius: 6px; cursor: pointer;">10. Advanced Functions</div>
+    <div class="grid-2 matte" style="padding: 0;">
+        <div class="sidebar">
+            <h3 style="margin-bottom: 16px; color: white;">Lessons</h3>
+            <div class="matte-card active">0. Hello World</div>
+            <div class="matte-card">1. Variables</div>
+            <div class="matte-card">2. Math Operations</div>
+            <div class="matte-card">3. Conditionals</div>
+            <div class="matte-card">4. Loops</div>
+            <div class="matte-card">5. Functions</div>
+            <div class="matte-card">6. Lists</div>
+            <div class="matte-card">7. UI Components</div>
+            <div class="matte-card">8. Styling</div>
+            <div class="matte-card">9. Forms</div>
+            <div class="matte-card">10. Advanced Functions</div>
         </div>
-        <div style="display: flex; flex-direction: column; padding: 2rem; overflow-y: auto;">
-            <div style="background: #e8f5e9; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; border-left: 4px solid #4caf50;">
-                <p style="font-weight: bold; margin-bottom: 0.5rem;">🎯 Why Azalea?</p>
-                <p style="font-size: 0.9rem; line-height: 1.6;">Azalea is SUPER easy! No complex syntax. Once you master Azalea, learning JavaScript will be a breeze. The concepts are the same, just different words!</p>
+        <div class="content">
+            <div class="matte" style="padding: 16px; margin-bottom: 24px; background: rgba(76, 175, 80, 0.2); border-color: rgba(76, 175, 80, 0.3);">
+                <p style="font-weight: bold; margin-bottom: 8px; color: white;">🎯 Why Azalea?</p>
+                <p style="color: white; font-size: 0.9rem;">Azalea is SUPER easy! No complex syntax. Once you master Azalea, learning JavaScript will be a breeze. The concepts are the same, just different words!</p>
             </div>
-            <h2 style="font-size: 2rem; margin-bottom: 1rem; color: #667eea;">Lesson 0: Hello World</h2>
-            <div style="background: #e3f2fd; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
-                <p style="font-weight: bold; margin-bottom: 0.5rem;">Goal:</p>
-                <p>Print 'Hello World' - Your first program!</p>
+            <h2 style="font-size: 2rem; margin-bottom: 16px; color: white;">Lesson 0: Hello World</h2>
+            <div class="matte" style="padding: 16px; margin-bottom: 24px; background: rgba(33, 150, 243, 0.2); border-color: rgba(33, 150, 243, 0.3);">
+                <p style="font-weight: bold; margin-bottom: 8px; color: white;">Goal:</p>
+                <p style="color: white;">Print 'Hello World' - Your first program!</p>
             </div>
-            <p style="line-height: 1.6; margin-bottom: 1rem;">In Azalea, printing is super simple. Just use <code style="background: #f5f5f5; padding: 2px 6px; border-radius: 4px;">say</code> (or any of 8+ other words!).</p>
-            <pre class="language-azalea" style="background: #1e1e1e; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem; overflow-x: auto;"><code>say Hello World</code></pre>
-            <div style="background: #fff3cd; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
-                <p style="font-weight: bold; margin-bottom: 0.5rem;">💡 Super Flexible - Write Your Way!</p>
-                <p style="margin-bottom: 0.5rem;">All of these work the same:</p>
-                <pre style="background: #f5f5f5; padding: 0.75rem; border-radius: 4px; font-size: 0.85rem; overflow-x: auto;"><code>say Hello World
-print Hello World
-output Hello World
-display Hello World
-log Hello World</code></pre>
-                <p style="margin-top: 0.5rem; font-size: 0.9rem;">Choose what feels natural to you! This flexibility builds creativity.</p>
+            <p style="margin-bottom: 16px;">In Azalea, printing is super simple. Just use <code>say</code> (or any of 8+ other words!).</p>
+            <pre><code>say Hello World</code></pre>
+            <div class="matte" style="padding: 16px; margin: 24px 0; background: rgba(255, 193, 7, 0.2); border-color: rgba(255, 193, 7, 0.3);">
+                <p style="font-weight: bold; margin-bottom: 8px; color: white;">💡 Hint:</p>
+                <p style="color: white;">Use the 'say' keyword to print text</p>
             </div>
-            <div style="background: #e1f5fe; padding: 1rem; border-radius: 8px; margin-bottom: 2rem;">
-                <p style="font-weight: bold; margin-bottom: 0.5rem;">🚀 JavaScript Comparison:</p>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; font-size: 0.9rem;">
-                    <div>
-                        <p style="font-weight: bold; color: #667eea;">Azalea (Super Easy!)</p>
-                        <pre style="background: #1e1e1e; color: #d4d4d4; padding: 0.75rem; border-radius: 4px; margin-top: 0.5rem;"><code>say Hello World</code></pre>
-                    </div>
-                    <div>
-                        <p style="font-weight: bold; color: #667eea;">JavaScript (You'll learn this next!)</p>
-                        <pre style="background: #1e1e1e; color: #d4d4d4; padding: 0.75rem; border-radius: 4px; margin-top: 0.5rem;"><code>console.log("Hello World");</code></pre>
-                    </div>
-                </div>
-                <p style="margin-top: 0.75rem; font-size: 0.85rem; opacity: 0.8;">See? Same concept! Azalea uses simple words, JS uses functions. Master Azalea first, then JS will make perfect sense!</p>
+            <div style="display: flex; gap: 12px;">
+                <a href="/playground" class="btn">Try in Playground</a>
+                <button class="btn" style="background: rgba(40, 167, 69, 0.3); border-color: rgba(40, 167, 69, 0.4);">Mark Complete</button>
             </div>
-            <div style="background: #f3e5f5; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
-                <p style="font-weight: bold; margin-bottom: 0.5rem;">✨ Creativity Tip:</p>
-                <p style="font-size: 0.9rem;">Try different keywords! Use <code style="background: white; padding: 2px 6px; border-radius: 4px;">print</code>, <code style="background: white; padding: 2px 6px; border-radius: 4px;">display</code>, or <code style="background: white; padding: 2px 6px; border-radius: 4px;">log</code> instead of <code style="background: white; padding: 2px 6px; border-radius: 4px;">say</code>. They all work! This flexibility lets you express yourself.</p>
-            </div>
-            <div style="display: flex; gap: 1rem;">
-                <a href="/playground" class="btn" style="background: #667eea; color: white; padding: 1rem 2rem; border-radius: 8px;">Try in Playground</a>
-                <button class="btn" style="background: #28a745; color: white; padding: 1rem 2rem; border-radius: 8px;">Mark Complete</button>
-            </div>
-            <div style="background: #f5f5f5; padding: 1.5rem; border-radius: 8px; margin-top: 2rem;">
+            <div class="matte" style="padding: 1.5rem; margin-top: 2rem;">
                 <h3 style="margin-bottom: 1rem;">🤖 Need Help? Ask AI</h3>
-                <textarea id="lesson_question" placeholder="Ask about this lesson..." style="width: 100%; padding: 1rem; border-radius: 8px; border: 1px solid #ccc; font-size: 14px; min-height: 100px; margin-bottom: 1rem;"></textarea>
-                <button class="btn" style="background: #667eea; color: white; padding: 0.75rem 1.5rem;" onclick="getAIHelp()">Get AI Help</button>
+                <textarea id="lesson_question" placeholder="Ask about this lesson..."></textarea>
+                <button class="btn" onclick="getAIHelp()" style="padding: 0.75rem 1.5rem;">Get AI Help</button>
             </div>
         </div>
-    </main>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    </div>
     <script>
-        // Azalea language definition for Prism.js
-        Prism.languages.azalea = {
-            'comment': { pattern: /\/\/.*|\/\*[\s\S]*?\*\//, greedy: true },
-            'string': { pattern: /"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'/, greedy: true },
-            'keyword': {
-                pattern: /\b(?:form|let|var|const|set|create|make|declare|define|init|new|act|def|fn|func|function|method|procedure|call|if|when|whenever|provided|assuming|given|else|elseif|loop|while|for|repeat|each|foreach|iterate|do|then|begin|end|finish|done|say|print|output|display|log|echo|show|write|from|is|equals|to|as|becomes|return|break|continue|true|false|null|num|text|bool|list|map)\b/i,
-                greedy: true
-            },
-            'number': /\b\d+(?:\.\d+)?\b/,
-            'operator': /[+\-*/=<>!&|]+/,
-            'punctuation': /[{}[\];(),.:]/
-        };
-        Prism.highlightAll();
-        
         async function getAIHelp() {
             const question = document.getElementById('lesson_question').value;
             if (!question) return;
